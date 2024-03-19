@@ -8,6 +8,8 @@ Then run:
 When connecting the wit-motion IMU:
 	It interfaces over USB-RS232. As in, Ground -> Ground, VCC -> 5V, TX -> 232R, RX -> 232T.
 	Make sure the /dev/ttyUSB0 serial port is open to your user (so the wit-motion package can access serial output).
-
+		sudo usermod -a $(whoami) -G dialout
+		sudo chgrp dialout /dev/ttyUSB0		
+		sudo chmod 660 /dev/ttyUSB0
 To get info from the IMU:
 	roslaunch witmotion_ros witmotion.launch
