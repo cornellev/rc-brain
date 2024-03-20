@@ -13,3 +13,6 @@ When connecting the wit-motion IMU:
 		sudo chmod 660 /dev/ttyUSB0
 To get info from the IMU:
 	roslaunch witmotion_ros witmotion.launch
+
+To launch localization:
+	roslaunch rc-localization localization.launch
