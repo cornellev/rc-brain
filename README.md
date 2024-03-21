@@ -1,6 +1,7 @@
 Dependencies:
 In the catkin_ws/src directory please run:
 	sudo apt-get install libqt5serialport5-dev
+ 	sudo apt-get install ros-noetic-robot-localization
 	git clone --recursive https://github.com/ElettraSciComp/witmotion_IMU_ros.git src/witmotion_ros
 Then run:
 	mv src/witmotion_ros .
@@ -16,3 +17,7 @@ To get info from the IMU:
 
 To launch localization:
 	roslaunch rc-localization localization.launch
+
+To launch the controller:
+	export ROS_MASTER_URI=http://mini-uno:11211
+	roslaunch rc-localization controller.launch # Not implemented yet
