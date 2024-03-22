@@ -10,7 +10,7 @@ def joy_to_twist(data):
 	turn = data.axes[3] * max_turning_angle  # Positive angle turns left, so counterclockwise
 	drive = -.5 * (data.axes[2] - 1) * max_vel  # By default axis is 1, and goes to -1, so transform
 
-	msg = AckermannDriveStamped()
+	msg = AckermannDrive()
 	msg.steering_angle = turn  # LT
 	msg.speed = drive  # R Joy
 	pub.publish(msg)
