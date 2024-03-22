@@ -12,8 +12,8 @@ def joy_to_twist(data):
 	drive = -.5 * (data.axes[2] - 1) * max_vel  # By default axis is 1, and goes to -1, so transform
 
 	twist = Twist()
-	twist.linear.x = turn  # LT
-	twist.angular.z = drive  # R Stick
+	twist.linear.x = drive  # LT
+	twist.angular.z = turn  # R Stick
 	pub.publish(twist)
 
 # Intializes everything
