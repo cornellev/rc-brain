@@ -1,5 +1,4 @@
 <launch>
+    <node name="joy_node" pkg="joy" type="joy_node" output="screen" />
     <node name="interpret_joy" pkg="rc-teleop" type="interpret_joy.py" output="screen" />
-    
-    <node name="drive" pkg="rc-teleop" type="drive_node.py" output="screen" />
 </launch>
