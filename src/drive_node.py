@@ -8,7 +8,7 @@ def drive_ackermann(msg):
 	rospy.loginfo(msg.speed)
 
 def start():
-	rospy.Subscriberr"rc_movement_msg", AckermannDrive, drive_ackermann)
+	rospy.Subscriber("rc_movement_msg", AckermannDrive, drive_ackermann)
 
 	rospy.init_node('drive_node')
 	rospy.spin()
