@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 from sensor_msgs.msg import Joy
-from ackermann_msgs.msg import AckermannDriveStamped
+from ackermann_msgs.msg import AckermannDrive
 
 def joy_to_twist(data):
 	global max_turning_angle
@@ -11,9 +11,8 @@ def joy_to_twist(data):
 	drive = -.5 * (data.axes[2] - 1) * max_vel  # By default axis is 1, and goes to -1, so transform
 
 	msg = AckermannDriveStamped()
-	msg.header.stamp = rospy.Time.now()
-	msg.header.steering_angle = turn  # LT
-	msg.header.speed = drive  # R Joy
+	msg.steering_angle = turn  # LT
+	msg.speed = drive  # R Joy
 	pub.publish(msg)
 
 # Intializes everything
@@ -25,7 +24,7 @@ def start():
 	max_vel = 5
 	max_turning_angle = 50
 
-	pub = rospy.Publisher('rc_movement_msg', AckermannDriveStamped, queue_size=10)
+	pub = rospy.Publisher('rc_movement_msg', AckermannDrive, queue_size=10)
 
 	rospy.Subscriber("joy", Joy, joy_to_twist)
 
