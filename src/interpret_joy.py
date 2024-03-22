@@ -13,6 +13,7 @@ def scale(axis_value: float):
 	return max(abs(axis_value) ** 1.5 * min_vel, min_vel)
 
 def joy_to_twist(data):
+	rospy.loginfo("hello")
 	twist = Twist()
 	twist.linear.x = scale(data.axes[1])  # Left stick
 	twist.angular.z = scale(data.axes[0])  # Right stick
