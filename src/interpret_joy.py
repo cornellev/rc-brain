@@ -20,10 +20,10 @@ def joy_to_twist(data):
 def start():
 	global pub
 	global max_vel
-	global max_turning_angle = 50
+	global max_turning_angle
 
 	max_vel = 5
-	min_vel = -5
+	max_turning_angle = 50
 
 	pub = rospy.Publisher('rc_movement_twist', Twist, queue_size=10)
 
