@@ -1,9 +1,15 @@
-Requires:
+# rc-telelop
+
+## Requires:
+
  - ros-noetic-joy
  - ros-noetic-ackermann_msgs
 
+## Instructions:
+
 Please follow the tutorial at
  - http://wiki.ros.org/joy/Tutorials/ConfiguringALinuxJoystick
+
 
 On your computer:
  - export ROS_IP='your_ip_on_LAN'
@@ -14,3 +20,6 @@ On your computer:
 On the pi:
  - rostopic echo joy
 
+## Controls
+
+*Make sure gamepad is in x-mode so triggers are analog input.*

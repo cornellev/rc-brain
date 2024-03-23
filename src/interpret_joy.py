@@ -3,34 +3,35 @@ import rospy
 from sensor_msgs.msg import Joy
 from ackermann_msgs.msg import AckermannDrive
 
-def joy_to_twist(data):
-	global max_turning_angle
-	global max_vel
+from gamepads import LogitechRead
 
-	turn = data.axes[3] * max_turning_angle  # Positive angle turns left, so counterclockwise
-	drive = -.5 * (data.axes[2] - 1) * max_vel  # By default axis is 1, and goes to -1, so transform
+class JoyInterpreter:
+	def __init__(self, joystick_read_type):
+		self.joystick_read_type = joystick_read_type
+		self.movement_pub = rospy.Publisher('rc_movement_msg', AckermannDrive, queue_size=10)
+		rospy.Subscriber("joy", Joy, self.joy_to_twist)
 
-	msg = AckermannDrive()
-	msg.steering_angle = turn  # LT
-	msg.speed = drive  # R Joy
+		self.max_turning_angle = rospy.get_param(param_name='max_turning_angle', default=1.0)
+		self.max_vel = rospy.get_param(param_name='max_vel', default=1.0)
+		rospy.loginfo(f"Found parameter max_turning_angle={self.max_turning_angle}")
+		rospy.loginfo(f"Found parameter max_vel={self.max_vel}")
 
-	pub.publish(msg)
+	def joy_to_twist(self, data):
+		gamepad_data = self.joystick_read_type(data.axes, data.buttons)
+		turn = gamepad_data.get_right_stick_x() * self.max_turning_angle  # Positive angle turns left, so counterclockwise
+		drive = gamepad_data.get_left_trigger() * self.max_vel  # By default axis is 1, and goes to -1, so transform
 
-# Intializes everything
-def start():
-	global pub
-	global max_vel
-	global max_turning_angle
+		msg = AckermannDrive()
+		msg.steering_angle = turn  # LT
+		msg.speed = drive  # R Joy
 
-	max_vel = 5
-	max_turning_angle = 50
+		rospy.loginfo(f"Turn command: {turn}")
+		rospy.loginfo(f"Drive command: {drive}")
 
-	pub = rospy.Publisher('rc_movement_msg', AckermannDrive, queue_size=10)
-
-	rospy.Subscriber("joy", Joy, joy_to_twist)
-
-	rospy.init_node('joy_interpreter')
-	rospy.spin()
+		self.movement_pub.publish(msg)
 
 if __name__ == '__main__':
-	start()
+	rospy.init_node('joy_interpreter')
+	ji = JoyInterpreter(joystick_read_type=LogitechRead)
+	rospy.spin()
+
