@@ -1,6 +1,7 @@
 <launch>
 
-  <rosparam command="load" file="$(find rc-autonomy)/config/config.yml" />
+  <rosparam command="load" file="$(find rc-autonomy)/config/teleop_config.yml" />
+  <rosparam command="load" file="$(find rc-autonomy)/config/servo_config.yml" />
 
   <!-- Launch rc-teleop -->
   <include file="$(find rc-teleop)/launch/teleop.launch">
@@ -13,5 +14,10 @@
   <!-- Launch rc-controls -->
   <include file="$(find rc-controls)/launch/controls.launch">
   </include>
+
+  <!-- Launch rc-hardware-actuation -->
+  <include file="$(find rc-hardware-actuation)/launch/servo.launch">
+  </include>
+
 
 </launch>
