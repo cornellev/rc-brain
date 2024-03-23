@@ -1,6 +1,6 @@
 # rc-controls
 
-Actuation and controls stack for RC cars. Generates PWM and servo inputs to feed to the rc-cars.
+Actuation and controls stack for RC cars. Generates servo and ESC PWM signals from desired movements of the chassis.
 
 ## Installation
 
@@ -10,8 +10,4 @@ git clone git@github.com:cornellev/rc-controls.git
 ```
 
 ## Instructions
-
-To run just this package: `roslaunch launch controls.launch`. 
-
-This will run one node that accepts ackermann drive inputs and generates inputs for the car.
 
