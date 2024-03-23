@@ -3,14 +3,16 @@ import rospy
 from ackermann_msgs.msg import AckermannDrive
 from gpiozero import AngularZero
 
-def read_param(param, default):
-	if not rospy.has_param(param):
-	    rospy.logwarn(f"Did not find {param}, using default {default}")
-        return default
 
-    val = rospy.get_param(param)
-    rospy.loginfo(f"Using parameter {param}=\"{val}\"")
-    return val
+def read_param(param, default):
+	
+	if not rospy.has_param(param):
+		rospy.logwarn(f"Did not find {param}, using default {default}")
+		return default
+    
+	val = rospy.get_param(param)
+	rospy.loginfo(f"Using parameter {param}=\"{val}\"")
+	return val
 
 max_pwm = read_param('max_steer_pwm', 0.30)
 min_pwm = read_param('min_steer_pwm', -0.15)
