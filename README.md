@@ -23,3 +23,6 @@ On the pi:
 ## Controls
 
 *Make sure gamepad is in x-mode so triggers are analog input.*
+
+ - Left Trigger is forward and Right Trigger is reverse
+ - Right Joystick X-axis is steering angle
