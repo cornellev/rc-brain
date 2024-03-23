@@ -1,4 +1,3 @@
 <launch>
   <node name="servo_actuation" pkg="$(find rc-hardware-actuation)" type="servo_actuation.py" />
-  <rosparam command="load" file="$(find rc-hardware-actuation)/config/default.yaml" />
 </launch>
