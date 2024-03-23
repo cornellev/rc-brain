@@ -1,5 +1,7 @@
 <launch>
 
+  <rosparam command="load" file="$(find rc-autonomy)/config/config.yml" />
+
   <!-- Launch rc-teleop -->
   <include file="$(find rc-teleop)/launch/teleop.launch">
   </include>
