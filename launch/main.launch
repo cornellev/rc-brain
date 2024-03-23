@@ -1,11 +1,15 @@
 <launch>
 
-  <!-- Launching rc-teleop -->
-  <include file="$(find rc-teleop)/launch/drive.launch">
+  <!-- Launch rc-teleop -->
+  <include file="$(find rc-teleop)/launch/teleop.launch">
   </include>
 
-  <!-- Launching rc-localization -->
+  <!-- Launch rc-localization -->
   <include file="$(find rc-localization)/launch/localization.launch">
+  </include>
+
+  <!-- Launch rc-controls -->
+  <include file="$(find rc-controls)/launch/controls.launch">
   </include>
 
 </launch>
