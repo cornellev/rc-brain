@@ -29,7 +29,7 @@ class JoyInterpreter:
 		msg.steering_angle = turn
 		msg.speed = drive 
 
-		rospy.loginfo(data.axes)
+		# rospy.loginfo(data.axes)
 
 		self.movement_pub.publish(msg)
 
