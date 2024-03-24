@@ -8,12 +8,8 @@
   </include>
 
   <!-- Launch rc-localization -->
-  <include file="$(find rc-localization)/launch/localization.launch">
-  </include>
-
-  <!-- Launch rc-controls -->
-  <include file="$(find rc-controls)/launch/controls.launch">
-  </include>
+  <!-- <include file="$(find rc-localization)/launch/localization.launch">
+  </include>  -->
 
   <!-- Launch rc-hardware-actuation -->
   <include file="$(find rc-hardware-actuation)/launch/servo.launch">
