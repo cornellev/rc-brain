@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 from ackermann_msgs.msg import AckermannDrive
-from gpiozero import AngularZero
+from gpiozero import AngularServo
 
 
 def read_param(param, default):
