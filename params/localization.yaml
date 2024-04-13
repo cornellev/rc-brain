@@ -66,10 +66,10 @@ permit_corrected_publication: false
 #         estimation node from robot_localization! However, that instance should *not* fuse the global data.
 map_frame: map              # Defaults to "map" if unspecified
 odom_frame: odom            # Defaults to "odom" if unspecified
-base_link_frame: imu        # Defaults to "base_link" if unspecified
+base_link_frame: base_link  # Defaults to "base_link" if unspecified
 world_frame: odom           # Defaults to the value of odom_frame if unspecified
 
-imu0: /imu_uno
+imu0: /imu/data
 imu0_config: [false, false, false,
               true,  true,  true,
               false, false, false,
@@ -82,22 +82,6 @@ imu0_queue_size: 5
 imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
 imu0_twist_rejection_threshold: 0.8                #
 imu0_linear_acceleration_rejection_threshold: 0.8  #
-
-
-imu1: /imu_dos
-imu1_config: [false, false, false,
-              true,  true,  true,
-              false, false, false,
-              true,  true,  true,
-              true,  true,  true]
-imu1_nodelay: false
-imu1_differential: false
-imu1_relative: true
-imu1_queue_size: 5
-imu1_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-imu1_twist_rejection_threshold: 0.8                #
-imu1_linear_acceleration_rejection_threshold: 0.8  #
-
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.

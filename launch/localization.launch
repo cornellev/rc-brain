@@ -1,14 +1,12 @@
 <launch>
-  <rosparam command="load" file="$(find rc-localization)/params/imu_1.yml" />
-  <node name="imu_uno" pkg="witmotion_ros"  type="witmotion_ros_node" output="screen"/>
+  <rosparam command="load" file="$(find rc-localization)/params/imu.yaml" />
+  <node name="imu" pkg="witmotion_ros" type="witmotion_ros_node" output="screen"/>
 
-  <rosparam command="load" file="$(find rc-localization)/params/imu_2.yml" />
-  <node name="imu_dos" pkg="witmotion_ros"  type="witmotion_ros_node" launch-prefix="bash -c 'sleep 10; $0 $@' " output="screen"/>
+  <node pkg="tf" type="static_transform_publisher" name="base_link_imu_static_transform"
+      output="screen" args="0 0 0 0 0 0 base_link imu 100" />
 
-<!--
-  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true" launch-prefix="bash -c 'sleep 20; $0 $@' ">
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
     <rosparam command="load" file="$(find rc-localization)/params/localization.yaml" />
   </node>
--->
 </launch>
 
