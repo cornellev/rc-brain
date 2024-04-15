@@ -3,6 +3,13 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float32.h>
 #include <rc_hardware_sensors/SensorCollect.h>
+#include <ackermann_msgs/AckermannDrive.h>
+
+void ackermannDriveCallback(const ackermann_msgs::AckermannDrive msg)
+{
+    // This function will be called whenever a new Ackermann drive message is received
+    Serial.print("Received Ackermann drive message:");
+}
 
 Encoder left_encoder(3, 6);
 Encoder right_encoder(2, 5);
@@ -11,6 +18,8 @@ ros::NodeHandle nh;
 rc_hardware_sensors::SensorCollect msg;
 
 ros::Publisher sensor_collect_pub("sensor_collect", &msg);
+ros::Subscriber<ackermann_msgs::AckermannDrive> sub("ackermann_cmd", ackermannDriveCallback);
+
 long last_time;
 
 void setup()
