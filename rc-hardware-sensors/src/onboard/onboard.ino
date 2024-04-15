@@ -26,10 +26,10 @@ void setup()
 void loop()
 {
     // Populate the message with sensor data
+    msg.header.stamp = ros::Time::now();
     msg.encoder_left.data = (int) left_encoder.read();
     msg.encoder_right.data = (int) right_encoder.read();
-    msg.steering_angle.data = 57.62;
-    msg.stamp = ros::Time::now();
+    msg.steering_angle.data = 57.62; // Placeholder value
 
     // Publish the sensor data
     sensor_collect_pub.publish(&msg);
