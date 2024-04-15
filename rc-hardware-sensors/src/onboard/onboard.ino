@@ -17,6 +17,8 @@ void setup()
     Serial.begin(9600);
     nh.initNode();
     nh.advertise(sensor_collect_pub);
+
+    // Helps when using custom topics over rosserial
     nh.negotiateTopics();
     ros::Rate rate(100);
 }
