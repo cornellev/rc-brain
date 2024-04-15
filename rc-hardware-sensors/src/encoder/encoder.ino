@@ -15,10 +15,10 @@ ros::Publisher sensor_collect_pub("sensor_collect", &msg);
 void setup()
 {
     Serial.begin(9600);
-    Serial.println("Basic Encoder Test:");
     nh.initNode();
     nh.advertise(sensor_collect_pub);
     nh.negotiateTopics();
+    ros::Rate rate(100);
 }
 
 void loop()
@@ -27,10 +27,12 @@ void loop()
     msg.encoder_left.data = (int) left_encoder.read();
     msg.encoder_right.data = (int) right_encoder.read();
     msg.steering_angle.data = 57.62;
+    msg.stamp = ros::Time::now();
 
     // Publish the sensor data
     sensor_collect_pub.publish(&msg);
 
+    // Spin and sleep until time for next loop
     nh.spinOnce();
-    delay(100);
+    rate.sleep();
 }
