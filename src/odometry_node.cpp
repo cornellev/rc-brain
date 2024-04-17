@@ -7,46 +7,49 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <rc_localization/SensorCollect.h>
 
-const double BIKE_LENGTH = 10.0; // TODO
-const double WHEEL_DIAMETER_M = 110.0 / 1000;
+const double BIKE_LENGTH = 19.0 / 100;
+const double WHEEL_DIAMETER_M = 9.5 / 100;
 const double TICKS_PER_REV = 827.2;
-const double TICKS_TO_M = TICKS_PER_REV * 2 * M_PI * (WHEEL_DIAMETER_M / 2);
+const double TICKS_TO_M = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_M / 2));
 
-struct EncoderData
-{
-    ros::Time stamp;
-    int32_t data;
+bool first = true;
+rc_localization::SensorCollect last;
 
-    EncoderData()
-    {
-    }
-
-    EncoderData(ros::Time stamp, int32_t data) : stamp(stamp), data(data)
-    {
-    }
-};
-
-EncoderData left_enc_last, left_enc_current, right_enc_last, right_enc_current;
 double steer_angle = 0.0;
-double x, y, theta, x_dot, y_dot, theta_dot;
+double x, y, theta, x_dot, y_dot, theta_dot = 0;
 
-// these really need to be stamped
-void left_enc_callback(std_msgs::Int32 encoder)
+void data_callback(rc_localization::SensorCollect current)
 {
-    left_enc_last = left_enc_current;
-    left_enc_current = EncoderData(ros::Time::now(), encoder.data);
-}
+    if (first)
+    {
+        first = false;
+        last = current;
+        return;
+    }
 
-void right_enc_callback(std_msgs::Int32 encoder)
-{
-    right_enc_last = right_enc_current;
-    right_enc_current = EncoderData(ros::Time::now(), encoder.data);
-}
+    ros::Duration dt = ros::Duration((current.timestamp - last.timestamp) / 1000.0);
 
-void steer_angle_callback(std_msgs::Float32 angle)
-{
-    steer_angle = angle.data;
+    double current_avg = (current.encoder_left + current.encoder_right) / 2.0;
+    double last_avg = (last.encoder_left + last.encoder_right) / 2.0;
+    double delta_enc = current_avg - last_avg;
+    double delta_enc_m = TICKS_TO_M * delta_enc;
+
+    last = current;
+
+    double v = delta_enc_m / dt.toSec();
+    double steer_angle = current.steering_angle;
+
+    // should be new theta?
+    x_dot = v * std::cos(theta);
+    y_dot = v * std::sin(theta);
+    theta_dot = v * std::tan(steer_angle) / BIKE_LENGTH;
+
+    // Don't update theta for now, at least until we switch to getting an initial estimate of theta.
+    x += x_dot * dt.toSec();
+    y += y_dot * dt.toSec();
+    theta += theta_dot * dt.toSec(); // temporary
 }
 
 void state_callback(nav_msgs::Odometry filtered)
@@ -62,42 +65,11 @@ void state_callback(nav_msgs::Odometry filtered)
     theta = yaw;
 }
 
-void calculate_bicycle(ros::Time last_time, ros::Time now)
-{
-    ros::Duration dt = now - last_time;
-
-    double v_left = (left_enc_current.data - left_enc_last.data) /
-                    (left_enc_current.stamp - left_enc_last.stamp).toSec();
-    double v_right = (right_enc_current.data - right_enc_last.data) /
-                     (right_enc_current.stamp - right_enc_last.stamp).toSec();
-
-    // Interpolate/extrapolate encoder position to last calculation time and current calculation time
-    double left_old = left_enc_last.data + v_left * (last_time - left_enc_last.stamp).toSec();
-    double left_now = left_enc_current.data + v_left * (now - left_enc_current.stamp).toSec();
-    double left_delta = left_now - left_old;
-
-    double right_old = right_enc_last.data + v_right * (last_time - right_enc_last.stamp).toSec();
-    double right_now = right_enc_current.data + v_right * (now - right_enc_current.stamp).toSec();
-    double right_delta = right_now - right_old;
-
-    double v = (left_delta + right_delta) / 2 * dt.toSec();
-
-    // should be new theta?
-    x_dot = v * std::cos(theta);
-    y_dot = v * std::sin(theta);
-    theta_dot = v * std::tan(steer_angle) / BIKE_LENGTH;
-
-    x += x_dot * dt.toSec();
-    y += y_dot * dt.toSec();
-    // Don't update theta for now, at least until we switch to getting an initial estimate of theta.
-}
-
-nav_msgs::Odometry get_odom_packet(ros::Time stamp)
+nav_msgs::Odometry get_odom_packet()
 {
     nav_msgs::Odometry odom;
 
     odom.header.frame_id = "odom";
-    odom.header.stamp = stamp;
 
     odom.pose.pose.position.x = x;
     odom.pose.pose.position.y = y;
@@ -120,27 +92,26 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "odometry_node");
 
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
 
-    nh.subscribe("/encoder/left", 5, left_enc_callback);
-    nh.subscribe("/encoder/right", 5, right_enc_callback);
-    nh.subscribe("/steering_angle", 5, steer_angle_callback);
-    nh.subscribe("/odometry/filtered", 5, state_callback);
+    ros::Subscriber s1 = nh.subscribe("/sensor_collect", 5, data_callback);
+    ros::Subscriber s2 = nh.subscribe("/odometry/filtered", 5, state_callback);
 
-    ros::Publisher odom_publish = nh.advertise<nav_msgs::Odometry>("/odometry", 5);
+    ros::Publisher odom_publish = nh.advertise<nav_msgs::Odometry>("/odometry", 1);
 
-    ros::Time last_calc = ros::Time::now();
-    ros::Rate rate = ros::Rate(10);
+    ros::Rate rate = ros::Rate(100);
+    ros::Time last = ros::Time::now();
+
     while (ros::ok())
     {
         ros::Time now = ros::Time::now();
-        calculate_bicycle(last_calc, now);
-        last_calc = now;
-
-        auto msg = get_odom_packet(now);
-        odom_publish.publish(msg);
+        if (now - last > rate.expectedCycleTime())
+        {
+            last = now;
+            auto msg = get_odom_packet();
+            odom_publish.publish(msg);
+        }
 
         ros::spinOnce();
-        rate.sleep();
     }
 }
