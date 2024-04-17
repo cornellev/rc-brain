@@ -10,7 +10,6 @@ project(rc_hardware_sensors)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
-  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -48,17 +47,10 @@ find_package(catkin REQUIRED COMPONENTS
 
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-    FILES
-    SensorCollect.msg
-#   Message1.msg
-#   Message2.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
