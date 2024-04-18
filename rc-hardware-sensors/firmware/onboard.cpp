@@ -1,9 +1,10 @@
+#include <Arduino.h>
 #include <ros.h>
 #include <Encoder.h>
 #include <rc_localization/SensorCollect.h>
 #include <ackermann_msgs/AckermannDrive.h>
 
-void ackermannDriveCallback(const ackermann_msgs::AckermannDrive msg)
+void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg)
 {
     // This function will be called whenever a new Ackermann drive message is received
     Serial.print("Received Ackermann drive message:");

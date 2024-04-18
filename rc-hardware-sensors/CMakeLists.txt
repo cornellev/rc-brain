@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(rc_hardware_sensors)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -10,6 +10,8 @@ project(rc_hardware_sensors)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  rosserial_arduino
+  rosserial_client
 )
 
 ## System dependencies are found with CMake's conventions
@@ -112,6 +114,41 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
 )
+
+# things are about to get strange
+# I'm copying a lot of things from here
+# https://github.com/ros-drivers/rosserial/blob/c169ae2173dcfda7cee567d64beae45198459400/rosserial_client/cmake/rosserial_client-extras.cmake#L15
+function(rosserial_generate_messages MSG_PACKAGE)
+  message(STATUS "Using rosserial_client/make_library.py to include messages from package ${MSG_PACKAGE}")
+
+  add_custom_command(
+    OUTPUT ${PROJECT_BINARY_DIR}/ros_lib/${MSG_PACKAGE}
+    COMMAND ${CATKIN_ENV} rosrun rosserial_client make_library.py ${PROJECT_BINARY_DIR} ${MSG_PACKAGE}
+  )
+  add_custom_target(${PROJECT_NAME}_ros_lib_${MSG_PACKAGE} DEPENDS ${PROJECT_BINARY_DIR}/ros_lib)
+
+  find_package(rc_localization)
+  add_dependencies(${PROJECT_NAME}_ros_lib_${MSG_PACKAGE}
+    rc_localization_generate_messages_py
+  )
+endfunction()
+
+rosserial_generate_ros_lib(
+  PACKAGE rosserial_arduino
+  SCRIPT make_libraries.py
+)
+
+rosserial_generate_messages(
+  MSG_PACKAGE rc_localization
+)
+
+rosserial_configure_client(
+  DIRECTORY firmware
+  TOOLCHAIN_FILE ${ROSSERIAL_ARDUINO_TOOLCHAIN}
+)
+
+rosserial_add_client_target(firmware firmware ALL)
+rosserial_add_client_target(firmware firmware-upload)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
