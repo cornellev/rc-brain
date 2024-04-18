@@ -14,6 +14,9 @@ const double WHEEL_DIAMETER_M = 9.5 / 100;
 const double TICKS_PER_REV = 827.2;
 const double TICKS_TO_M = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_M / 2));
 
+int initial_encoder_left;
+int initial_encoder_right;
+
 bool first = true;
 rc_localization::SensorCollect last;
 
@@ -22,9 +25,17 @@ double x, y, theta, x_dot, y_dot, theta_dot = 0;
 
 void data_callback(rc_localization::SensorCollect current)
 {
+    // Calculate encoder offset
+    current.encoder_left -= initial_encoder_left;
+    current.encoder_right -= initial_encoder_right;
+
     if (first)
     {
         first = false;
+
+        // Zero the encoders on startup
+        initial_encoder_left = current.encoder_left;
+        initial_encoder_right = current.encoder_right;
         last = current;
         return;
     }
