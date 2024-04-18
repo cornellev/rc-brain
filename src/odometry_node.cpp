@@ -14,30 +14,24 @@ const double WHEEL_DIAMETER_M = 9.5 / 100;
 const double TICKS_PER_REV = 827.2;
 const double TICKS_TO_M = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_M / 2));
 
-int initial_encoder_left;
-int initial_encoder_right;
-
 bool first = true;
 rc_localization::SensorCollect last;
 
 double steer_angle = 0.0;
 double x, y, theta, x_dot, y_dot, theta_dot = 0;
 
+bool run_once = false;
+
 void data_callback(rc_localization::SensorCollect current)
 {
-    // Calculate encoder offset
-    current.encoder_left -= initial_encoder_left;
-    current.encoder_right -= initial_encoder_right;
+    if (run_once)
+    {
+        return;
+    }
 
     if (first)
     {
         first = false;
-
-        // Zero the encoders on startup
-        initial_encoder_left = current.encoder_left;
-        initial_encoder_right = current.encoder_right;
-        current.encoder_left -= initial_encoder_left;
-        current.encoder_right -= initial_encoder_right;
         last = current;
         return;
     }
@@ -54,17 +48,21 @@ void data_callback(rc_localization::SensorCollect current)
     double v = delta_enc_m / dt.toSec();
     double steer_angle = current.steering_angle;
 
-    steer_angle = 0; // TEMPORARY FOR TESTING
-
     // should be new theta?
     x_dot = v * std::cos(theta);
     y_dot = v * std::sin(theta);
     theta_dot = v * std::tan(steer_angle) / BIKE_LENGTH;
 
+    ROSINFO("x_dot: %f, y_dot: %f, theta_dot: %f", x_dot, y_dot, theta_dot);
+
     // Don't update theta for now, at least until we switch to getting an initial estimate of theta.
     x += x_dot * dt.toSec();
     y += y_dot * dt.toSec();
     theta += theta_dot * dt.toSec(); // temporary
+
+    ROS_INFO("x: %f, y: %f, theta: %f", x, y, theta);
+
+    run_once = true;
 }
 
 void state_callback(nav_msgs::Odometry filtered)
