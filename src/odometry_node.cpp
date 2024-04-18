@@ -36,6 +36,8 @@ void data_callback(rc_localization::SensorCollect current)
         // Zero the encoders on startup
         initial_encoder_left = current.encoder_left;
         initial_encoder_right = current.encoder_right;
+        current.encoder_left -= initial_encoder_left;
+        current.encoder_right -= initial_encoder_right;
         last = current;
         return;
     }
