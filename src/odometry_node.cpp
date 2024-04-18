@@ -54,6 +54,8 @@ void data_callback(rc_localization::SensorCollect current)
     double v = delta_enc_m / dt.toSec();
     double steer_angle = current.steering_angle;
 
+    steer_angle = 0; // TEMPORARY FOR TESTING
+
     // should be new theta?
     x_dot = v * std::cos(theta);
     y_dot = v * std::sin(theta);
