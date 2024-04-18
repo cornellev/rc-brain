@@ -20,8 +20,6 @@ rc_localization::SensorCollect last;
 double steer_angle = 0.0;
 double x, y, theta, x_dot, y_dot, theta_dot = 0;
 
-bool run_once = false;
-
 void data_callback(rc_localization::SensorCollect current)
 {
     if (run_once)
@@ -53,16 +51,10 @@ void data_callback(rc_localization::SensorCollect current)
     y_dot = v * std::sin(theta);
     theta_dot = v * std::tan(steer_angle) / BIKE_LENGTH;
 
-    ROSINFO("x_dot: %f, y_dot: %f, theta_dot: %f", x_dot, y_dot, theta_dot);
-
     // Don't update theta for now, at least until we switch to getting an initial estimate of theta.
     x += x_dot * dt.toSec();
     y += y_dot * dt.toSec();
-    theta += theta_dot * dt.toSec(); // temporary
-
-    ROS_INFO("x: %f, y: %f, theta: %f", x, y, theta);
-
-    run_once = true;
+    theta += theta_dot * dt.toSec();
 }
 
 void state_callback(nav_msgs::Odometry filtered)
