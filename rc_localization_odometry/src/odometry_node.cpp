@@ -7,7 +7,7 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <rc_localization/SensorCollect.h>
+#include <rc_localization_odometry/SensorCollect.h>
 
 const double BIKE_LENGTH = 19.0 / 100;
 const double WHEEL_DIAMETER_M = 9.5 / 100;
@@ -15,12 +15,12 @@ const double TICKS_PER_REV = 827.2;
 const double TICKS_TO_M = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_M / 2));
 
 bool first = true;
-rc_localization::SensorCollect last;
+rc_localization_odometry::SensorCollect last;
 
 double steer_angle = 0.0;
 double x, y, theta, x_dot, y_dot, theta_dot = 0;
 
-void data_callback(rc_localization::SensorCollect current)
+void data_callback(rc_localization_odometry::SensorCollect current)
 {
     if (run_once)
     {
