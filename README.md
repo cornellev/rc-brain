@@ -4,6 +4,10 @@ Hardware and sensor interfacing for RC cars.
 
 ## Installation
 
+This module requires a recursive clone to build. The encoder firmware is in a separate repo so that it can be isolated and put on the arduino.
+
+```git clone --recursive git@github.com:cornellev/rc-hardware.git```
+
 ### Dependencies
 `rc_hardware_sensors` depends on `rc_localization_odometry` for certain message types.
 You must have `rc_localization_odometry` cloned/installed before you begin.
