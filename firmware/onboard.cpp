@@ -14,8 +14,23 @@
 #define in4 A4
 
 #define servoPin 9
-
 Servo servo;
+
+const float MAX_SPEED = 1.0;
+const float MIN_SPEED = -1.0;
+
+const float STEERING_ZERO_ANGLE = 110.0;
+const float STEERING_MAX_ANGLE = 180.0;
+const float STEERING_MIN_ANGLE = 40.0;
+
+
+void writeAngle(float angle) {
+  if (angle > 0) {
+    servo.write(min(STEERING_ZERO_ANGLE + angle, STEERING_MAX_ANGLE));
+  } else {
+    servo.write(max(STEERING_ZERO_ANGLE - angle, STEERING_MIN_ANGLE));
+  }
+}
 
 void writePercent(float value) {
   if (value >= 0) {
@@ -35,6 +50,13 @@ void writePercent(float value) {
     analogWrite(enB, -value * 255);
   }
 }
+
+void writeAckermann(float angle, float speed) {
+  writeAngle(angle);
+  writePercent(speed);
+}
+
+
 
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg)
 {
@@ -82,8 +104,8 @@ void setup()
 
 void loop()
 {
-    writePercent(0.7);
-    servo.write(120);
+
+    writeAckermann(25, 0.5);
 
     // Set last time for rate
     last_time = millis();
@@ -98,9 +120,5 @@ void loop()
 
     // Spin and sleep until time for next loop
 
-    while (10 > millis() - last_time)
-    { // 1 Hz
-        delay(0);
-    }
     nh.spinOnce();
 }
