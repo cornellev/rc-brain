@@ -1,8 +1,40 @@
 #include <Arduino.h>
 #include <ros.h>
 #include <Encoder.h>
+#include <Servo.h>
 #include <rc_localization_odometry/SensorCollect.h>
 #include <ackermann_msgs/AckermannDrive.h>
+
+#define enA 5
+#define in1 A1
+#define in2 A2
+
+#define enB 6
+#define in3 A3
+#define in4 A4
+
+#define servoPin 9
+
+Servo servo;
+
+void writePercent(float value) {
+  if (value >= 0) {
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+    digitalWrite(in3, LOW);
+    digitalWrite(in4, HIGH);
+
+    analogWrite(enA, value * 255);
+    analogWrite(enB, value * 255);
+  } else {
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
+    digitalWrite(in3, HIGH);
+    digitalWrite(in4, LOW);
+    analogWrite(enA, -value * 255);
+    analogWrite(enB, -value * 255);
+  }
+}
 
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg)
 {
@@ -29,10 +61,30 @@ void setup()
 
     // Helps when using custom topics over rosserial
     nh.negotiateTopics();
+
+    servo.attach(servoPin);
+
+    pinMode(enA, OUTPUT);
+    pinMode(in1, OUTPUT);
+    pinMode(in2, OUTPUT);
+    pinMode(enB, OUTPUT);
+    pinMode(in3, OUTPUT);
+    pinMode(in4, OUTPUT);
+
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+    digitalWrite(in3, LOW);
+    digitalWrite(in4, HIGH);
+
+    digitalWrite(enA, LOW);
+    digitalWrite(enB, LOW);
 }
 
 void loop()
 {
+    writePercent(0.7);
+    servo.write(120);
+
     // Set last time for rate
     last_time = millis();
     // Populate the message with sensor data
