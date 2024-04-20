@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ros.h>
 #include <Encoder.h>
-#include <rc_localization/SensorCollect.h>
+#include <rc_localization_odometry/SensorCollect.h>
 #include <ackermann_msgs/AckermannDrive.h>
 
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg)
@@ -14,7 +14,7 @@ Encoder left_encoder(2, 5);
 Encoder right_encoder(3, 6);
 
 ros::NodeHandle nh;
-rc_localization::SensorCollect msg;
+rc_localization_odometry::SensorCollect msg;
 
 ros::Publisher sensor_collect_pub("sensor_collect", &msg);
 ros::Subscriber<ackermann_msgs::AckermannDrive> sub("ackermann_msg", &ackermannDriveCallback);

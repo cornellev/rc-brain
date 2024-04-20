@@ -127,9 +127,9 @@ function(rosserial_generate_messages MSG_PACKAGE)
   )
   add_custom_target(${PROJECT_NAME}_ros_lib_${MSG_PACKAGE} DEPENDS ${PROJECT_BINARY_DIR}/ros_lib)
 
-  find_package(rc_localization)
+  find_package(rc_localization_odometry)
   add_dependencies(${PROJECT_NAME}_ros_lib_${MSG_PACKAGE}
-    rc_localization_generate_messages_py
+    rc_localization_odometry_generate_messages_py
   )
 endfunction()
 
@@ -139,7 +139,7 @@ rosserial_generate_ros_lib(
 )
 
 rosserial_generate_messages(
-  MSG_PACKAGE rc_localization
+  MSG_PACKAGE rc_localization_odometry
 )
 
 rosserial_configure_client(

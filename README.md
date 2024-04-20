@@ -5,8 +5,8 @@ Hardware and sensor interfacing for RC cars.
 ## Installation
 
 ### Dependencies
-`rc_hardware_sensors` depends on `rc_localization` for certain message types.
-You must have `rc_localization` cloned/installed before you begin.
+`rc_hardware_sensors` depends on `rc_localization_odometry` for certain message types.
+You must have `rc_localization_odometry` cloned/installed before you begin.
 
 You also must have `rosserial` and `rosserial_arduino` installed.
 ```sh
