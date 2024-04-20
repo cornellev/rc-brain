@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rc_locaization_imu</name>
+  <name>rc_localization_imu</name>
   <version>0.0.0</version>
-  <description>The rc_locaization_imu package</description>
+  <description>The rc_localization_imu package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
