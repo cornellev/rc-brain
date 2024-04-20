@@ -14,10 +14,14 @@ const double WHEEL_DIAMETER_M = 9.5 / 100;
 const double TICKS_PER_REV = 827.2;
 const double TICKS_TO_M = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_M / 2));
 
+std::string frame;
+std::string sensor_topic;
+std::string odom_topic;
+int pub_rate;
+
 bool first = true;
 rc_localization_odometry::SensorCollect last;
 
-bool initial_estimate_recieved = true; // TODO: recieve initial estimates
 double steer_angle = 0.0;
 double x, y, theta, x_dot, y_dot, theta_dot = 0;
 
@@ -52,39 +56,11 @@ void data_callback(rc_localization_odometry::SensorCollect current)
     theta += theta_dot * dt.toSec();
 }
 
-double get_yaw(tf2::Quaternion q)
-{
-    double yaw, _pitch, _roll;
-    tf2::Matrix3x3(q).getEulerYPR(yaw, _pitch, _roll);
-    return yaw;
-}
-
-void state_callback(nav_msgs::Odometry filtered)
-{
-    tf2::Vector3 pos;
-    tf2::Quaternion rot;
-    tf2::fromMsg(filtered.pose.pose.position, pos);
-    tf2::fromMsg(filtered.pose.pose.orientation, rot);
-
-    x = pos.x();
-    y = pos.y();
-    theta = get_yaw(rot);
-
-    tf2::Vector3 lin_v;
-    tf2::Vector3 ang_v;
-    tf2::fromMsg(filtered.twist.twist.linear, lin_v);
-    tf2::fromMsg(filtered.twist.twist.angular, ang_v);
-
-    x_dot = lin_v.x();
-    y_dot = lin_v.y();
-    theta_dot = ang_v.getZ();
-}
-
-nav_msgs::Odometry get_odom_packet()
+nav_msgs::Odometry build_odom_packet()
 {
     nav_msgs::Odometry odom;
 
-    odom.header.frame_id = "encoder";
+    odom.header.frame_id = frame;
 
     odom.pose.pose.position.x = x;
     odom.pose.pose.position.y = y;
@@ -107,30 +83,29 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "odometry_node");
 
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
 
-    ros::Subscriber s1 = nh.subscribe("/sensor_collect", 5, data_callback);
-    // ros::Subscriber s2 = nh.subscribe("/odometry/filtered", 5, state_callback);
+    nh.getParam("frame", frame);
+    nh.getParam("sensor_topic", sensor_topic);
+    nh.getParam("odom_topic", odom_topic);
+    nh.getParam("publish_rate", pub_rate);
 
-    ros::Publisher odom_publish = nh.advertise<nav_msgs::Odometry>("/odometry", 1);
+    ros::Subscriber sub = nh.subscribe(sensor_topic, 5, data_callback);
 
-    ros::Rate rate = ros::Rate(100);
+    ros::Publisher odom_publish = nh.advertise<nav_msgs::Odometry>(odom_topic, 1);
+
+    ros::Rate rate = ros::Rate(pub_rate);
     ros::Time last = ros::Time::now();
 
     while (ros::ok())
     {
         ros::spinOnce();
 
-        if (!initial_estimate_recieved)
-        {
-            continue;
-        }
-
         ros::Time now = ros::Time::now();
         if (now - last > rate.expectedCycleTime())
         {
             last = now;
-            auto msg = get_odom_packet();
+            auto msg = build_odom_packet();
             odom_publish.publish(msg);
         }
     }

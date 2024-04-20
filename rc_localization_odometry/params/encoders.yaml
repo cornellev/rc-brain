@@ -1,0 +1,4 @@
+frame: encoder
+sensor_topic: /encoder
+odom_topic: /odometry/encoder
+publish_rate: 100
