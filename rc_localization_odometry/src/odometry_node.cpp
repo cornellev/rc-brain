@@ -17,6 +17,7 @@ const double TICKS_TO_M = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_M / 
 bool first = true;
 rc_localization_odometry::SensorCollect last;
 
+bool initial_estimate_recieved = true; // TODO: recieve initial estimates
 double steer_angle = 0.0;
 double x, y, theta, x_dot, y_dot, theta_dot = 0;
 
@@ -46,30 +47,44 @@ void data_callback(rc_localization_odometry::SensorCollect current)
     y_dot = v * std::sin(theta);
     theta_dot = v * std::tan(steer_angle) / BIKE_LENGTH;
 
-    // Don't update theta for now, at least until we switch to getting an initial estimate of theta.
     x += x_dot * dt.toSec();
     y += y_dot * dt.toSec();
     theta += theta_dot * dt.toSec();
 }
 
+double get_yaw(tf2::Quaternion q)
+{
+    double yaw, _pitch, _roll;
+    tf2::Matrix3x3(q).getEulerYPR(yaw, _pitch, _roll);
+    return yaw;
+}
+
 void state_callback(nav_msgs::Odometry filtered)
 {
-    tf2::Quaternion q;
-    tf2::fromMsg(filtered.pose.pose.orientation, q);
+    tf2::Vector3 pos;
+    tf2::Quaternion rot;
+    tf2::fromMsg(filtered.pose.pose.position, pos);
+    tf2::fromMsg(filtered.pose.pose.orientation, rot);
 
-    tf2::Matrix3x3 m(q);
+    x = pos.x();
+    y = pos.y();
+    theta = get_yaw(rot);
 
-    double yaw, _pitch, _roll;
-    m.getEulerYPR(yaw, _pitch, _roll);
+    tf2::Vector3 lin_v;
+    tf2::Vector3 ang_v;
+    tf2::fromMsg(filtered.twist.twist.linear, lin_v);
+    tf2::fromMsg(filtered.twist.twist.angular, ang_v);
 
-    theta = yaw;
+    x_dot = lin_v.x();
+    y_dot = lin_v.y();
+    theta_dot = ang_v.getZ();
 }
 
 nav_msgs::Odometry get_odom_packet()
 {
     nav_msgs::Odometry odom;
 
-    odom.header.frame_id = "odom";
+    odom.header.frame_id = "encoder";
 
     odom.pose.pose.position.x = x;
     odom.pose.pose.position.y = y;
@@ -95,7 +110,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
     ros::Subscriber s1 = nh.subscribe("/sensor_collect", 5, data_callback);
-    ros::Subscriber s2 = nh.subscribe("/odometry/filtered", 5, state_callback);
+    // ros::Subscriber s2 = nh.subscribe("/odometry/filtered", 5, state_callback);
 
     ros::Publisher odom_publish = nh.advertise<nav_msgs::Odometry>("/odometry", 1);
 
@@ -104,6 +119,13 @@ int main(int argc, char **argv)
 
     while (ros::ok())
     {
+        ros::spinOnce();
+
+        if (!initial_estimate_recieved)
+        {
+            continue;
+        }
+
         ros::Time now = ros::Time::now();
         if (now - last > rate.expectedCycleTime())
         {
@@ -111,7 +133,5 @@ int main(int argc, char **argv)
             auto msg = get_odom_packet();
             odom_publish.publish(msg);
         }
-
-        ros::spinOnce();
     }
 }
