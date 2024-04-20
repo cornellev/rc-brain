@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(rc-autonomy)
+project(rc_autonomy)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -10,7 +10,7 @@ project(rc-autonomy)
 find_package(catkin REQUIRED COMPONENTS
   rc_localization_imu
   rc_localization_odometry
-  rc-hardware
+  rc_hardware
   rc-teleop
   roscpp
   rospy
