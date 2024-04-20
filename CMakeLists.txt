@@ -8,7 +8,9 @@ project(rc-autonomy)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rc-localization
+  rc_localization_imu
+  rc_localization_odometry
+  rc-hardware
   rc-teleop
   roscpp
   rospy
