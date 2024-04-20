@@ -22,11 +22,6 @@ double x, y, theta, x_dot, y_dot, theta_dot = 0;
 
 void data_callback(rc_localization_odometry::SensorCollect current)
 {
-    if (run_once)
-    {
-        return;
-    }
-
     if (first)
     {
         first = false;
