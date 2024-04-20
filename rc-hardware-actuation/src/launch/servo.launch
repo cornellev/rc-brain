@@ -1,3 +1,0 @@
-<launch>
-  <node name="servo_actuation" pkg="rc-hardware-actuation" type="servo_actuation.py" />
-</launch>

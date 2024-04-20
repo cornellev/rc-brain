@@ -1,3 +1,0 @@
-[submodule "rc-hardware-sensors/firmware/Encoder"]
-	path = rc-hardware-sensors/firmware/Encoder
-	url = https://github.com/PaulStoffregen/Encoder.git
