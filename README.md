@@ -20,4 +20,5 @@ sudo apt-get install ros-noetic-rosserial-arduino
 
 ## Running
 1. Make sure all of your shells are sourced.
-2. `rosrun rosserial_python serial_node.py /dev/ttyUSB0` to connect the Nano to `roscore` running on your computer.
+2. Make sure the port you are using is accessible and that you have read/write permissions `sudo chmod a+rw /dev/ttyUSB0`
+3. `rosrun rosserial_python serial_node.py /dev/ttyUSB0` to connect the Nano to `roscore` running on your computer.
