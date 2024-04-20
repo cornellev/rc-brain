@@ -26,3 +26,6 @@ On the pi:
 
  - Left Trigger is forward and Right Trigger is reverse
  - Right Joystick X-axis is steering angle
+
+### Publish
+ - Publishes an ackermann_msgs/AckermannDrive message to 'rc_movement_msg'
