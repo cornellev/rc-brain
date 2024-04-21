@@ -11,11 +11,11 @@ Please follow the tutorial at
  - http://wiki.ros.org/joy/Tutorials/ConfiguringALinuxJoystick
 
 
-sudo chmod a+rw /dev/input/js0
-rosparam set joy_node/dev "/dev/input/js0"
-rosrun joy joy_node
-rostopic echo joy
-roslaunch rc-teleop teleop.launch
+sudo chmod a+rw /dev/input/js0  
+rosparam set joy_node/dev "/dev/input/js0"  
+rosrun joy joy_node  
+rostopic echo joy  
+roslaunch rc-teleop teleop.launch  
 
 ## Controls
 
