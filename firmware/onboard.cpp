@@ -27,6 +27,11 @@ int current_steering_angle; // Current steering angle of the vehicle
 long last_message_time; // Time of last message received
 long message_timeout = 1000; // Time in milliseconds without a message before the vehicle stops moving
 
+// Initialize hardware/sensors
+Encoder left_encoder(2, 5);
+Encoder right_encoder(3, 6);
+Servo servo;
+
 
 /**
  * Turn steering servo to specified angle. Angle will be clamped to be between -MAX_INPUT_STEER and MAX_INPUT_STEER.
@@ -89,11 +94,6 @@ void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
   last_message_time = millis(); // Update received last message time
 }
 
-
-// Initialize hardware/sensors
-Encoder left_encoder(2, 5);
-Encoder right_encoder(3, 6);
-Servo servo;
 
 // Setup ROS interface
 ros::NodeHandle nh;
