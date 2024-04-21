@@ -1,4 +1,12 @@
 <launch>
-    <node name="joy_node" pkg="joy" type="joy_node" output="screen" />
+    <node name="joy_node" pkg="joy" type="joy_node">
+        <param name="dev" value="/dev/input/js0"/>
+    </node>
+
     <node name="interpret_joy" pkg="rc-teleop" type="interpret_joy.py" output="screen" />
+
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+        <param name="port" value="/dev/USB0"/>
+    </node>
 </launch>
+

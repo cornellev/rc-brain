@@ -11,13 +11,9 @@ class JoyInterpreter:
 		self.movement_pub = rospy.Publisher('rc_movement_msg', AckermannDrive, queue_size=10)
 		rospy.Subscriber("joy", Joy, self.joy_to_twist)
 
-		self.deadzone = rospy.get_param(param_name='deadzone', default=0.1)
-		self.max_turning_angle = rospy.get_param(param_name='max_turning_angle', default=1.0)
-		self.max_velocity = rospy.get_param(param_name='max_velocity', default=1.0)
-
-		if not rospy.has_param('deadzone'): rospy.logwarn("`deadzone` parameter not specified")
-		if not rospy.has_param('max_turning_angle'): rospy.logwarn("`max_turning_angle` parameter not specified")
-		if not rospy.has_param('max_velocity'): rospy.logwarn("`max_velocity` parameter not specified")
+		self.deadzone = rospy.get_param(param_name='joy_interpreter/teleop/deadzone', default=0.1)
+		self.max_turning_angle = rospy.get_param(param_name='joy_interpreter/teleop/max_turning_angle', default=1.0)
+		self.max_velocity = rospy.get_param(param_name='joy_interpreter/teleop/max_velocity', default=1.0)
 
 		rospy.loginfo(f"Parameter max_turning_angle={self.max_turning_angle}")
 		rospy.loginfo(f"Parameter max_velocity={self.max_velocity}")
