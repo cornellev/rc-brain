@@ -3,7 +3,7 @@
 ## Requires:
 
  - ros-noetic-joy
- - ros-noetic-ackermann_msgs
+ - ros-noetic-ackermann-msgs
 
 ## Instructions:
 
