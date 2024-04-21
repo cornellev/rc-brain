@@ -20,11 +20,18 @@ const float MAX_SPEED = 1.0;
 const float MIN_SPEED = -1.0;
 
 const float STEERING_ZERO_ANGLE = 110.0;
-const float MAX_INPUT_STEER = 70.0;
+const float STEERING_MAX_ANGLE = 180.0;
+const float STEERING_MIN_ANGLE = 40.0;
+
+const float SIM_STEERING_MAX_ANGLE = STEERING_MAX_ANGLE - STEERING_ZERO_ANGLE;
+const float SIM_STEERING_MIN_ANGLE = STEERING_MIN_ANGLE - STEERING_ZERO_ANGLE;
 
 void writeAngle(float angle) {
-  angle = max(min(STEERING_ZERO_ANGLE + angle, STEERING_ZERO_ANGLE + MAX_INPUT_STEER), STEERING_ZERO_ANGLE - MAX_INPUT_STEER);
-  servo.write(angle);
+  if (angle > 0) {
+    servo.write(min(STEERING_ZERO_ANGLE + angle, STEERING_MAX_ANGLE));
+  } else {
+    servo.write(max(STEERING_ZERO_ANGLE - angle, STEERING_MIN_ANGLE));
+  }
 }
 
 void writePercent(float value) {
@@ -55,17 +62,17 @@ void writeAckermann(float angle, float speed) {
 
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg)
 {
-  writeAckermann(msg.steering_angle * MAX_INPUT_STEER, msg.speed);
+  writeAckermann(msg.steering_angle * SIM_STEERING_MAX_ANGLE, msg.speed);
 }
 
 Encoder left_encoder(2, 5);
 Encoder right_encoder(3, 6);
 
 ros::NodeHandle nh;
-// rc_localization_odometry::SensorCollect msg;
+rc_localization_odometry::SensorCollect msg;
 
-// ros::Publisher sensor_collect_pub("sensor_collect", &msg);
-ros::Subscriber<ackermann_msgs::AckermannDrive> sub("rc_movement_msg", &ackermannDriveCallback);
+ros::Publisher sensor_collect_pub("sensor_collect", &msg);
+ros::Subscriber<ackermann_msgs::AckermannDrive> sub("ackermann_msg", &ackermannDriveCallback);
 
 long last_time;
 
@@ -73,8 +80,7 @@ void setup()
 {
     Serial.begin(9600);
     nh.initNode();
-    nh.subscribe(sub);
-    // nh.advertise(sensor_collect_pub);
+    nh.advertise(sensor_collect_pub);
 
     // Helps when using custom topics over rosserial
     nh.negotiateTopics();
@@ -95,24 +101,23 @@ void setup()
 
     digitalWrite(enA, LOW);
     digitalWrite(enB, LOW);
-    
-    writeAckermann(0, 0);
 }
 
 void loop()
 {
+    writeAckermann(0, 0);
     // writeAckermann(25, 0.5);
 
     // Set last time for rate
     last_time = millis();
     // Populate the message with sensor data
-    // msg.timestamp = millis();
-    // msg.encoder_left = -(int)left_encoder.read();
-    // msg.encoder_right = (int)right_encoder.read();
-    //msg.steering_angle = 57.62; // Placeholder value
+    msg.timestamp = millis();
+    msg.encoder_left = -(int)left_encoder.read();
+    msg.encoder_right = (int)right_encoder.read();
+    msg.steering_angle = 57.62; // Placeholder value
 
     // Publish the sensor data
-    // sensor_collect_pub.publish(&msg);
+    sensor_collect_pub.publish(&msg);
 
     // Spin and sleep until time for next loop
 
