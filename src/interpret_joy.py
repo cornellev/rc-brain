@@ -26,7 +26,7 @@ class JoyInterpreter:
 		if abs(turn) < self.deadzone:   
 			turn = 0.0
 
-		drive = (gamepad_data.get_left_trigger() - gamepad_data.get_right_trigger()) * self.max_velocity  # By default axis is 1, and goes to -1, so transform
+		drive = (gamepad_data.get_right_trigger() - gamepad_data.get_left_trigger()) * self.max_velocity  # By default axis is 1, and goes to -1, so transform
 
 		msg = AckermannDrive()
 		msg.steering_angle = turn
