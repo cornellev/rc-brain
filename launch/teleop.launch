@@ -6,7 +6,7 @@
     <node name="interpret_joy" pkg="rc-teleop" type="interpret_joy.py" output="screen" />
 
     <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
-        <param name="port" value="/dev/USB0"/>
+        <param name="port" value="/dev/ttyUSB0"/>
     </node>
 </launch>
 
