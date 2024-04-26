@@ -28,8 +28,10 @@ const float MAX_INPUT_STEER = 70.0; // Steering range is from -MAX_INPUT_STEER t
 
 int current_steering_angle; // Current steering angle of the vehicle
 
-long last_message_time; // Time of last message received
-long message_timeout = 1000; // Time in milliseconds without a message before the vehicle stops moving
+//long last_message_time; // Time of last message received
+//long message_timeout = 1000; // Time in milliseconds without a message before the vehicle stops moving
+
+long last_time = millis();
 
 // Initialize hardware/sensors
 Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
@@ -95,7 +97,7 @@ void writeAckermann(float angle, float speed) {
  */
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
   writeAckermann(msg.steering_angle * MAX_INPUT_STEER, msg.speed); 
-  last_message_time = millis(); // Update received last message time
+//  last_message_time = millis(); // Update received last message time
 }
 
 
@@ -108,6 +110,8 @@ ros::Subscriber<ackermann_msgs::AckermannDrive> sub("rc_movement_msg", &ackerman
 void setup()
 {
     Serial.begin(9600);
+
+    delay(500);
 
     // Start node
     nh.initNode();
@@ -135,17 +139,23 @@ void setup()
 void loop()
 {
     // Populate the message with sensor data
-    msg.timestamp = millis();
-    msg.encoder_left =  (int) -left_encoder.read();
-    msg.encoder_right = (int) right_encoder.read();
-    msg.steering_angle = current_steering_angle; // Placeholder value
+     msg.timestamp = millis();
+     msg.encoder_left =  (int) -left_encoder.read();
+     msg.encoder_right = (int) right_encoder.read();
+     msg.steering_angle = current_steering_angle; // Placeholder value
 
     // Publish the sensor data
-    sensor_collect_pub.publish(&msg);
+     sensor_collect_pub.publish(&msg);
 
     // if (millis() - last_message_time > message_timeout) {
     //   writePercent(0); // Stop the vehicle if no message has been received in message_timeout milliseconds
     // }
+
+    last_time = millis();
+  
+    while (10 > millis() - last_time) {
+      delay(1);
+    }
 
     nh.spinOnce();
 }

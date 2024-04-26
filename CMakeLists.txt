@@ -118,37 +118,37 @@ include_directories(
 # things are about to get strange
 # I'm copying a lot of things from here
 # https://github.com/ros-drivers/rosserial/blob/c169ae2173dcfda7cee567d64beae45198459400/rosserial_client/cmake/rosserial_client-extras.cmake#L15
-function(rosserial_generate_messages MSG_PACKAGE)
-  message(STATUS "Using rosserial_client/make_library.py to include messages from package ${MSG_PACKAGE}")
+# function(rosserial_generate_messages msg_package)
+#   message("Using rosserial_client/make_library.py to include messages from package ${msg_package}")
 
-  add_custom_command(
-    OUTPUT ${PROJECT_BINARY_DIR}/ros_lib/${MSG_PACKAGE}
-    COMMAND ${CATKIN_ENV} rosrun rosserial_client make_library.py ${PROJECT_BINARY_DIR} ${MSG_PACKAGE}
-  )
-  add_custom_target(${PROJECT_NAME}_ros_lib_${MSG_PACKAGE} DEPENDS ${PROJECT_BINARY_DIR}/ros_lib)
+#   add_custom_command(
+#     OUTPUT ${PROJECT_BINARY_DIR}/ros_lib/${msg_package}
+#     COMMAND ${CATKIN_ENV} rosrun rosserial_client make_library.py ${PROJECT_BINARY_DIR} ${msg_package}
+#   )
+#   add_custom_target(${PROJECT_NAME}_ros_lib_${msg_package} DEPENDS ${PROJECT_BINARY_DIR}/ros_lib)
 
-  find_package(rc_localization_odometry)
-  add_dependencies(${PROJECT_NAME}_ros_lib_${MSG_PACKAGE}
-    rc_localization_odometry_generate_messages_py
-  )
-endfunction()
+#   find_package(rc_localization_odometry)
+#   add_dependencies(${PROJECT_NAME}_ros_lib_${msg_package}
+#     rc_localization_odometry_generate_messages_py
+#   )
+# endfunction()
 
-rosserial_generate_ros_lib(
-  PACKAGE rosserial_arduino
-  SCRIPT make_libraries.py
-)
+# rosserial_generate_ros_lib(
+#   PACKAGE rosserial_arduino
+#   SCRIPT make_libraries.py
+# )
 
-rosserial_generate_messages(
-  MSG_PACKAGE rc_localization_odometry
-)
+# rosserial_generate_messages(
+#   rc_localization_odometry
+# )
 
-rosserial_configure_client(
-  DIRECTORY firmware
-  TOOLCHAIN_FILE ${ROSSERIAL_ARDUINO_TOOLCHAIN}
-)
+# rosserial_configure_client(
+#   DIRECTORY firmware
+#   TOOLCHAIN_FILE ${ROSSERIAL_ARDUINO_TOOLCHAIN}
+# )
 
-rosserial_add_client_target(firmware firmware ALL)
-rosserial_add_client_target(firmware firmware-upload)
+# rosserial_add_client_target(firmware firmware ALL)
+# rosserial_add_client_target(firmware firmware-upload)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
