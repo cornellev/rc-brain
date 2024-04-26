@@ -5,16 +5,20 @@
 #include <rc_localization_odometry/SensorCollect.h>
 #include <ackermann_msgs/AckermannDrive.h>
 
-#define enA 5
-#define in1 A1
-#define in2 A2
+#define EN_A 5
+#define IN_1 A1
+#define IN_2 A2
 
-#define enB 6
-#define in3 A3
-#define in4 A4
+#define EN_B 6
+#define IN_3 A3
+#define IN_4 A4
 
-#define servoPin 9
+#define ENCODER_LEFT_C1 2
+#define ENCODER_LEFT_C2 11
+#define ENCODER_RIGHT_C1 3
+#define ENCODER_RIGHT_C2 12
 
+#define SERVO_PIN 9
 
 const float MAX_SPEED = 1.0; // Max percent speed of vehicle
 const float MIN_SPEED = -1.0; // Min percent speed
@@ -28,8 +32,8 @@ long last_message_time; // Time of last message received
 long message_timeout = 1000; // Time in milliseconds without a message before the vehicle stops moving
 
 // Initialize hardware/sensors
-Encoder left_encoder(2, 5);
-Encoder right_encoder(3, 6);
+Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
+Encoder right_encoder(ENCODER_RIGHT_C1, ENCODER_RIGHT_C2);
 Servo servo;
 
 
@@ -54,21 +58,21 @@ void writeAngle(float angle) {
  */
 void writePercent(float value) {
   if (value >= 0) {
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, HIGH);
-    digitalWrite(in3, LOW);
-    digitalWrite(in4, HIGH);
+    digitalWrite(IN_1, LOW);
+    digitalWrite(IN_2, HIGH);
+    digitalWrite(IN_3, LOW);
+    digitalWrite(IN_4, HIGH);
 
-    analogWrite(enA, value * 255);
-    analogWrite(enB, value * 255);
+    analogWrite(EN_A, value * 255);
+    analogWrite(EN_B, value * 255);
   } else {
-    digitalWrite(in1, HIGH);
-    digitalWrite(in2, LOW);
-    digitalWrite(in3, HIGH);
-    digitalWrite(in4, LOW);
+    digitalWrite(IN_1, HIGH);
+    digitalWrite(IN_2, LOW);
+    digitalWrite(IN_3, HIGH);
+    digitalWrite(IN_4, LOW);
 
-    analogWrite(enA, -value * 255);
-    analogWrite(enB, -value * 255);
+    analogWrite(EN_A, -value * 255);
+    analogWrite(EN_B, -value * 255);
   }
 }
 
@@ -114,15 +118,15 @@ void setup()
     nh.negotiateTopics();
 
     // Initialize servo
-    servo.attach(servoPin);
+    servo.attach(SERVO_PIN);
 
     // Set up motor pins
-    pinMode(enA, OUTPUT);
-    pinMode(in1, OUTPUT);
-    pinMode(in2, OUTPUT);
-    pinMode(enB, OUTPUT);
-    pinMode(in3, OUTPUT);
-    pinMode(in4, OUTPUT);
+    pinMode(EN_A, OUTPUT);
+    pinMode(IN_1, OUTPUT);
+    pinMode(IN_2, OUTPUT);
+    pinMode(EN_B, OUTPUT);
+    pinMode(IN_3, OUTPUT);
+    pinMode(IN_4, OUTPUT);
 
     // Start vehicle at 0 speed and 0 steering angle
     writeAckermann(0, 0);
@@ -139,9 +143,9 @@ void loop()
     // Publish the sensor data
     sensor_collect_pub.publish(&msg);
 
-    if (millis() - last_message_time > message_timeout) {
-      writePercent(0); // Stop the vehicle if no message has been received in message_timeout milliseconds
-    }
+    // if (millis() - last_message_time > message_timeout) {
+    //   writePercent(0); // Stop the vehicle if no message has been received in message_timeout milliseconds
+    // }
 
     nh.spinOnce();
 }
