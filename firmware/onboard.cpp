@@ -19,11 +19,12 @@
 #define ENCODER_RIGHT_C2 12
 
 #define SERVO_PIN 9
+#define POTENTIOMETER_PIN 8
 
 const float MAX_SPEED = 1.0; // Max percent speed of vehicle
 const float MIN_SPEED = -1.0; // Min percent speed
 
-const float STEERING_ZERO_ANGLE = 110.0; // Calibrated servo angle corresponding to a steering angle of 0
+const float STEERING_ZERO_ANGLE = 98.0; // Calibrated servo angle corresponding to a steering angle of 0
 const float MAX_INPUT_STEER = 70.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER
 
 int current_steering_angle; // Current steering angle of the vehicle
@@ -142,7 +143,8 @@ void loop()
      msg.timestamp = millis();
      msg.encoder_left =  (int) -left_encoder.read();
      msg.encoder_right = (int) right_encoder.read();
-     msg.steering_angle = current_steering_angle; // Placeholder value
+
+     msg.steering_angle = analogRead(POTENTIOMETER_PIN);; // Placeholder value
 
     // Publish the sensor data
      sensor_collect_pub.publish(&msg);
