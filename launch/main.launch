@@ -2,7 +2,12 @@
 
     <arg name="using_teleop" default="true"/>
 
-    <!-- Creates a bi-directional communication channel between the arduino and the rasperry pi -->
+    <!-- 
+        ARDUINO TOPICS:
+            - /sensor_collect - publishes sensor collect messages, velocity and steering data
+            - /rc_ackermann_msg - reads steer messages
+
+        Creates a bi-directional communication channel between the arduino and the rasperry pi -->
     <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
         <param name="port" value="/dev/ttyUSB0"/>
     </node>
@@ -53,13 +58,20 @@
             - if not using_teleop
 
         TELEOP TOPICS:
-            - see launch file and rosjoy
+            - see launch file and rosjoy for topics relating to joystick function
+            - /rc_ackermann_msg writes ackermann messages
 
     -->
     <group if="$(arg using_teleop)">
         <include file="$(find rc-teleop)/launch/teleop.launch" />
     </group>
 
+    <!-- LOCAL PLANNING NODES:
+
+        LOCAL PLANNING TOPICS:
+            - /rc_ackermann_msg writes ackermann messages
+
+    -->
     <group unless="$(arg using_teleops)">
         
     </group>
