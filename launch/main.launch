@@ -12,6 +12,9 @@
             - imu_node: starts IMU
             - base_link_imu_static_transform: publishes where the IMU is on the base link
 
+        SENSOR TOPICS:
+            /imu - has imu data published to it
+
     -->
     <node name="imu_node" pkg="witmotion_ros" type="witmotion_ros_node" output="screen">
         <rosparam command="load" file="$(find rc_localization_imu)/params/imu.yaml" />
@@ -28,6 +31,10 @@
         ODOMETRY NODES:
              - encoder_odom: calculates odom estimate from wheel data
              - robot_localization: reads imu data, encoder data, publishes a fused version
+
+        ODOMETRY TOPICS:
+            /odometry/encoder has the encoder estimate of the odometry uploaded to it
+            /odometry/filtered has the sensor fused odometry estimate uploaded to it
      -->
     <node name="encoder_odom" pkg="rc_localization_odometry" type="encoder_odometry_node" output="screen">
         <rosparam command="load" file="$(find rc_autonomy)/config/encoders.yaml" />
@@ -44,6 +51,9 @@
                 - interpret_joy (creates ackermann drive messages from joystick)
 
             - if not using_teleop
+
+        TELEOP TOPICS:
+            - see launch file and rosjoy
 
     -->
     <group if="$(arg using_teleop)">
