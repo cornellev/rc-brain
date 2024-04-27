@@ -1,19 +1,58 @@
 <launch>
 
-  <rosparam command="load" file="$(find rc_autonomy)/config/teleop_config.yml" />
-  <rosparam command="load" file="$(find rc_autonomy)/config/servo_config.yml" />
+    <arg name="using_teleop" default="true"/>
 
-  <!-- Launch rc-teleop -->
-  <include file="$(find rc-teleop)/launch/teleop.launch">
-  </include>
+    <!-- Creates a bi-directional communication channel between the arduino and the rasperry pi -->
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+        <param name="port" value="/dev/ttyUSB0"/>
+    </node>
 
-  <!-- Launch rc-localization -->
-  <!-- <include file="$(find rc-localization)/launch/localization.launch">
-  </include>  -->
+    <!--
+        SENSOR NODES:
+            - imu_node: starts IMU
+            - base_link_imu_static_transform: publishes where the IMU is on the base link
 
-  <!-- Launch rc_hardware-actuation -->
-  <include file="$(find rc_hardware-actuation)/launch/servo.launch">
-  </include>
+    -->
+    <node name="imu_node" pkg="witmotion_ros" type="witmotion_ros_node" output="screen">
+        <rosparam command="load" file="$(find rc_localization_imu)/params/imu.yaml" />
+    </node>
+
+    <node pkg="tf2_ros" 
+        type="static_transform_publisher" 
+        name="base_link_imu_static_transform" 
+        output="screen" args="0 0 0 0 0 0 base_link imu 100" />
+
+    <include file="$(find rplidar)/lauch/rplidar_a1.launch" />
+
+    <!-- 
+        ODOMETRY NODES:
+             - encoder_odom: calculates odom estimate from wheel data
+             - robot_localization: reads imu data, encoder data, publishes a fused version
+     -->
+    <node name="encoder_odom" pkg="rc_localization_odometry" type="encoder_odometry_node" output="screen">
+        <rosparam command="load" file="$(find rc_autonomy)/config/encoders.yaml" />
+    </node>
+
+    <node name="ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
+        <rosparam command="load" file="$(find rc_autonomy)/config/robot_localization.yaml" />
+    </node>
+
+
+    <!-- TELEOP NODES:
+            - using_teleop starts three nodes: 
+                - joy_node (reads joystick), 
+                - interpret_joy (creates ackermann drive messages from joystick)
+
+            - if not using_teleop
+
+    -->
+    <group if="$(arg using_teleop)">
+        <include file="$(find rc-teleop)/launch/teleop.launch" />
+    </group>
+
+    <group unless="$(arg using_teleops)">
+        
+    </group>
 
 
 </launch>
