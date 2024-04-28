@@ -19,7 +19,7 @@ class TrajectoryFollower:
 
     def calculate_setpoint(self):
         index = int((rospy.Time.now() - self.last_trajectory.header.stamp).to_sec() / self.last_trajectory.dt)
-        num_setpoints = len(self.last_trajectory.speed)
+        num_setpoints = len(self.last_trajectory.trajectory)
 
         current = AckermannDrive()
 
