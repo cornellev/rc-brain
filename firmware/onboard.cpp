@@ -19,18 +19,17 @@
 #define ENCODER_RIGHT_C2 12
 
 #define SERVO_PIN 9
-#define POTENTIOMETER_PIN 8
+#define POTENTIOMETER_PIN A6
 
 const float MAX_SPEED = 1.0; // Max percent speed of vehicle
 const float MIN_SPEED = -1.0; // Min percent speed
 
 const float STEERING_ZERO_ANGLE = 98.0; // Calibrated servo angle corresponding to a steering angle of 0
-const float MAX_INPUT_STEER = 70.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER
+const float MAX_INPUT_STEER = 20.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER
 
-int current_steering_angle; // Current steering angle of the vehicle
-
-//long last_message_time; // Time of last message received
-//long message_timeout = 1000; // Time in milliseconds without a message before the vehicle stops moving
+const double WHEEL_DIAMETER_METERS = 9.5 / 100;
+const double TICKS_PER_REV = 827.2;
+const double TICKS_TO_METERS = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_METERS / 2));
 
 long last_time = millis();
 
@@ -41,38 +40,36 @@ Servo servo;
 
 
 /**
- * Turn steering servo to specified angle. Angle will be clamped to be between -MAX_INPUT_STEER and MAX_INPUT_STEER.
- * 
- * @param angle: Angle to turn the servo to. Positive values turn the wheels to the right, negative values turn the wheels to the left. Zero is straight ahead.
- */
+   Turn steering servo to specified angle. Angle will be clamped to be between -MAX_INPUT_STEER and MAX_INPUT_STEER.
+
+   @param angle: Angle to turn the servo to. Positive values turn the wheels to the right, negative values turn the wheels to the left. Zero is straight ahead.
+*/
 void writeAngle(float angle) {
   angle = max(min(STEERING_ZERO_ANGLE + angle, STEERING_ZERO_ANGLE + MAX_INPUT_STEER), STEERING_ZERO_ANGLE - MAX_INPUT_STEER);
   servo.write(angle);
-
-  current_steering_angle = angle + STEERING_ZERO_ANGLE;
 }
 
 
 /**
- * Set the speed of the vehicle. Positive values move the vehicle forward, negative values move the vehicle backward.
- * 
- * @param value: Speed of the vehicle as a percentage of the maximum speed.
- * @pre -1 <= value <= 1
- */
+   Set the speed of the vehicle. Positive values move the vehicle forward, negative values move the vehicle backward.
+
+   @param value: Speed of the vehicle as a percentage of the maximum speed.
+   @pre -1 <= value <= 1
+*/
 void writePercent(float value) {
   if (value >= 0) {
-    digitalWrite(IN_1, LOW);
-    digitalWrite(IN_2, HIGH);
-    digitalWrite(IN_3, LOW);
-    digitalWrite(IN_4, HIGH);
-
-    analogWrite(EN_A, value * 255);
-    analogWrite(EN_B, value * 255);
-  } else {
     digitalWrite(IN_1, HIGH);
     digitalWrite(IN_2, LOW);
     digitalWrite(IN_3, HIGH);
     digitalWrite(IN_4, LOW);
+
+    analogWrite(EN_A, value * 255);
+    analogWrite(EN_B, value * 255);
+  } else {
+    digitalWrite(IN_1, LOW);
+    digitalWrite(IN_2, HIGH);
+    digitalWrite(IN_3, LOW);
+    digitalWrite(IN_4, HIGH);
 
     analogWrite(EN_A, -value * 255);
     analogWrite(EN_B, -value * 255);
@@ -81,12 +78,12 @@ void writePercent(float value) {
 
 
 /**
- * Write the steering angle and speed of the vehicle.
- *
- * @param angle: Angle to turn the steering servo to. Positive values turn the wheels to the right, negative values turn the wheels to the left. Zero is straight ahead.
- * @param speed: Speed of the vehicle as a percentage of the maximum speed.
- * @pre -1 <= speed <= 1
- */
+   Write the steering angle and speed of the vehicle.
+
+   @param angle: Angle to turn the steering servo to. Positive values turn the wheels to the right, negative values turn the wheels to the left. Zero is straight ahead.
+   @param speed: Speed of the vehicle as a percentage of the maximum speed.
+   @pre -1 <= speed <= 1
+*/
 void writeAckermann(float angle, float speed) {
   writeAngle(angle);
   writePercent(speed);
@@ -94,11 +91,11 @@ void writeAckermann(float angle, float speed) {
 
 
 /**
- * Callback for ackermann drive messages. Converts the steering angle and speed to the appropriate servo angle and motor speed.
- */
+   Callback for ackermann drive messages. Converts the steering angle and speed to the appropriate servo angle and motor speed.
+*/
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
-  writeAckermann(msg.steering_angle * MAX_INPUT_STEER, msg.speed); 
-//  last_message_time = millis(); // Update received last message time
+  writeAckermann(msg.steering_angle * MAX_INPUT_STEER, msg.speed);
+  //  last_message_time = millis(); // Update received last message time
 }
 
 // Setup ROS interface
@@ -114,71 +111,65 @@ int last_millis = 0;
 
 void setup()
 {
-    Serial.begin(9600);
+  // Start node
+  nh.initNode();
+  nh.subscribe(sub);
+  nh.advertise(sensor_collect_pub);
 
-    delay(500);
+  // Helps when using custom topics over rosserial
+  nh.negotiateTopics();
 
-    // Start node
-    nh.initNode();
-    nh.subscribe(sub);
-    nh.advertise(sensor_collect_pub);
+  // Initialize servo
+  servo.attach(SERVO_PIN);
 
-    // Helps when using custom topics over rosserial
-    nh.negotiateTopics();
+  // Set up motor pins
+  pinMode(EN_A, OUTPUT);
+  pinMode(IN_1, OUTPUT);
+  pinMode(IN_2, OUTPUT);
+  pinMode(EN_B, OUTPUT);
+  pinMode(IN_3, OUTPUT);
+  pinMode(IN_4, OUTPUT);
 
-    // Initialize servo
-    servo.attach(SERVO_PIN);
+  // Start vehicle at 0 speed and 0 steering angle
+  writeAckermann(0, 0);
 
-    // Set up motor pins
-    pinMode(EN_A, OUTPUT);
-    pinMode(IN_1, OUTPUT);
-    pinMode(IN_2, OUTPUT);
-    pinMode(EN_B, OUTPUT);
-    pinMode(IN_3, OUTPUT);
-    pinMode(IN_4, OUTPUT);
-
-    // Start vehicle at 0 speed and 0 steering angle
-    writeAckermann(0, 0);
-
-    last_encoder_left = (int) -left_encoder.read();
-    last_encoder_right = (int) right_encoder.read();
-    last_millis = millis();
+  last_encoder_left = (int) -left_encoder.read();
+  last_encoder_right = (int) right_encoder.read();
+  last_millis = millis();
+  
+  delay(2000);
 }
-
-const double WHEEL_DIAMETER_METERS = 9.5 / 100;
-const double TICKS_PER_REV = 827.2;
-const double TICKS_TO_METERS = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_METERS / 2));
-
 
 void loop()
 {
-    // Populate the message with sensor data
+  if (100 < millis() - last_time) { // Run once every ~100 ms
     int current_time = millis();
     
-    msg.timestamp = current_time;
+    // Encoder delta calculations
     int encoder_left =  (int) -left_encoder.read();
     int encoder_right = (int) right_encoder.read();
-
     int delta_encoder_left = encoder_left - last_encoder_left;
     int delta_encoder_right = encoder_right - last_encoder_right;
     int delta_encoder_average = (delta_encoder_left + delta_encoder_right)/2;
-
+    
+    // Velocity calculations
     double delta_encoder_distance = delta_encoder_average * TICKS_TO_METERS;
     double encoder_velocity = delta_encoder_distance / ((current_time - last_time)/1000);
 
+    // Store values for next update
     last_encoder_left = encoder_left;
     last_encoder_right = encoder_rigt;
-
     last_time = current_time;
 
+    // Populate the message with sensor data
+    msg.timestamp = current_time;
+
     msg.steering_angle = analogRead(POTENTIOMETER_PIN);
+    msg.velocity = encoder_velocity;
 
+    // Publish the sensor data
     sensor_collect_pub.publish(&msg);
+  }
 
-    last_time = millis();
-    while (10 > millis() - last_time) {
-      delay(1);
-    }
-
-    nh.spinOnce();
+  nh.spinOnce();
 }
