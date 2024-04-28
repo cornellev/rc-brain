@@ -29,8 +29,8 @@ class TrajectoryFollower:
             
             return current
 
-        current.speed = self.last_trajectory[index].speed
-        current.steering_angle = self.last_trajectory[index].steering_angle
+        current.speed = self.last_trajectory.trajectory[index].speed
+        current.steering_angle = self.last_trajectory.trajectory[index].steering_angle
 
         return current
 
