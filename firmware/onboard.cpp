@@ -96,7 +96,6 @@ void writeAckermann(float angle, float speed) {
 */
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
   writeAckermann(msg.steering_angle * MAX_INPUT_STEER, msg.speed);
-  //  last_message_time = millis(); // Update received last message time
 }
 
 
