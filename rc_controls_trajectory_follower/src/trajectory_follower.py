@@ -36,7 +36,7 @@ class TrajectoryFollower:
 
 
 if __name__ == "__main__": 
-    rospy.init_node("open_loop_control_node")
+    rospy.init_node("rc_controls_trajectory_follower")
     follower = TrajectoryFollower()
 
     rate = rospy.Rate(10)
