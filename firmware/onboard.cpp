@@ -24,12 +24,15 @@
 const float MAX_SPEED = 1.0; // Max percent speed of vehicle
 const float MIN_SPEED = -1.0; // Min percent speed
 
-const float STEERING_ZERO_ANGLE = 98.0; // Calibrated servo angle corresponding to a steering angle of 0
-const float MAX_INPUT_STEER = 20.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER
+const float STEERING_ZERO_ANGLE = 98.0; // Calibrated servo angle corresponding to a steering angle of 0  TODO: Calibrate
+const float MAX_INPUT_STEER = 20.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER (Degrees)  TODO: Calibrate
 
 const double WHEEL_DIAMETER_METERS = 9.5 / 100;
 const double TICKS_PER_REV = 827.2;
 const double TICKS_TO_METERS = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_METERS / 2));
+
+const int POTENTIOMETER_ZERO = 370; // Calibrated potentiometer value corresponding to a steering angle of 0  TODO: Calibrate
+const int POTENTIOMETER_RANGE = 50; // Range of potentiometer values corresponding to a steering angle of -MAX_INPUT_STEER to MAX_INPUT_STEER  TODO: Calibrate
 
 // Initialize hardware/sensors
 Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
@@ -111,6 +114,13 @@ float rightEncoderPosition() {
   return right_encoder.read() * TICKS_TO_METERS;
 }
 
+/**
+ * Return the angle of the potentiometer in degrees.
+*/
+float potentiometerAngle() {
+  return (analogRead(POTENTIOMETER_PIN) - POTENTIOMETER_ZERO) / POTENTIOMETER_RANGE * MAX_INPUT_STEER;
+}
+
 // Setup ROS interface
 ros::NodeHandle nh;
 rc_localization_odometry::SensorCollect msg;
@@ -176,7 +186,7 @@ void loop()
     // Populate the message with sensor data
     msg.timestamp = current_time;
 
-    msg.steering_angle = analogRead(POTENTIOMETER_PIN);
+    msg.steering_angle = potentiometerAngle();
     msg.velocity = encoder_velocity;
 
     // Publish the sensor data
