@@ -31,8 +31,6 @@ const double WHEEL_DIAMETER_METERS = 9.5 / 100;
 const double TICKS_PER_REV = 827.2;
 const double TICKS_TO_METERS = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_METERS / 2));
 
-long last_time = millis();
-
 // Initialize hardware/sensors
 Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
 Encoder right_encoder(ENCODER_RIGHT_C1, ENCODER_RIGHT_C2);
@@ -98,16 +96,30 @@ void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
   //  last_message_time = millis(); // Update received last message time
 }
 
+
+/**
+ * Get the traveled distance of the right encoder in meters (relative to 0).
+ */
+float leftEncoderPosition() {
+  return left_encoder.read() * TICKS_TO_METERS;
+}
+
+/**
+ * Get the traveled distance of the right encoder in meters (relative to 0).
+ */
+float rightEncoderPosition() {
+  return right_encoder.read() * TICKS_TO_METERS;
+}
+
 // Setup ROS interface
 ros::NodeHandle nh;
 rc_localization_odometry::SensorCollect msg;
 ros::Publisher sensor_collect_pub("sensor_collect", &msg); // Publishes all sensor data
 ros::Subscriber<ackermann_msgs::AckermannDrive> sub("rc_movement_msg", &ackermannDriveCallback); // Listens to ackermann drive messages and drives the vehicle
 
-int last_encoder_left = 0;
-int last_encoder_right = 0;
-
-int last_millis = 0;
+float last_encoder_left;
+float last_encoder_right;
+long last_time;
 
 void setup()
 {
@@ -133,9 +145,9 @@ void setup()
   // Start vehicle at 0 speed and 0 steering angle
   writeAckermann(0, 0);
 
-  last_encoder_left = (int) -left_encoder.read();
-  last_encoder_right = (int) right_encoder.read();
-  last_millis = millis();
+  last_encoder_left = leftEncoderPosition();
+  last_encoder_right = rightEncoderPosition();
+  last_time = millis();
   
   delay(2000);
 }
@@ -146,19 +158,19 @@ void loop()
     int current_time = millis();
     
     // Encoder delta calculations
-    int encoder_left =  (int) -left_encoder.read();
-    int encoder_right = (int) right_encoder.read();
-    int delta_encoder_left = encoder_left - last_encoder_left;
-    int delta_encoder_right = encoder_right - last_encoder_right;
-    int delta_encoder_average = (delta_encoder_left + delta_encoder_right)/2;
+    float encoder_left =  leftEncoderPosition();
+    float encoder_right = rightEncoderPosition();
+    float avg_dist = (
+      (encoder_left - last_encoder_left) + 
+      (encoder_right - last_encoder_right)
+    ) / 2.0;
     
     // Velocity calculations
-    double delta_encoder_distance = delta_encoder_average * TICKS_TO_METERS;
-    double encoder_velocity = delta_encoder_distance / ((current_time - last_time)/1000);
+    double encoder_velocity = avg_dist / ((current_time - last_time) / 1000);
 
     // Store values for next update
     last_encoder_left = encoder_left;
-    last_encoder_right = encoder_rigt;
+    last_encoder_right = encoder_right;
     last_time = current_time;
 
     // Populate the message with sensor data
