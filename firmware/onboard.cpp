@@ -6,12 +6,12 @@
 #include <ackermann_msgs/AckermannDrive.h>
 
 #define EN_A 5
-#define IN_1 A0
-#define IN_2 A1
+#define IN_1 A1
+#define IN_2 A2
 
 #define EN_B 6
-#define IN_3 A2
-#define IN_4 A3
+#define IN_3 A3
+#define IN_4 A4
 
 #define ENCODER_LEFT_C1 2
 #define ENCODER_LEFT_C2 11
@@ -19,7 +19,7 @@
 #define ENCODER_RIGHT_C2 12
 
 #define SERVO_PIN 9
-#define POTENTIOMETER_PIN A4
+#define POTENTIOMETER_PIN A6
 
 const float MAX_SPEED = 1.0; // Max percent speed of vehicle
 const float MIN_SPEED = -1.0; // Min percent speed
@@ -110,10 +110,6 @@ ros::Subscriber<ackermann_msgs::AckermannDrive> sub("rc_movement_msg", &ackerman
 
 void setup()
 {
-  Serial.begin(9600);
-
-  delay(500);
-
   // Start node
   nh.initNode();
   nh.subscribe(sub);
@@ -135,6 +131,8 @@ void setup()
 
   // Start vehicle at 0 speed and 0 steering angle
   writeAckermann(0, 0);
+
+  delay(2000);
 }
 
 void loop()
@@ -144,7 +142,7 @@ void loop()
   //   writePercent(0); // Stop the vehicle if no message has been received in message_timeout milliseconds
   // }
 
-  if (10 > millis() - last_time) {
+  if (100 < millis() - last_time) {
     last_time = millis();
 
     // Populate the message with sensor data
