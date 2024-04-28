@@ -38,10 +38,7 @@ void data_callback(rc_localization_odometry::SensorCollect current)
 
     ros::Duration dt = ros::Duration((current.timestamp - last.timestamp) / 1000.0);
 
-    double current_avg = (current.encoder_left + current.encoder_right) / 2.0;
-    double last_avg = (last.encoder_left + last.encoder_right) / 2.0;
-    double delta_enc = current_avg - last_avg;
-    double delta_enc_m = TICKS_TO_M * delta_enc;
+    double delta_enc_m = current.velocity;
 
     last = current;
 
