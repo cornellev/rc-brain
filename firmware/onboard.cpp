@@ -27,6 +27,10 @@ const float MIN_SPEED = -1.0; // Min percent speed
 const float STEERING_ZERO_ANGLE = 98.0; // Calibrated servo angle corresponding to a steering angle of 0
 const float MAX_INPUT_STEER = 20.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER
 
+const double WHEEL_DIAMETER_METERS = 9.5 / 100;
+const double TICKS_PER_REV = 827.2;
+const double TICKS_TO_METERS = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_METERS / 2));
+
 long last_time = millis();
 
 // Initialize hardware/sensors
@@ -94,12 +98,16 @@ void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
   //  last_message_time = millis(); // Update received last message time
 }
 
-
 // Setup ROS interface
 ros::NodeHandle nh;
 rc_localization_odometry::SensorCollect msg;
 ros::Publisher sensor_collect_pub("sensor_collect", &msg); // Publishes all sensor data
 ros::Subscriber<ackermann_msgs::AckermannDrive> sub("rc_movement_msg", &ackermannDriveCallback); // Listens to ackermann drive messages and drives the vehicle
+
+int last_encoder_left = 0;
+int last_encoder_right = 0;
+
+int last_millis = 0;
 
 void setup()
 {
@@ -125,20 +133,39 @@ void setup()
   // Start vehicle at 0 speed and 0 steering angle
   writeAckermann(0, 0);
 
+  last_encoder_left = (int) -left_encoder.read();
+  last_encoder_right = (int) right_encoder.read();
+  last_millis = millis();
+  
   delay(2000);
 }
 
 void loop()
 {
   if (100 < millis() - last_time) { // Run once every ~100 ms
-    last_time = millis();
+    int current_time = millis();
+    
+    // Encoder delta calculations
+    int encoder_left =  (int) -left_encoder.read();
+    int encoder_right = (int) right_encoder.read();
+    int delta_encoder_left = encoder_left - last_encoder_left;
+    int delta_encoder_right = encoder_right - last_encoder_right;
+    int delta_encoder_average = (delta_encoder_left + delta_encoder_right)/2;
+    
+    // Velocity calculations
+    double delta_encoder_distance = delta_encoder_average * TICKS_TO_METERS;
+    double encoder_velocity = delta_encoder_distance / ((current_time - last_time)/1000);
+
+    // Store values for next update
+    last_encoder_left = encoder_left;
+    last_encoder_right = encoder_rigt;
+    last_time = current_time;
 
     // Populate the message with sensor data
-    msg.timestamp = millis();
-    msg.encoder_left =  (int) - left_encoder.read();
-    msg.encoder_right = (int) right_encoder.read();
+    msg.timestamp = current_time;
 
     msg.steering_angle = analogRead(POTENTIOMETER_PIN);
+    msg.velocity = encoder_velocity;
 
     // Publish the sensor data
     sensor_collect_pub.publish(&msg);
