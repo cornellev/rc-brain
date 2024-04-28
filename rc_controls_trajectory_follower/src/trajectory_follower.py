@@ -18,19 +18,19 @@ class TrajectoryFollower:
         self.ready = True
 
     def calculate_setpoint(self):
-        index = int((rospy.Time.now() - self.last_trajectory.header.stamp).to_sec() / self.last_trajectory.dt.data)
+        index = int((rospy.Time.now() - self.last_trajectory.header.stamp).to_sec() / self.last_trajectory.dt)
         num_setpoints = len(self.last_trajectory.speeds)
 
         current = AckermannDrive()
 
         if index >= num_setpoints:
             current.speed = 0
-            current.steering_angle = self.last_trajectory.steering_angles[-1].data
+            current.steering_angle = self.last_trajectory.steering_angles[-1]
             
             return current
 
-        current.speed = self.last_trajectory.speeds[index].data
-        current.steering_angle = self.last_trajectory.steering_angles[index].data
+        current.speed = self.last_trajectory.speeds[index]
+        current.steering_angle = self.last_trajectory.steering_angles[index]
 
         return current
 
