@@ -5,6 +5,9 @@ from rc_controls_trajectory_follower.msg import TrajectoryMsg
 from ackermann_msgs.msg import AckermannDrive
 
 class TrajectoryFollower:
+    """
+    Class for the trajectory follower node. This node subscribes to the /trajectory_msg topic and publishes AckermannDrive messages to the /rc_movement_msg topic.
+    """
     def __init__(self):
         self.sub = rospy.Subscriber("/trajectory_msg", TrajectoryMsg, self.trajectory_callback)
         self.pub = rospy.Publisher("/rc_movement_msg", AckermannDrive, queue_size=1)
@@ -14,10 +17,26 @@ class TrajectoryFollower:
         rospy.loginfo("Trajectory follower node initialized.")
 
     def trajectory_callback(self, msg):
+        """
+        Callback for the trajectory message. Simply stores the last received trajectory message.
+
+        Args:
+            msg (TrajectoryMsg): The received trajectory message.
+        """
+
+        rospy.loginfo("Received new trajectory message.")
+
         self.last_trajectory = msg
         self.ready = True
 
     def calculate_setpoint(self):
+        """
+        Calculates the current velocity/heading setpoint based on the current time and the last received trajectory message.
+
+        Returns:
+            AckermannDrive: The current velocity/heading setpoint.
+        """
+
         index = int((rospy.Time.now() - self.last_trajectory.header.stamp).to_sec() / self.last_trajectory.dt)
         num_setpoints = len(self.last_trajectory.trajectory)
 
