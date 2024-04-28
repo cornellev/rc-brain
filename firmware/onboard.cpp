@@ -27,11 +27,6 @@ const float MIN_SPEED = -1.0; // Min percent speed
 const float STEERING_ZERO_ANGLE = 98.0; // Calibrated servo angle corresponding to a steering angle of 0
 const float MAX_INPUT_STEER = 20.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER
 
-// int current_steering_angle; // Current steering angle of the vehicle
-
-//long last_message_time; // Time of last message received
-//long message_timeout = 1000; // Time in milliseconds without a message before the vehicle stops moving
-
 long last_time = millis();
 
 // Initialize hardware/sensors
@@ -48,8 +43,6 @@ Servo servo;
 void writeAngle(float angle) {
   angle = max(min(STEERING_ZERO_ANGLE + angle, STEERING_ZERO_ANGLE + MAX_INPUT_STEER), STEERING_ZERO_ANGLE - MAX_INPUT_STEER);
   servo.write(angle);
-
-  // current_steering_angle = angle + STEERING_ZERO_ANGLE;
 }
 
 
@@ -137,12 +130,7 @@ void setup()
 
 void loop()
 {
-
-  // if (millis() - last_message_time > message_timeout) {
-  //   writePercent(0); // Stop the vehicle if no message has been received in message_timeout milliseconds
-  // }
-
-  if (100 < millis() - last_time) {
+  if (100 < millis() - last_time) { // Run once every ~100 ms
     last_time = millis();
 
     // Populate the message with sensor data
@@ -150,15 +138,11 @@ void loop()
     msg.encoder_left =  (int) - left_encoder.read();
     msg.encoder_right = (int) right_encoder.read();
 
-    msg.steering_angle = analogRead(POTENTIOMETER_PIN); // Placeholder value
+    msg.steering_angle = analogRead(POTENTIOMETER_PIN);
 
     // Publish the sensor data
     sensor_collect_pub.publish(&msg);
   }
-
-  // while (10 > millis() - last_time) {
-  //   delay(1);
-  // }
 
   nh.spinOnce();
 }
