@@ -1,2 +1,2 @@
-std_msgs/Float32 speed
-std_msgs/Float32 steering_angle
+float32 speed
+float32 steering_angle
