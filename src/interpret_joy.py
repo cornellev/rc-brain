@@ -12,7 +12,7 @@ class JoyInterpreter:
 		rospy.Subscriber("joy", Joy, self.joy_to_twist)
 
 		self.deadzone = rospy.get_param(param_name='joy_interpreter/teleop/deadzone', default=0.1)
-		self.max_turning_angle = rospy.get_param(param_name='joy_interpreter/teleop/max_turning_angle', default=1.0)
+		self.max_turning_angle = rospy.get_param(param_name='joy_interpreter/teleop/max_turning_angle', default=20.0)
 		self.max_velocity = rospy.get_param(param_name='joy_interpreter/teleop/max_velocity', default=1.0)
 
 		rospy.loginfo(f"Parameter max_turning_angle={self.max_turning_angle}")
