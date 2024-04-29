@@ -23,15 +23,16 @@ if __name__ == "__main__":
     rate = rospy.Rate(1)
     pub = rospy.Publisher("/trajectory_msg", TrajectoryMsg, queue_size=1)
 
-    msg = TrajectoryMsg()
-    msg.header.stamp = rospy.Time.now()
-    msg.header.frame_id = "map"
-    msg.dt = dT
-    msg.trajectory = state_steps
+    while not rospy.is_shutdown():
+        msg = TrajectoryMsg()
+        msg.header.stamp = rospy.Time.now()
+        msg.header.frame_id = "map"
+        msg.dt = dT
+        msg.trajectory = state_steps
 
-    pub.publish(msg)
+        pub.publish(msg)
 
-    rospy.loginfo("Trajectory published")
+        rospy.loginfo("Trajectory published")
     # while not rospy.is_shutdown():
     #     msg = TrajectoryMsg()
     #     msg.header.stamp = rospy.Time.now()
