@@ -19,24 +19,18 @@ if __name__ == "__main__":
         state_steps[-1].speed = .5
         state_steps[-1].steering_angle = math.sin(i * dT) * .3
 
-    rospy.loginfo("Publishing trajectory")
-    rospy.loginfo(state_steps)
+    msg = TrajectoryMsg()
+    msg.header.stamp = rospy.Time.now()
+    msg.header.frame_id = "map"
+    msg.dt = dT
+    msg.trajectory = state_steps
 
     rate = rospy.Rate(1)
     pub = rospy.Publisher("/trajectory_msg", TrajectoryMsg, queue_size=1)
 
     while not rospy.is_shutdown():
-        if not pushed:
-            msg = TrajectoryMsg()
-            msg.header.stamp = rospy.Time.now()
-            msg.header.frame_id = "map"
-            msg.dt = dT
-            msg.trajectory = state_steps
-
-            pub.publish(msg)
-
-            rospy.loginfo("Trajectory published")
-            pushed = True
+        pub.publish(msg)
+        rospy.loginfo("Trajectory published")
     # while not rospy.is_shutdown():
     #     msg = TrajectoryMsg()
     #     msg.header.stamp = rospy.Time.now()
