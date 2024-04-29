@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     for i in range(30):
         state_steps.append(TrajectoryPointMsg())
-        state_steps[-1].speed = 1
+        state_steps[-1].speed = 1.5
         state_steps[-1].steering_angle = 0
 
     msg = TrajectoryMsg()
