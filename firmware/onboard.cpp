@@ -165,7 +165,7 @@ void updateAngle() {
 }
 
 void resetAngle() {
-  data_points = 50;
+  data_points = 100;
 }
 
 // Setup ROS interface
@@ -213,13 +213,13 @@ void loop()
 {
   long current_time = millis();
 
-  if (5 < current_time - last_update_time) { // Run once every ~5 ms
+  if (3 < current_time - last_update_time) { // Run once every ~5 ms
     updateVelocity();
     updateAngle();
     updateAckermann();
   }
   
-  if (50 < current_time - last_push_time) { // Run once every ~50 ms
+  if (5 < current_time - last_push_time) { // Run once every ~50 ms
     // Populate the message with sensor data
     msg.timestamp = current_time;
     msg.steering_angle = current_angle;
