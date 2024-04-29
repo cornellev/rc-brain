@@ -17,6 +17,9 @@ if __name__ == "__main__":
         state_steps[-1].speed = 1
         state_steps[-1].steering_angle = math.sin(i * dT)
 
+    rospy.loginfo("Publishing trajectory")
+    rospy.loginfo(state_steps)
+
     rate = rospy.Rate(1)
     pub = rospy.Publisher("/trajectory_msg", TrajectoryMsg, queue_size=1)
 
@@ -28,6 +31,7 @@ if __name__ == "__main__":
 
     pub.publish(msg)
 
+    rospy.loginfo("Trajectory published")
     # while not rospy.is_shutdown():
     #     msg = TrajectoryMsg()
     #     msg.header.stamp = rospy.Time.now()
