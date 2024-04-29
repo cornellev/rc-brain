@@ -10,14 +10,14 @@ if __name__ == "__main__":
 
     rospy.init_node("test_node")
 
-    dT = 1/3
+    dT = 1/6
 
     state_steps = []
 
-    for i in range(90):
+    for i in range(30):
         state_steps.append(TrajectoryPointMsg())
         state_steps[-1].speed = .7
-        state_steps[-1].steering_angle = math.cos(i * dT + math.pi / 2) * .3
+        state_steps[-1].steering_angle = math.cos(i * dT + (math.pi/2))
 
     msg = TrajectoryMsg()
     msg.header.stamp = rospy.Time.now()
