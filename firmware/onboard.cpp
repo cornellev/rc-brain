@@ -21,18 +21,41 @@
 #define SERVO_PIN 9
 #define POTENTIOMETER_PIN A6
 
-const float MAX_SPEED = 1.0; // Max percent speed of vehicle
-const float MIN_SPEED = -1.0; // Min percent speed
+const float MAX_VELOCITY = 2.0; // Max velocity of vehicle in m/s
+const float MIN_VELOCITY = -2.0; // Min velocity of vehicle in m/s
+
+const float MAX_POWER_SPEED = 1.0; // Max percent speed of vehicle
+const float MIN_POWER_SPEED = -1.0; // Min percent speed
 
 const float STEERING_ZERO_ANGLE = 98.0; // Calibrated servo angle corresponding to a steering angle of 0  TODO: Calibrate
 const float MAX_INPUT_STEER = 20.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER (Degrees)  TODO: Calibrate
 
-const double WHEEL_DIAMETER_METERS = 9.5 / 100;
-const double TICKS_PER_REV = 827.2;
-const double TICKS_TO_METERS = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_METERS / 2));
+const float WHEEL_DIAMETER_METERS = 9.5 / 100;
+const float TICKS_PER_REV = 827.2;
+const float TICKS_TO_METERS = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_METERS / 2));
 
-const int POTENTIOMETER_ZERO = 370; // Calibrated potentiometer value corresponding to a steering angle of 0  TODO: Calibrate
-const int POTENTIOMETER_RANGE = 50; // Range of potentiometer values corresponding to a steering angle of -MAX_INPUT_STEER to MAX_INPUT_STEER  TODO: Calibrate
+const float POTENTIOMETER_ZERO = 370.0; // Calibrated potentiometer value corresponding to a steering angle of 0  TODO: Calibrate
+const float POTENTIOMETER_RANGE = 50.0; // Range of potentiometer values corresponding to a steering angle of -MAX_INPUT_STEER to MAX_INPUT_STEER  TODO: Calibrate
+
+float current_angle = 0.0;
+float data_points = 0.0;
+
+float current_velocity;
+float target_velocity;
+float target_angle;
+
+float last_encoder_left;
+float last_encoder_right;
+long last_update_time;
+long last_push_time;
+long last_error_time;
+
+// SID controller values
+const float kP = .05; // Proportional gain for SID controller
+// const kI = .05; // Integral gain for SID controller
+const float kD = .05; // Derivative gain for SID controller
+// float integral = 0;
+float last_error = 0.0;
 
 // Initialize hardware/sensors
 Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
@@ -91,33 +114,58 @@ void writeAckermann(float angle, float speed) {
 }
 
 
+void updateAckermann() {
+  long current_time = millis();
+
+  float error = target_velocity - current_velocity;
+  float velocity = kP * error + kD * (error - last_error / ((current_time - last_error_time) / 1000000)) + (current_velocity / MAX_VELOCITY);
+
+  last_error = error;
+  last_error_time = current_time;
+
+  writeAckermann(target_angle, velocity);
+}
+
+
 /**
    Callback for ackermann drive messages. Converts the steering angle and speed to the appropriate servo angle and motor speed.
 */
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
-  writeAckermann(msg.steering_angle * MAX_INPUT_STEER, msg.speed);
+  target_angle = msg.steering_angle;
+  target_velocity = msg.speed;
 }
 
+void updateVelocity() {
+  long current_time = millis();
+    
+  // Encoder delta calculations
+  // float encoder_left =  left_encoder.read() * TICKS_TO_METERS;
+  float encoder_left = -right_encoder.read() * TICKS_TO_METERS;
+  float encoder_right = -right_encoder.read() * TICKS_TO_METERS;
+  float avg_dist = (
+    (encoder_left - last_encoder_left) + 
+    (encoder_right - last_encoder_right)
+  ) / 2.0;
+  
+  // Velocity calculations
+  current_velocity = avg_dist / ((current_time - last_update_time) / 1000.0);
 
-/**
- * Get the traveled distance of the right encoder in meters (relative to 0).
- */
-float leftEncoderPosition() {
-  return left_encoder.read() * TICKS_TO_METERS;
+  // Store values for next update
+  last_encoder_left = encoder_left;
+  last_encoder_right = encoder_right;
+  last_update_time = current_time;
 }
 
-/**
- * Get the traveled distance of the right encoder in meters (relative to 0).
- */
-float rightEncoderPosition() {
-  return right_encoder.read() * TICKS_TO_METERS;
+void updateAngle() {
+  float poten = (analogRead(POTENTIOMETER_PIN) - POTENTIOMETER_ZERO) / POTENTIOMETER_RANGE * MAX_INPUT_STEER;
+  float multiplier = max(poten - current_angle, current_angle - poten) * 4.0;
+
+  current_angle = (current_angle * data_points + multiplier * poten) / (data_points + multiplier);
+  data_points += 1.0;
 }
 
-/**
- * Return the angle of the potentiometer in degrees.
-*/
-float potentiometerAngle() {
-  return (analogRead(POTENTIOMETER_PIN) - POTENTIOMETER_ZERO) / POTENTIOMETER_RANGE * MAX_INPUT_STEER;
+void resetAngle() {
+  data_points = 50;
 }
 
 // Setup ROS interface
@@ -125,10 +173,6 @@ ros::NodeHandle nh;
 rc_localization_odometry::SensorCollect msg;
 ros::Publisher sensor_collect_pub("sensor_collect", &msg); // Publishes all sensor data
 ros::Subscriber<ackermann_msgs::AckermannDrive> sub("rc_movement_msg", &ackermannDriveCallback); // Listens to ackermann drive messages and drives the vehicle
-
-float last_encoder_left;
-float last_encoder_right;
-long last_time;
 
 void setup()
 {
@@ -153,43 +197,40 @@ void setup()
 
   // Start vehicle at 0 speed and 0 steering angle
   writeAckermann(0, 0);
+  target_velocity = 0.0;
+  target_angle = 0.0;
+  current_velocity = 0.0;
 
-  last_encoder_left = leftEncoderPosition();
-  last_encoder_right = rightEncoderPosition();
-  last_time = millis();
-  
+  last_encoder_left = -right_encoder.read() * TICKS_TO_METERS;
+  last_encoder_right = -right_encoder.read() * TICKS_TO_METERS;
   delay(2000);
+  last_update_time = millis();
+  last_push_time = millis();
+  last_error_time = millis();
 }
 
 void loop()
 {
-  if (100 < millis() - last_time) { // Run once every ~100 ms
-    int current_time = millis();
-    
-    // Encoder delta calculations
-    float encoder_left =  leftEncoderPosition();
-    float encoder_right = rightEncoderPosition();
-    float avg_dist = (
-      (encoder_left - last_encoder_left) + 
-      (encoder_right - last_encoder_right)
-    ) / 2.0;
-    
-    // Velocity calculations
-    double encoder_velocity = avg_dist / ((current_time - last_time) / 1000);
+  long current_time = millis();
 
-    // Store values for next update
-    last_encoder_left = encoder_left;
-    last_encoder_right = encoder_right;
-    last_time = current_time;
-
+  if (5 < current_time - last_update_time) { // Run once every ~5 ms
+    updateVelocity();
+    updateAngle();
+    updateAckermann();
+  }
+  
+  if (50 < current_time - last_push_time) { // Run once every ~50 ms
     // Populate the message with sensor data
     msg.timestamp = current_time;
+    msg.steering_angle = current_angle;
+    msg.velocity = current_velocity;
 
-    msg.steering_angle = potentiometerAngle();
-    msg.velocity = encoder_velocity;
+    resetAngle();
 
     // Publish the sensor data
     sensor_collect_pub.publish(&msg);
+
+    last_push_time = current_time;
   }
 
   nh.spinOnce();
