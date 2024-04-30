@@ -5,9 +5,9 @@ from std_msgs.msg import Bool
 from sensor_msgs.msg import LaserScan
 import math
 
-min_angle_range_to_register = math.radians(1)
-angle_min = math.radians(150)
-angle_max = math.radians(210)
+min_angle_range_to_register = math.radians(20)
+angle_min = math.radians(160)
+angle_max = math.radians(200)
 min_distance_to_register = .6 # m
 
 
