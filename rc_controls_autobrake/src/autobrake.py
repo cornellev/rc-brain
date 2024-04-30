@@ -8,7 +8,7 @@ import math
 min_angle_range_to_register = math.radians(5)
 angle_min = math.radians(150)
 angle_max = math.radians(210)
-min_distance_to_register = 1 # m
+min_distance_to_register = 1.2 # m
 
 
 def convert_polar_dist_to_vertical_dist(dist, angle):
