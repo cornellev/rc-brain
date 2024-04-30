@@ -127,8 +127,11 @@ void writeAckermann(float angle, float speed) {
 void updateAckermann() {
   if (autobrake) {
     target_velocity = min(0, target_velocity);
+  }
+
+  if (target_velocity == 0) {
     given_power = 0;
-    kP = .08;
+    kP = 3;
   } else {
     kP = .002;
   }
@@ -273,10 +276,6 @@ void loop()
     sensor_collect_pub.publish(&msg);
 
     last_push_time = current_time;
-  }
-
-  if (autobrake) {
-    writeAckermann(target_angle, 0);
   }
 
   nh.spinOnce();
