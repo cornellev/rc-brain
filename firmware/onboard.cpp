@@ -4,6 +4,7 @@
 #include <Servo.h>
 #include <rc_localization_odometry/SensorCollect.h>
 #include <ackermann_msgs/AckermannDrive.h>
+#include <std_msgs/Bool.h>
 
 #define EN_A 5
 #define IN_1 A1
@@ -51,8 +52,10 @@ long last_update_time;
 long last_push_time;
 long last_error_time;
 
+bool autobrake = false;
+
 // SID controller values
-const float kP = .002; // Proportional gain for SID controller
+float kP = .002; // Proportional gain for SID controller
 const float kI = .005; // Integral gain for SID controller
 const float kD = .002; // Derivative gain for SID controller // .003
 //float integral = 0;
@@ -122,6 +125,14 @@ void writeAckermann(float angle, float speed) {
 
 
 void updateAckermann() {
+  if (autobrake) {
+    target_velocity = min(0, target_velocity);
+    given_power = 0;
+    kP = .08;
+  } else {
+    kP = .002;
+  }
+  
   long current_time = millis();
 
   float error = target_velocity - current_velocity;
@@ -135,11 +146,11 @@ void updateAckermann() {
 //  total_error += error;
   last_error_time = current_time;
 
-  if (((given_power + target_velocity / MAX_VELOCITY) < .2 && (given_power + target_velocity / MAX_VELOCITY) > -.2) || target_velocity == 0.0) {
-    writeAckermann(target_angle, 0);
-  } else {
-    writeAckermann(target_angle, given_power + (target_velocity / MAX_VELOCITY));
-  }
+//  if (((given_power + target_velocity / MAX_VELOCITY) < .2 && (given_power + target_velocity / MAX_VELOCITY) > -.2) || target_velocity == 0.0) {
+//    writeAckermann(target_angle, 0);
+//  } else {
+  writeAckermann(target_angle, given_power + (target_velocity / MAX_VELOCITY));
+//  }
 }
 
 
@@ -149,6 +160,10 @@ void updateAckermann() {
 void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
   target_angle = msg.steering_angle;
   target_velocity = msg.speed;
+}
+
+void autobrakeCallback(const std_msgs::Bool& msg) {
+  autobrake = msg.data;
 }
 
 void updateVelocity() {
@@ -189,12 +204,14 @@ ros::NodeHandle nh;
 rc_localization_odometry::SensorCollect msg;
 ros::Publisher sensor_collect_pub("sensor_collect", &msg); // Publishes all sensor data
 ros::Subscriber<ackermann_msgs::AckermannDrive> sub("rc_movement_msg", &ackermannDriveCallback); // Listens to ackermann drive messages and drives the vehicle
+ros::Subscriber<std_msgs::Bool> autoSub("autobrake", &autobrakeCallback); // Listens to autobrake message
 
 void setup()
 {
   // Start node
   nh.initNode();
   nh.subscribe(sub);
+  nh.subscribe(autoSub);
   nh.advertise(sensor_collect_pub);
 
   // Helps when using custom topics over rosserial
@@ -256,6 +273,10 @@ void loop()
     sensor_collect_pub.publish(&msg);
 
     last_push_time = current_time;
+  }
+
+  if (autobrake) {
+    writeAckermann(target_angle, 0);
   }
 
   nh.spinOnce();
