@@ -21,8 +21,8 @@
 #define SERVO_PIN 9
 #define POTENTIOMETER_PIN A6
 
-const float MAX_VELOCITY = 2.0; // Max velocity of vehicle in m/s
-const float MIN_VELOCITY = -2.0; // Min velocity of vehicle in m/s
+const float MAX_VELOCITY = 2.07; // Max velocity of vehicle in m/s
+const float MIN_VELOCITY = -2.07; // Min velocity of vehicle in m/s
 
 const float MAX_POWER_SPEED = 1.0; // Max percent speed of vehicle
 const float MIN_POWER_SPEED = -1.0; // Min percent speed
