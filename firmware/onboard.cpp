@@ -43,6 +43,7 @@ float data_points = 0.0;
 float current_velocity;
 float target_velocity;
 float target_angle;
+float next_vel = 0;
 
 float last_encoder_left;
 float last_encoder_right;
@@ -51,11 +52,15 @@ long last_push_time;
 long last_error_time;
 
 // SID controller values
-const float kP = .05; // Proportional gain for SID controller
-// const kI = .05; // Integral gain for SID controller
-const float kD = .05; // Derivative gain for SID controller
-// float integral = 0;
+const float kP = .002; // Proportional gain for SID controller
+const float kI = .005; // Integral gain for SID controller
+const float kD = .002; // Derivative gain for SID controller // .003
+//float integral = 0;
 float last_error = 0.0;
+float total_error = 0.0;
+
+float given_power = 0.0;
+float max_speed = 0.0;
 
 // Initialize hardware/sensors
 Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
@@ -81,6 +86,8 @@ void writeAngle(float angle) {
    @pre -1 <= value <= 1
 */
 void writePercent(float value) {
+  value = max(min(value, 1), -1);
+  
   if (value >= 0) {
     digitalWrite(IN_1, HIGH);
     digitalWrite(IN_2, LOW);
@@ -118,12 +125,17 @@ void updateAckermann() {
   long current_time = millis();
 
   float error = target_velocity - current_velocity;
-  float velocity = kP * error + kD * (error - last_error / ((current_time - last_error_time) / 1000000)) + (current_velocity / MAX_VELOCITY);
+  float delta_error = error - last_error;
+
+  given_power = max(-1, min(1, (given_power + kP * error + kD * delta_error)));
+
+  // given_power = kP * error + kI * total_error + kD * ((error - last_error) / ((current_time - last_error_time) / 1000.0));
 
   last_error = error;
+//  total_error += error;
   last_error_time = current_time;
 
-  writeAckermann(target_angle, velocity);
+  writeAckermann(target_angle, given_power + (target_velocity / MAX_VELOCITY));
 }
 
 
@@ -140,8 +152,8 @@ void updateVelocity() {
     
   // Encoder delta calculations
   // float encoder_left =  left_encoder.read() * TICKS_TO_METERS;
-  float encoder_left = -right_encoder.read() * TICKS_TO_METERS;
-  float encoder_right = -right_encoder.read() * TICKS_TO_METERS;
+  float encoder_left = right_encoder.read() * TICKS_TO_METERS;
+  float encoder_right = right_encoder.read() * TICKS_TO_METERS;
   float avg_dist = (
     (encoder_left - last_encoder_left) + 
     (encoder_right - last_encoder_right)
@@ -220,10 +232,18 @@ void loop()
   }
   
   if (5 < current_time - last_push_time) { // Run once every ~50 ms
+    if (current_velocity > max_speed) {
+      max_speed = current_velocity;
+    }
     // Populate the message with sensor data
     msg.timestamp = current_time;
-    msg.steering_angle = current_angle;
-    msg.velocity = current_velocity;
+     msg.steering_angle = current_velocity;
+//    msg.velocity = current_velocity;
+    msg.velocity = max_speed;
+//    msg.steering_angle = target_angle;
+//     msg.velocity = next_vel;
+//    msg.steering_angle = (float) right_encoder.read();
+//    msg.velocity = (float) left_encoder.read();
 
     resetAngle();
 
