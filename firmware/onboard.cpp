@@ -27,7 +27,7 @@ const float MIN_VELOCITY = -2.07; // Min velocity of vehicle in m/s
 const float MAX_POWER_SPEED = 1.0; // Max percent speed of vehicle
 const float MIN_POWER_SPEED = -1.0; // Min percent speed
 
-const float STEERING_ZERO_ANGLE = 98.0; // Calibrated servo angle corresponding to a steering angle of 0  TODO: Calibrate
+const float STEERING_ZERO_ANGLE = 95.0; // Calibrated servo angle corresponding to a steering angle of 0  TODO: Calibrate
 const float MAX_INPUT_STEER = 20.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER (Degrees)  TODO: Calibrate
 
 const float WHEEL_DIAMETER_METERS = 9.5 / 100;
@@ -243,7 +243,7 @@ void loop()
     msg.timestamp = current_time;
     //  msg.steering_angle = current_velocity;
     msg.velocity = current_velocity;
-    msg.steering_angle = target_velocity;
+    msg.steering_angle = current_angle;
     // msg.velocity = max_speed;
 //    msg.steering_angle = target_angle;
 //     msg.velocity = next_vel;
