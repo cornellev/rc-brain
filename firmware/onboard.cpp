@@ -19,7 +19,7 @@
 #define ENCODER_RIGHT_C2 12
 
 #define SERVO_PIN 9
-#define POTENTIOMETER_PIN A6
+#define POTENTIOMETER_PIN A5
 
 const float MAX_VELOCITY = 2.07; // Max velocity of vehicle in m/s
 const float MIN_VELOCITY = -2.07; // Min velocity of vehicle in m/s
@@ -135,7 +135,11 @@ void updateAckermann() {
 //  total_error += error;
   last_error_time = current_time;
 
-  writeAckermann(target_angle, given_power + (target_velocity / MAX_VELOCITY));
+  if (((given_power + target_velocity / MAX_VELOCITY) < .2 && (given_power + target_velocity / MAX_VELOCITY) > -.2) || target_velocity == 0.0) {
+    writeAckermann(target_angle, 0);
+  } else {
+    writeAckermann(target_angle, given_power + (target_velocity / MAX_VELOCITY));
+  }
 }
 
 
@@ -152,7 +156,7 @@ void updateVelocity() {
     
   // Encoder delta calculations
   // float encoder_left =  left_encoder.read() * TICKS_TO_METERS;
-  float encoder_left = right_encoder.read() * TICKS_TO_METERS;
+  float encoder_left = -left_encoder.read() * TICKS_TO_METERS;
   float encoder_right = right_encoder.read() * TICKS_TO_METERS;
   float avg_dist = (
     (encoder_left - last_encoder_left) + 
@@ -237,13 +241,14 @@ void loop()
     }
     // Populate the message with sensor data
     msg.timestamp = current_time;
-     msg.steering_angle = current_velocity;
-//    msg.velocity = current_velocity;
-    msg.velocity = max_speed;
+    //  msg.steering_angle = current_velocity;
+    msg.velocity = current_velocity;
+    msg.steering_angle = target_velocity;
+    // msg.velocity = max_speed;
 //    msg.steering_angle = target_angle;
 //     msg.velocity = next_vel;
-//    msg.steering_angle = (float) right_encoder.read();
-//    msg.velocity = (float) left_encoder.read();
+//   msg.steering_angle = (float) right_encoder.read();
+//   msg.velocity = (float) left_encoder.read();
 
     resetAngle();
 
