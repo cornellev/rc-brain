@@ -5,9 +5,9 @@ from std_msgs.msg import Bool
 from sensor_msgs.msg import LaserScan
 import math
 
-min_angle_range_to_register = math.radians(20)
-angle_min = math.radians(170)
-angle_max = math.radians(190)
+min_angle_range_to_register = math.radians(10)
+angle_min = math.radians(150)
+angle_max = math.radians(210)
 min_distance_to_register = .6 # m
 
 
@@ -39,12 +39,17 @@ def interpret_scan(data):
   start = int(angle_min / increment)
   end = int(angle_max / increment)
 
-  ranges = data.ranges[start:] + data.ranges[:end]
+  # ranges = data.ranges[start:] + data.ranges[:end]
+  
+  ranges = data.ranges[start:end]
+  # rospy.loginfo(ranges)
+
+
 
 #   rospy.loginfo("Increment: " + str(increment))
 #   rospy.loginfo("Step count: " + str(step_count))
-#   rospy.loginfo("Start: " + str(start))
-#   rospy.loginfo("End: " + str(end))
+  # rospy.loginfo("Start: " + str(start))
+  # rospy.loginfo("End: " + str(end))
   # rospy.loginfo("Original len: " + str(len(data.ranges)))
 #   rospy.loginfo("New len: " + str(len(ranges)))
 
