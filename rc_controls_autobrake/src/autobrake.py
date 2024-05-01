@@ -4,6 +4,7 @@ import rospy
 from std_msgs.msg import Bool
 from sensor_msgs.msg import LaserScan
 import math
+from rc_localization_odometry.msg import SensorCollect
 
 min_angle_range_to_register = math.radians(10)
 angle_min = math.radians(160)
@@ -61,6 +62,10 @@ def interpret_scan(data):
     brake.data = False
     pub.publish(brake)
 
+def set_range(data):
+  global min_distance_to_register
+  min_distance_to_register = data.velocity
+
 if __name__ == '__main__':
   brake = Bool()
   brake.data = False
@@ -69,6 +74,7 @@ if __name__ == '__main__':
 
   sub = rospy.Subscriber('scan', LaserScan, interpret_scan)
   pub = rospy.Publisher('autobrake', Bool, queue_size=1)
+  sub = rospy.Subscriber('sensor_collect', SensorCollect, set_range)
 
   rospy.spin()
 
