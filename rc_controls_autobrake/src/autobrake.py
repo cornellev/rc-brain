@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
   sub = rospy.Subscriber('scan', LaserScan, interpret_scan)
   pub = rospy.Publisher('autobrake', Bool, queue_size=1)
-  sub = rospy.Subscriber('sensor_collect', SensorCollect, set_range)
+  # sub = rospy.Subscriber('sensor_collect', SensorCollect, set_range)
 
   rospy.loginfo("Autobrake node initialized.")
 
