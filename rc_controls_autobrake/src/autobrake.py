@@ -64,7 +64,7 @@ def interpret_scan(data):
 
 def set_range(data):
   global min_distance_to_register
-  min_distance_to_register = data.velocity
+  min_distance_to_register = max(data.velocity, .3)
 
 if __name__ == '__main__':
   brake = Bool()
