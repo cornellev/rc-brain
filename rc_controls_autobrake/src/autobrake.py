@@ -66,6 +66,8 @@ def set_range(data):
   global min_distance_to_register
   min_distance_to_register = max(data.velocity, .3)
 
+  rospy.loginfo("New min_distance_to_register: " + str(min_distance_to_register))
+
 if __name__ == '__main__':
   brake = Bool()
   brake.data = False
@@ -75,6 +77,8 @@ if __name__ == '__main__':
   sub = rospy.Subscriber('scan', LaserScan, interpret_scan)
   pub = rospy.Publisher('autobrake', Bool, queue_size=1)
   sub = rospy.Subscriber('sensor_collect', SensorCollect, set_range)
+
+  rospy.loginfo("Autobrake node initialized.")
 
   rospy.spin()
 
