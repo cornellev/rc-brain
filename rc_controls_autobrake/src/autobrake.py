@@ -64,7 +64,7 @@ def interpret_scan(data):
 
 def set_range(data):
   global min_distance_to_register
-  min_distance_to_register = max(data.velocity/2, .3)
+  min_distance_to_register = max(data.velocity/1.5, .3)
 
   rospy.loginfo("New min_distance_to_register: " + str(min_distance_to_register))
 
