@@ -101,7 +101,7 @@ def set_vars(data):
 def set_targets(data):
   global target_velocity
 
-  target_velocity = data.velocity
+  target_velocity = data.speed
 
 if __name__ == '__main__':
   steering_angle = 0
