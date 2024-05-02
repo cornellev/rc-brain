@@ -8,7 +8,7 @@ from rc_localization_odometry.msg import SensorCollect
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
-AUTOBRAKE_TIME = .3
+AUTOBRAKE_TIME = .6
 
 MIN_COLLISIONS_FOR_BRAKE = 5
 
