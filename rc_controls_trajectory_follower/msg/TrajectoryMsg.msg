@@ -1,3 +1,3 @@
 std_msgs/Header header
 rc_controls_trajectory_follower/TrajectoryPointMsg[] trajectory
-float32 dt
+duration dt
