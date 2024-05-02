@@ -8,7 +8,7 @@ from rc_localization_odometry.msg import SensorCollect
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
-AUTOBRAKE_TIME = .45
+AUTOBRAKE_TIME = 1 # .45
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 
@@ -27,7 +27,7 @@ def check_collision(data):
   global velocity
   global steering_angle
 
-  steering_angle = -steering_angle
+  steering_angle = steering_angle
   velocity = velocity
   brake = Bool()
   brake.data = False
@@ -56,7 +56,7 @@ def check_collision(data):
   increment = data.angle_increment
 
   for obs in range(len(data.ranges)):
-    obstacle = (data.ranges[obs], obs * increment + LIDAR_START_ANGLE)
+    obstacle = (data.ranges[obs], (obs * increment + LIDAR_START_ANGLE) % (2*math.pi))
     obstacle_x = flag * obstacle[0] * math.cos(obstacle[1])
     obstacle_y = obstacle[0] * math.sin(obstacle[1])
     obstacle_center_dist = math.sqrt((obstacle_x - circle_center[0])**2 + (obstacle_y - circle_center[1])**2)
@@ -69,10 +69,11 @@ def check_collision(data):
       circum_dist_to_obstacle_angle = turning_radius_center * obstacle_center_angle
       time_to_collision = (circum_dist_to_obstacle_angle / velocity) if velocity != 0 else float('inf')
 
-      if time_to_collision < max(AUTOBRAKE_TIME * velocity, AUTOBRAKE_TIME):
+      # if time_to_collision < max(AUTOBRAKE_TIME * velocity, AUTOBRAKE_TIME):
+      if time_to_collision < AUTOBRAKE_TIME:
         collisions += 1
 
-      if collisions > MIN_COLLISIONS_FOR_BRAKE:
+      if collisions >= MIN_COLLISIONS_FOR_BRAKE:
         brake.data = True
         pub.publish(brake)
         rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
@@ -92,12 +93,11 @@ def set_vars(data):
   global steering_angle
 
   velocity = data.velocity
-  steering_angle = data.steering_angle
+  steering_angle = -data.steering_angle
 
 if __name__ == '__main__':
   steering_angle = 0
   velocity = 0
-
   rospy.init_node('autobrake')
 
   sub = rospy.Subscriber('scan', LaserScan, test_collision)
