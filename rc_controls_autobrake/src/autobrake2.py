@@ -30,7 +30,6 @@ def check_collision(data):
   steering_angle = steering_angle
   velocity = velocity
   brake = Bool()
-  brake.data = False
 
   if velocity < 0:
     pub.publish(brake)
@@ -85,7 +84,6 @@ def check_collision(data):
   # if collisions > MIN_COLLISIONS_FOR_BRAKE:
   #   brake.data = True
   #   rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
-
   brake.data = False
   pub.publish(brake)
 
