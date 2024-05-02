@@ -62,14 +62,14 @@ def check_collision(data):
     obstacle_center_dist = math.sqrt((obstacle_x - circle_center[0])**2 + (obstacle_y - circle_center[1])**2)
     obstacle_center_angle = math.atan2(obstacle_y - circle_center[1], obstacle_x - circle_center[0])
 
-    rospy.loginfo("OBSTACLE IN PATH!!!")
-
     if obstacle_center_angle < 0:
       obstacle_center_angle = 2*math.pi + obstacle_center_angle
 
     if turning_radius_right_wheel < obstacle_center_dist < turning_radius_left_wheel or turning_radius_left_wheel < obstacle_center_dist < turning_radius_right_wheel:
       circum_dist_to_obstacle_angle = turning_radius_center * obstacle_center_angle
       time_to_collision = (circum_dist_to_obstacle_angle / velocity) if velocity != 0 else float('inf')
+
+      rospy.loginfo("OBSTACLE IN PATH!!!")
 
       if time_to_collision < AUTOBRAKE_TIME:
         collisions += 1
