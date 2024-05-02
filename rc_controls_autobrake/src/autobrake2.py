@@ -49,6 +49,10 @@ def check_collision(data):
   turning_radius_right_wheel = turning_radius_center + VEHICLE_WIDTH/2
   circle_center = (-turning_radius_center, 0)
 
+  rospy.loginfo("VELOCITY: " + str(velocity))
+  rospy.loginfo("STEERING ANGLE: " + str(steering_angle))
+  rospy.loginfo("TURNING RADIUS: " + str(turning_radius_center))
+
   increment = data.angle_increment
 
   for obs in range(len(data.ranges)):
