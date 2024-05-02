@@ -32,6 +32,7 @@ def check_collision(data):
   brake = Bool()
 
   if velocity < 0:
+    brake.data = False
     pub.publish(brake)
     return
 
