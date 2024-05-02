@@ -74,6 +74,7 @@ def check_collision(data):
 
       if collisions > MIN_COLLISIONS_FOR_BRAKE:
         brake.data = True
+        pub.publish(brake)
         rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
         return
 
