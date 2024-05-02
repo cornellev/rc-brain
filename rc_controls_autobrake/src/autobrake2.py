@@ -24,7 +24,8 @@ def test_collision(data):
   check_collision(data)
 
 def check_collision(data):
-  global velocity, steering_angle
+  global velocity
+  global steering_angle
   global brake
   collisions = 0
   flag = 1
@@ -66,7 +67,9 @@ def check_collision(data):
   pub.publish(brake)
 
 def set_vars(data):
-  global velocity, steering_angle
+  global velocity
+  global steering_angle
+  
   velocity = data.velocity
   steering_angle = data.steering_angle
 
