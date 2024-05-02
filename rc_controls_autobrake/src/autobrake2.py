@@ -26,7 +26,12 @@ def test_collision(data):
 def check_collision(data):
   global velocity
   global steering_angle
-  global brake
+
+  steering_angle = steering_angle
+  velocity = velocity
+  brake = Bool()
+  brake.data = False
+
   collisions = 0
   flag = 1
 
@@ -61,21 +66,17 @@ def check_collision(data):
   if collisions > MIN_COLLISIONS_FOR_BRAKE:
     brake.data = True
     rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
-  else:
-    brake.data = False
 
   pub.publish(brake)
 
 def set_vars(data):
   global velocity
   global steering_angle
-  
+
   velocity = data.velocity
   steering_angle = data.steering_angle
 
 if __name__ == '__main__':
-  brake = Bool()
-  brake.data = False
   steering_angle = 0
   velocity = 0
 
