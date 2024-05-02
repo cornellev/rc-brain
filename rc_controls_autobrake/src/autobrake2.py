@@ -14,8 +14,6 @@ MIN_COLLISIONS_FOR_BRAKE = 2
 
 LIDAR_START_ANGLE = math.pi
 
-steering_angle, velocity = 0, 0
-
 def turning_radius(steering_angle):
   if steering_angle == 0:
     return 1000000000000
@@ -23,6 +21,7 @@ def turning_radius(steering_angle):
   return VEHICLE_LENGTH / math.tan(steering_angle)
 
 def check_collision(data):
+  global velocity, steering_angle
   collisions = 0
   flag = 1
 
@@ -70,6 +69,7 @@ def set_vars(data):
 if __name__ == '__main__':
   brake = Bool()
   brake.data = False
+  steering_angle, velocity = 0, 0
 
   rospy.init_node('autobrake')
 
