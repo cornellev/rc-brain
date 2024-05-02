@@ -20,6 +20,9 @@ def turning_radius(steering_angle):
 
   return VEHICLE_LENGTH / math.tan(steering_angle)
 
+def test_collision(data):
+  check_collision(data)
+
 def check_collision(data):
   global velocity, steering_angle
   collisions = 0
@@ -73,7 +76,7 @@ if __name__ == '__main__':
 
   rospy.init_node('autobrake')
 
-  sub = rospy.Subscriber('scan', LaserScan, check_collision)
+  sub = rospy.Subscriber('scan', LaserScan, test_collision)
   sub = rospy.Subscriber('sensor_collect', SensorCollect, set_vars)
 
   pub = rospy.Publisher('autobrake', Bool, queue_size=1)
