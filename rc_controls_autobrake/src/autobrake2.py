@@ -5,6 +5,7 @@ from std_msgs.msg import Bool
 from sensor_msgs.msg import LaserScan
 import math
 from rc_localization_odometry.msg import SensorCollect
+from ackermann_msgs.msg import AckermannDrive
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
@@ -26,12 +27,14 @@ def test_collision(data):
 def check_collision(data):
   global velocity
   global steering_angle
+  global target_velocity
 
   steering_angle = steering_angle
   velocity = velocity
+  target_velocity = target_velocity
   brake = Bool()
 
-  if velocity < 0:
+  if target_velocity < 0:
     brake.data = False
     pub.publish(brake)
     return
@@ -95,15 +98,23 @@ def set_vars(data):
   velocity = data.velocity
   steering_angle = -data.steering_angle
 
+def set_targets(data):
+  global target_velocity
+
+  target_velocity = data.velocity
+
 if __name__ == '__main__':
   steering_angle = 0
   velocity = 0
+  target_velocity = 0
+
   brake = Bool()
   brake.data = False
   rospy.init_node('autobrake')
 
   sub = rospy.Subscriber('scan', LaserScan, test_collision)
   sub = rospy.Subscriber('sensor_collect', SensorCollect, set_vars)
+  sub = rospy.Subscriber('rc_movement_msg', AckermannDrive, set_targets)
 
   pub = rospy.Publisher('autobrake', Bool, queue_size=1)
 
