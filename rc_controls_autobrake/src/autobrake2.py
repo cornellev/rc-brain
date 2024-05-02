@@ -6,9 +6,9 @@ from sensor_msgs.msg import LaserScan
 import math
 from rc_localization_odometry.msg import SensorCollect
 
-VEHICLE_LENGTH = 1
-VEHICLE_WIDTH = 0.8
-AUTOBRAKE_TIME = 2
+VEHICLE_LENGTH = .3
+VEHICLE_WIDTH = 0.25
+AUTOBRAKE_TIME = 1
 
 MIN_COLLISIONS_FOR_BRAKE = 2
 
