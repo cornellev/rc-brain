@@ -72,12 +72,17 @@ def check_collision(data):
       if time_to_collision < max(AUTOBRAKE_TIME * velocity * 2, AUTOBRAKE_TIME):
         collisions += 1
 
-      if time_to_collision < 2:
-        rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
+      if collisions > MIN_COLLISIONS_FOR_BRAKE:
+        brake.data = True
+        rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
+        return
 
-  if collisions > MIN_COLLISIONS_FOR_BRAKE:
-    brake.data = True
-    rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
+      # if time_to_collision < 2:
+      #   rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
+
+  # if collisions > MIN_COLLISIONS_FOR_BRAKE:
+  #   brake.data = True
+  #   rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
 
   pub.publish(brake)
 
