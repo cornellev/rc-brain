@@ -25,6 +25,7 @@ def test_collision(data):
 
 def check_collision(data):
   global velocity, steering_angle
+  global brake
   collisions = 0
   flag = 1
 
@@ -72,7 +73,8 @@ def set_vars(data):
 if __name__ == '__main__':
   brake = Bool()
   brake.data = False
-  steering_angle, velocity = 0, 0
+  steering_angle = 0
+  velocity = 0
 
   rospy.init_node('autobrake')
 
