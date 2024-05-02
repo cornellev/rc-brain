@@ -70,7 +70,7 @@ def check_collision(data):
 
     if turning_radius_right_wheel < obstacle_center_dist < turning_radius_left_wheel or turning_radius_left_wheel < obstacle_center_dist < turning_radius_right_wheel:
       circum_dist_to_obstacle_angle = turning_radius_center * obstacle_center_angle
-      time_to_collision = (circum_dist_to_obstacle_angle / velocity) if velocity != 0 else float('inf')
+      time_to_collision = (circum_dist_to_obstacle_angle / max(velocity, target_velocity)) if max(velocity, target_velocity) != 0 else float('inf')
 
       if time_to_collision < max(AUTOBRAKE_TIME * max(velocity, target_velocity), AUTOBRAKE_TIME):
       # if time_to_collision < AUTOBRAKE_TIME:
