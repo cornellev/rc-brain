@@ -86,6 +86,7 @@ def check_collision(data):
   #   brake.data = True
   #   rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
 
+  brake.data = False
   pub.publish(brake)
 
 def set_vars(data):
@@ -98,6 +99,8 @@ def set_vars(data):
 if __name__ == '__main__':
   steering_angle = 0
   velocity = 0
+  brake = Bool()
+  brake.data = False
   rospy.init_node('autobrake')
 
   sub = rospy.Subscriber('scan', LaserScan, test_collision)
@@ -107,4 +110,9 @@ if __name__ == '__main__':
 
   rospy.loginfo("Autobrake node initialized.")
 
-  rospy.spin()
+  rate = rospy.Rate(10) 
+
+  while not rospy.is_shutdown():
+    pub.publish(brake)
+    rospy.spin_once()
+    rate.sleep()
