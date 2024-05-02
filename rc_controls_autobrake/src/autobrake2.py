@@ -62,6 +62,8 @@ def check_collision(data):
     obstacle_center_dist = math.sqrt((obstacle_x - circle_center[0])**2 + (obstacle_y - circle_center[1])**2)
     obstacle_center_angle = math.atan2(obstacle_y - circle_center[1], obstacle_x - circle_center[0])
 
+    rospy.loginfo("OBSTACLE IN PATH!!!")
+
     if obstacle_center_angle < 0:
       obstacle_center_angle = 2*math.pi + obstacle_center_angle
 
