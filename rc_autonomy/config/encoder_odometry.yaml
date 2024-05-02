@@ -1,5 +1,5 @@
 frame: encoder
-sensor_topic: /encoder
+sensor_topic: /sensor_collect
 odom_topic: /odometry/encoder
 publish_rate: 20
 pose_variance: [ 0.05, 0.05, 0.05 ]  # x, y, theta

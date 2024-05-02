@@ -1,0 +1,19 @@
+<launch>
+
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+        <param name="port" value="/dev/ttyACM0"/>
+    </node>
+
+    <include file="$(find rc-teleop)/launch/teleop.launch" />
+
+    <node name="encoder_odom" pkg="rc_localization_odometry" type="encoder_odometry_node" output="screen">
+        <rosparam command="load" file="$(find rc_autonomy)/config/encoder_odometry.yaml" />
+    </node>
+
+
+    <node name="ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
+        <rosparam command="load" file="$(find rc_autonomy)/config/robot_localization.yaml" />
+    </node>
+
+
+</launch>
