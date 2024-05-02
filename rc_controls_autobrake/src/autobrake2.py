@@ -71,7 +71,6 @@ def check_collision(data):
 
       if time_to_collision < max(AUTOBRAKE_TIME * velocity * 2, AUTOBRAKE_TIME):
         collisions += 1
-      else:
         rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
 
   if collisions > MIN_COLLISIONS_FOR_BRAKE:
