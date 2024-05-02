@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 
-# import rospy
-# from std_msgs.msg import Bool
-# from sensor_msgs.msg import LaserScan
+import rospy
+from std_msgs.msg import Bool
+from sensor_msgs.msg import LaserScan
 import math
-# from rc_localization_odometry.msg import SensorCollect
-import matplotlib.pyplot as plt
+from rc_localization_odometry.msg import SensorCollect
 
 VEHICLE_LENGTH = 1
 VEHICLE_WIDTH = 0.8
-AUTOBRAKE_TIME = .7
+AUTOBRAKE_TIME = 2
 
-LIDAR_START_ANGLE = 0
+MIN_COLLISIONS_FOR_BRAKE = 2
+
+LIDAR_START_ANGLE = math.pi
+
+steering_angle, velocity = 0, 0
 
 def turning_radius(steering_angle):
   if steering_angle == 0:
@@ -19,7 +22,7 @@ def turning_radius(steering_angle):
 
   return VEHICLE_LENGTH / math.tan(steering_angle)
 
-def check_collision(data, steering_angle, velocity):
+def check_collision(data):
   collisions = 0
   flag = 1
 
@@ -51,41 +54,30 @@ def check_collision(data, steering_angle, velocity):
       if time_to_collision < AUTOBRAKE_TIME:
         collisions += 1
 
-  return collisions
+  if collisions > MIN_COLLISIONS_FOR_BRAKE:
+    brake.data = True
+    rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
+  else:
+    brake.data = False
 
-class Data:
-  ranges = []
-  angle_increment = 0
+  pub.publish(brake)
 
-data = Data()
-data.ranges = [1, 1.2, 1, .6, 1]
-data.angle_increment = math.pi / 5
+def set_vars(data):
+  global velocity, steering_angle
+  velocity = data.velocity
+  steering_angle = data.steering_angle
 
-# Steering Circle Plot
-steering_angle = math.pi / 4
-turning_radius_center = turning_radius(steering_angle)
-circle = plt.Circle((-turning_radius_center, 0), turning_radius_center, color='r', fill=False)
-circle2 = plt.Circle((-turning_radius_center, 0), turning_radius_center + VEHICLE_WIDTH / 2, color='r', fill=False)
-circle3 = plt.Circle((-turning_radius_center, 0), turning_radius_center - VEHICLE_WIDTH / 2, color='r', fill=False)
+if __name__ == '__main__':
+  brake = Bool()
+  brake.data = False
 
-# Obstacles Plot
-angles = [i * data.angle_increment + LIDAR_START_ANGLE for i in range(len(data.ranges))]
+  rospy.init_node('autobrake')
 
-distances = data.ranges
-obstacle_x = [distances[i] * math.cos(angles[i]) for i in range(len(distances))]
-obstacle_y = [distances[i] * math.sin(angles[i]) for i in range(len(distances))]
+  sub = rospy.Subscriber('scan', LaserScan, check_collision)
+  sub = rospy.Subscriber('sensor_collect', SensorCollect, set_vars)
 
-plt.figure(figsize=(8, 6))
-ax = plt.gca()
-ax.add_patch(circle)
-ax.add_patch(circle2)
-ax.add_patch(circle3)
-plt.plot(obstacle_x, obstacle_y, 'bo')
-ax.set_aspect('equal', adjustable='box')
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.title('Steering Circle and Obstacles')
-plt.grid(True)
-plt.show()
+  pub = rospy.Publisher('autobrake', Bool, queue_size=1)
 
-print(check_collision(data, math.pi/4, 2))
+  rospy.loginfo("Autobrake node initialized.")
+
+  rospy.spin()
