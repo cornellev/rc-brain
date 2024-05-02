@@ -111,6 +111,7 @@ if __name__ == '__main__':
   rate = rospy.Rate(10) 
 
   while not rospy.is_shutdown():
+    rospy.loginfo("DETECTED OBSTAasfwefeNG.")
     pub.publish(brake)
-    rospy.spin_once()
+    rospy.spin()
     rate.sleep()
