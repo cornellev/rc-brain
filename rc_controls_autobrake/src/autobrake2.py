@@ -8,7 +8,7 @@ from rc_localization_odometry.msg import SensorCollect
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
-AUTOBRAKE_TIME = .6
+AUTOBRAKE_TIME = .3
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 
@@ -69,7 +69,7 @@ def check_collision(data):
       circum_dist_to_obstacle_angle = turning_radius_center * obstacle_center_angle
       time_to_collision = (circum_dist_to_obstacle_angle / velocity) if velocity != 0 else float('inf')
 
-      if time_to_collision < max(AUTOBRAKE_TIME * velocity * 2, AUTOBRAKE_TIME):
+      if time_to_collision < max(AUTOBRAKE_TIME * velocity, AUTOBRAKE_TIME):
         collisions += 1
 
       if collisions > MIN_COLLISIONS_FOR_BRAKE:
