@@ -69,7 +69,7 @@ def check_collision(data):
       circum_dist_to_obstacle_angle = turning_radius_center * obstacle_center_angle
       time_to_collision = (circum_dist_to_obstacle_angle / velocity) if velocity != 0 else float('inf')
 
-      if time_to_collision < AUTOBRAKE_TIME * velocity * 2:
+      if time_to_collision < max(AUTOBRAKE_TIME * velocity, AUTOBRAKE_TIME):
         collisions += 1
       else:
         rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
