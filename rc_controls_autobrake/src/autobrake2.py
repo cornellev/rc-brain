@@ -13,7 +13,7 @@ AUTOBRAKE_TIME = .45 # .45
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 
-LIDAR_START_ANGLE = 0
+LIDAR_START_ANGLE = math.pi
 
 def turning_radius(steering_angle):
   if abs(steering_angle) < .01:
@@ -57,12 +57,13 @@ def check_collision(data):
   # rospy.loginfo("STEERING ANGLE: " + str(steering_angle))
   # rospy.loginfo("TURNING RADIUS: " + str(turning_radius_center))
 
+  angle_start = data.angle_min
   increment = data.angle_increment
 
   min_obstacle = float('inf')
 
   for obs in range(len(data.ranges)):
-    obstacle = (data.ranges[obs], (obs * increment + LIDAR_START_ANGLE) % (2*math.pi))
+    obstacle = (data.ranges[obs], obs * increment + angle_start)
     obstacle_x = flag * obstacle[0] * math.cos(obstacle[1])
     obstacle_y = obstacle[0] * math.sin(obstacle[1])
     obstacle_center_dist = math.sqrt((obstacle_x - circle_center[0])**2 + (obstacle_y - circle_center[1])**2)
