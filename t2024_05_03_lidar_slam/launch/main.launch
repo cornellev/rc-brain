@@ -10,4 +10,39 @@
     <rosparam command="load" file="$(find t2024_05_03_lidar_slam)/config/rplidar_node.yaml" />
 </node>
 
+<node name="rplidar_static_transform" pkg="tf2_ros" type="static_transform_publisher" args="-0.035 0.036 0.098 0 0 0 base_link rplidar" />
+
+<node ns="/rtabmap/odom/" name="lidar_odometry" pkg="rtabmap_odom" type="icp_odometry">
+    <remap from="/rtabmap/odom/scan" to="/scan" />
+    <remap from="/rtabmap/odom/scan_cloud" to="/dummy" />
+</node>
+
+<arg name="localization" default="false" />
+<arg name="rtabmap_args" default=""/> <!-- delete_db_on_start -->
+
+<node ns="/rtabmap/slam" name="lidar_slam" pkg="rtabmap_slam" type="rtabmap" output="screen" args="$(arg rtabmap_args)">
+    <param name="frame_id" type="string" value="base_link"/>
+
+    <param name="subscribe_rgb"   type="bool" value="false"/>
+    <param name="subscribe_depth" type="bool" value="false"/>
+    <param name="subscribe_rgbd"  type="bool" value="false"/>
+    <param name="subscribe_scan"  type="bool" value="true"/>
+
+    <!-- RTAB-Map's parameters -->
+    <param name="Reg/Strategy"       type="string" value="1"/>    <!-- 0=Visual, 1=ICP, 2=Visual+ICP -->
+    <param name="Reg/Force3DoF"      type="string" value="true"/>
+    <!-- <param name="RGBD/ProximityBySpace"    type="string" value="true"/> -->
+    <param name="Icp/CorrespondenceRatio"  type="string" value="0.2"/>
+    <param name="Icp/VoxelSize"            type="string" value="0.05"/>
+
+    <remap from="scan" to="/scan"/>
+    <remap from="odom" to="/rtabmap/odom/odom"/>
+    <!-- <param name="subscribe_odom_info" type="bool" value="true"/> -->
+
+    <!-- localization mode -->
+    <param     if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
+    <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
+    <param name="Mem/InitWMWithAllNodes" type="string" value="$(arg localization)"/>
+</node>
+
 </launch>
