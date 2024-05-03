@@ -15,14 +15,14 @@ import matplotlib.pyplot as plt
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
-AUTOBRAKE_TIME = 1 # .45
+AUTOBRAKE_TIME = .5 # .45
 AUTOBRAKE_DISTANCE = .5
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 LIDAR_HORIZONTAL_OFFSET = .035
 
-steering_angle = -math.pi/7
-velocity = 1
+steering_angle = 0
+velocity = 0
 
 class LidarScan:
     def __init__(self, angle_min, angle_max, angle_increment, ranges):
@@ -33,26 +33,28 @@ class LidarScan:
 
 def find_obstacles(data: LidarScan):
     global steering_angle
+
     invert_flag = 1
+    num_collisions = 0
 
     if steering_angle < 0:
         invert_flag = -1
 
     turning_radius = VEHICLE_LENGTH / math.tan(invert_flag * steering_angle) if abs(steering_angle) > .01 else float('inf')
+
     if turning_radius == float('inf'):
         for i in range(len(data.ranges)):
             theta = (data.angle_min + i * data.angle_increment)
             r = data.ranges[i]
-            x = r * math.sin(theta)
+            x = r * math.sin(theta) - LIDAR_HORIZONTAL_OFFSET
             y = r * math.cos(theta)
 
             if abs(x) < VEHICLE_WIDTH/2:
                 dist_to_obstacle = y
-                time_to_hit = dist_to_obstacle / velocity
-                print(dist_to_obstacle, time_to_hit)
+                time_to_hit = dist_to_obstacle / velocity if velocity != 0 else float('inf')
+                
                 if dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME:
-                    print(f"Obstacle at ({x}, {y})")
-
+                    num_collisions += 1
     else:
         left_wheel_radius = turning_radius - VEHICLE_WIDTH/2
         right_wheel_radius = turning_radius + VEHICLE_WIDTH/2
@@ -60,19 +62,12 @@ def find_obstacles(data: LidarScan):
         for i in range(len(data.ranges)):
             theta = (data.angle_min + i * data.angle_increment)
             r = data.ranges[i]
-            x = invert_flag * (r * math.sin(theta))
+            x = invert_flag * (r * math.sin(theta) - LIDAR_HORIZONTAL_OFFSET)
             y = r * math.cos(theta)
 
             dist_to_obstacle = math.sqrt((x + turning_radius)**2 + y**2)
 
-            # print("OBSTACLE: ", invert_flag * x, y)
-            # print(dist_to_obstacle)
-
             if right_wheel_radius < dist_to_obstacle < left_wheel_radius or left_wheel_radius < dist_to_obstacle < right_wheel_radius:
-                print(f"Obstacle in path at ({invert_flag * x}, {y})")
-
-                # print(turning_radius)
-
                 angle_from_center_to_obstacle = math.atan2(y, turning_radius + x)
 
                 if angle_from_center_to_obstacle < 0:
@@ -80,18 +75,18 @@ def find_obstacles(data: LidarScan):
                 
                 angle_from_center_to_obstacle %= 2 * math.pi
 
-                print(math.degrees(angle_from_center_to_obstacle))
-
                 circum_dist_to_obstacle = turning_radius * angle_from_center_to_obstacle
-                time_to_hit = circum_dist_to_obstacle / velocity
-
-                print(circum_dist_to_obstacle, time_to_hit)
+                time_to_hit = circum_dist_to_obstacle / velocity if velocity != 0 else float('inf')
 
                 if circum_dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME:
-                    print(f"Obstacle at ({invert_flag * x}, {y})")
+                    num_collisions += 1
+
+    if num_collisions >= MIN_COLLISIONS_FOR_BRAKE:
+        print(num_collisions)
+        print("BRAKE")
 
 
-data = LidarScan(-math.pi/2, math.pi/2, math.pi/10, [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1])
+data = LidarScan(-math.pi/1.85, math.pi/2, math.pi/10, [1, 1, 1, 1, 1, 1])
 
 find_obstacles(data)
 
@@ -102,7 +97,7 @@ y = []
 for i in range(len(data.ranges)):
     theta = (data.angle_min + i * data.angle_increment)
     r = data.ranges[i]
-    x.append(r * math.sin(theta))
+    x.append(r * math.sin(theta) - LIDAR_HORIZONTAL_OFFSET)
     y.append(r * math.cos(theta))
     ax.scatter(x, y)
 
