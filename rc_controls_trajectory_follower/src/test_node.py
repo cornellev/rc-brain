@@ -8,14 +8,14 @@ import math
 if __name__ == "__main__":
     rospy.init_node("test_node")
 
-    dT = 1/6
+    dT = 1 / 6
 
     state_steps = []
 
     for i in range(30):
         state_steps.append(TrajectoryPointMsg())
         state_steps[-1].speed = 1.0
-        state_steps[-1].steering_angle = math.cos(6 * i * dT + (math.pi/2)) * 20
+        state_steps[-1].steering_angle = math.cos(6 * i * dT + (math.pi / 2)) * 20
 
     # for i in range(30):
     #     state_steps.append(TrajectoryPointMsg())
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     msg = TrajectoryMsg()
     msg.header.stamp = rospy.Time.now()
-    msg.header.frame_id = "map"
+    msg.header.frame_id = "odom"
     msg.dt = dT
     msg.trajectory = state_steps
 

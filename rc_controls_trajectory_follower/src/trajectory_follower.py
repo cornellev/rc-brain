@@ -8,12 +8,6 @@ import numpy as np
 import numpy.typing as npt
 from typing import Union
 
-ANGLE_KP = 0
-ANGLE_KI = 0
-ANGLE_KD = 0
-ANGLE_KF = 1
-ANGLE_I_MAX = 10
-
 
 def vec3_to_np(vec3) -> npt.NDArray:
     return np.array([vec3.x, vec3.y, vec3.z])
@@ -89,11 +83,9 @@ class TrajectoryFollower:
         self.pub = rospy.Publisher("/rc_movement_msg", AckermannDrive, queue_size=1)
         self.trajectory = None
         self.pose = None
-        self.pid = PID(ANGLE_KP, ANGLE_KI, ANGLE_KD, (-ANGLE_I_MAX, ANGLE_I_MAX))
+        self.pid = PID(angle_kp, angle_ki, angle_kd, (-angle_i_max, angle_i_max))
 
-        rospy.loginfo("Trajectory follower node initialized.")
-
-    def trajectory_callback(self, msg):
+    def trajectory_callback(self, msg: TrajectoryMsg):
         """
         Callback for the trajectory message. Simply stores the last received trajectory message.
 
@@ -101,12 +93,20 @@ class TrajectoryFollower:
             msg (TrajectoryMsg): The received trajectory message.
         """
 
-        rospy.loginfo("Received new trajectory message.")
-
         self.trajectory = msg
+        if msg.header.frame_id != odom_frame:
+            rospy.logwarn(
+                "Trajectory is expected to be in the odom frame, but it is not. \
+                The trajectory follower may behave unpredictably."
+            )
 
     def odometry_callback(self, msg: Odometry):
         self.odom = msg
+        if msg.header.frame_id != odom_frame:
+            rospy.logwarn(
+                "Odometry is expected to be in the odom frame, but it is not. \
+                The trajectory follower may behave unpredictably."
+            )
 
     def cross_track_error(
         self, path0: npt.NDArray, path1: npt.NDArray, pos: npt.NDArray
@@ -161,7 +161,7 @@ class TrajectoryFollower:
         percent_along = (now - segment_start_time) / self.trajectory.dt
         result.speed = interpolate(start.speed, end.speed, percent_along)
 
-        result.steering_angle = self.pid.calculate(xte) + ANGLE_KF * interpolate(
+        result.steering_angle = self.pid.calculate(xte) + angle_kf * interpolate(
             start.steering_angle, end.steering_angle, percent_along
         )
 
@@ -171,7 +171,27 @@ class TrajectoryFollower:
 
 if __name__ == "__main__":
     rospy.init_node("rc_controls_trajectory_follower")
+
+    odom_frame = rospy.get_param("~odom_frame", "odom")
+    steering_config = rospy.get_param("~steering")
+    angle_kp = steering_config["kp"]
+    angle_ki = steering_config["ki"]
+    angle_kd = steering_config["kd"]
+    angle_kf = steering_config["kf"]
+    angle_i_max = steering_config["i_max"]
+
+    rospy.loginfo("Odom frame: %s", odom_frame)
+    rospy.loginfo(
+        "Steering control parameters: kp=%.3f, ki=%.3f, kd=%.3f, kf=%.3f, i_max=%.3f",
+        angle_kp,
+        angle_ki,
+        angle_kd,
+        angle_kf,
+        angle_i_max,
+    )
+
     follower = TrajectoryFollower()
+    rospy.loginfo("Trajectory follower node initialized.")
 
     rate = rospy.Rate(10)
 
