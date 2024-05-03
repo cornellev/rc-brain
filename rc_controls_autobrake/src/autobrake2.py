@@ -63,7 +63,7 @@ def check_collision(data):
   min_obstacle = float('inf')
 
   for obs in range(len(data.ranges)):
-    obstacle = (data.ranges[obs], obs * increment + angle_start)
+    obstacle = (data.ranges[obs], (obs * increment + angle_start) % 2*math.pi)
     obstacle_x = flag * obstacle[0] * math.cos(obstacle[1])
     obstacle_y = obstacle[0] * math.sin(obstacle[1])
     obstacle_center_dist = math.sqrt((obstacle_x - circle_center[0])**2 + (obstacle_y - circle_center[1])**2)
