@@ -11,7 +11,7 @@ VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
 AUTOBRAKE_TIME = .25 # .45
 
-MIN_COLLISIONS_FOR_BRAKE = 2
+MIN_COLLISIONS_FOR_BRAKE = 1
 
 LIDAR_START_ANGLE = math.pi
 
@@ -68,6 +68,10 @@ def check_collision(data):
 
   for obs in range(len(data.ranges)):
     obstacle = (data.ranges[obs], (obs * increment + angle_start) % 2*math.pi)
+
+    if obstacle[0] < data.range_min or obstacle[0] > data.range_max:
+      continue
+
     obstacle_x = flag * obstacle[0] * math.cos(obstacle[1])
     obstacle_y = obstacle[0] * math.sin(obstacle[1])
     obstacle_center_dist = math.sqrt((obstacle_x - circle_center[0])**2 + (obstacle_y - circle_center[1])**2)
