@@ -25,24 +25,29 @@ NOTE: LIDAR'S 0 is forward, and angles increment clockwise
 """
 
 VEHICLE_LENGTH = .3
-VEHICLE_WIDTH = 0.2
-AUTOBRAKE_TIME = .8 # .45
-AUTOBRAKE_DISTANCE = .5
+VEHICLE_WIDTH = 0.214
+AUTOBRAKE_TIME = .7 # .45
+AUTOBRAKE_DISTANCE = .2
 
-MIN_COLLISIONS_FOR_BRAKE = 1
+MIN_COLLISIONS_FOR_BRAKE = 3
 LIDAR_ROTATIONAL_OFFSET = math.pi
 LIDAR_HORIZONTAL_OFFSET = .035 # From center of front axle
 
 steering_angle = 0
 velocity = 0
+target_velocity = 0
 brake = Bool()
 brake.data = False
+
+def autobrake_time(vel):
+    return AUTOBRAKE_TIME + vel * .1
 
 def check_collision(data: LaserScan):
     start_time = time.time()
 
     invert_flag = 1
     num_collisions = 0
+    vel = max(velocity, target_velocity)
 
     if steering_angle < 0:
         invert_flag = -1
@@ -64,7 +69,7 @@ def check_collision(data: LaserScan):
 
             if abs(x) < VEHICLE_WIDTH/2:
                 dist_to_obstacle = y
-                time_to_hit = dist_to_obstacle / velocity if velocity != 0 else float('inf')
+                time_to_hit = dist_to_obstacle / vel if vel != 0 else float('inf')
 
                 if dist_to_obstacle >= 0:
                     min_dist = min(min_dist, dist_to_obstacle)
@@ -72,7 +77,7 @@ def check_collision(data: LaserScan):
                 if time_to_hit >= 0:
                     min_time = min(min_time, time_to_hit)
 
-                if dist_to_obstacle >= 0 and time_to_hit >= 0 and (dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME):
+                if dist_to_obstacle >= 0 and time_to_hit >= 0 and (dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= autobrake_time(vel)):
                     num_collisions += 1
     else:
         left_wheel_radius = turning_radius - VEHICLE_WIDTH/2
@@ -98,7 +103,7 @@ def check_collision(data: LaserScan):
                 angle_from_center_to_obstacle %= 2 * math.pi
 
                 circum_dist_to_obstacle = turning_radius * angle_from_center_to_obstacle
-                time_to_hit = circum_dist_to_obstacle / velocity if velocity != 0 else float('inf')
+                time_to_hit = circum_dist_to_obstacle / vel if vel != 0 else float('inf')
 
                 if dist_to_obstacle >= 0:
                     min_dist = min(min_dist, circum_dist_to_obstacle)
@@ -106,7 +111,7 @@ def check_collision(data: LaserScan):
                 if time_to_hit >= 0:
                     min_time = min(min_time, time_to_hit)
 
-                if circum_dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME:
+                if circum_dist_to_obstacle >= 0 and time_to_hit >= 0 and (circum_dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= autobrake_time(vel)):
                     # rospy.loginfo("dist to OBSTACLE: " + str(circum_dist_to_obstacle))
                     # rospy.loginfo("TEIRJER" + str(time_to_hit))
                     num_collisions += 1
@@ -150,3 +155,4 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         pub.publish(brake)
         rate.sleep()
+        
