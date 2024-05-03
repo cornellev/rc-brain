@@ -263,7 +263,7 @@ void loop()
     msg.timestamp = current_time;
     //  msg.steering_angle = current_velocity;
     msg.velocity = current_velocity;
-    msg.steering_angle = current_angle;
+    msg.steering_angle = target_angle;
     // msg.velocity = max_speed;
 //    msg.steering_angle = target_angle;
 //     msg.velocity = next_vel;
