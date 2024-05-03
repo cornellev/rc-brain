@@ -60,7 +60,7 @@ def check_collision(data):
   angle_start = data.angle_min
   increment = data.angle_increment
 
-  # min_obstacle = float('inf')
+  min_obstacle = float('inf')
 
   for obs in range(len(data.ranges)):
     obstacle = (data.ranges[obs], obs * increment + angle_start)
@@ -76,12 +76,12 @@ def check_collision(data):
       circum_dist_to_obstacle_angle = turning_radius_center * obstacle_center_angle
       time_to_collision = (circum_dist_to_obstacle_angle / max(velocity, target_velocity)) if max(velocity, target_velocity) != 0 else float('inf')
 
-      # if circum_dist_to_obstacle_angle < min_obstacle:
-      #   min_obstacle = circum_dist_to_obstacle_angle
+      if circum_dist_to_obstacle_angle < min_obstacle:
+        min_obstacle = circum_dist_to_obstacle_angle
 
       # rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
 
-      if time_to_collision < max(AUTOBRAKE_TIME * max(velocity, target_velocity), AUTOBRAKE_TIME) or circum_dist_to_obstacle_angle < .3:
+      if time_to_collision < max(AUTOBRAKE_TIME * max(velocity, target_velocity), AUTOBRAKE_TIME) or circum_dist_to_obstacle_angle < .5:
       # # if time_to_collision < AUTOBRAKE_TIME:
         collisions += 1
 
@@ -103,7 +103,7 @@ def check_collision(data):
 
   # brake.data = False
 
-  # rospy.loginfo("MIN OBSTACLE: " + str(min_obstacle))
+  rospy.loginfo("MIN OBSTACLE: " + str(min_obstacle))
   pub.publish(brake)
 
 def set_vars(data):
