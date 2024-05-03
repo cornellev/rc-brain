@@ -125,11 +125,13 @@ void writeAckermann(float angle, float speed) {
 
 
 void updateAckermann() {
+  float target_vel = target_velocity;
+
   if (autobrake) {
-    target_velocity = min(0, target_velocity);
+    target_vel = min(0, target_vel);
   }
 
-  if (target_velocity == 0) {
+  if (target_vel == 0) {
     given_power = 0;
     kP = 3;
   } else {
@@ -138,7 +140,7 @@ void updateAckermann() {
   
   long current_time = millis();
 
-  float error = target_velocity - current_velocity;
+  float error = target_vel - current_velocity;
   float delta_error = error - last_error;
 
   given_power = max(-1, min(1, (given_power + kP * error + kD * delta_error)));
@@ -152,7 +154,7 @@ void updateAckermann() {
 //  if (((given_power + target_velocity / MAX_VELOCITY) < .2 && (given_power + target_velocity / MAX_VELOCITY) > -.2) || target_velocity == 0.0) {
 //    writeAckermann(target_angle, 0);
 //  } else {
-  writeAckermann(target_angle, given_power + (target_velocity / MAX_VELOCITY));
+  writeAckermann(target_angle, given_power + (target_vel / MAX_VELOCITY));
 //  }
 }
 
