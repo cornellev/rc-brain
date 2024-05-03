@@ -59,6 +59,8 @@ def check_collision(data):
 
   increment = data.angle_increment
 
+  min_obstacle = float('inf')
+
   for obs in range(len(data.ranges)):
     obstacle = (data.ranges[obs], (obs * increment + LIDAR_START_ANGLE) % (2*math.pi))
     obstacle_x = flag * obstacle[0] * math.cos(obstacle[1])
@@ -73,6 +75,9 @@ def check_collision(data):
       circum_dist_to_obstacle_angle = turning_radius_center * obstacle_center_angle
       time_to_collision = (circum_dist_to_obstacle_angle / max(velocity, target_velocity)) if max(velocity, target_velocity) != 0 else float('inf')
 
+      if circum_dist_to_obstacle_angle < min_obstacle:
+        min_obstacle = circum_dist_to_obstacle_angle
+
       # rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
 
       # if time_to_collision < max(AUTOBRAKE_TIME * max(velocity, target_velocity), AUTOBRAKE_TIME):
@@ -83,10 +88,11 @@ def check_collision(data):
         collisions += 1
 
       if collisions >= MIN_COLLISIONS_FOR_BRAKE:
-        brake.data = True
-        pub.publish(brake)
+        # brake.data = True
+        # pub.publish(brake)
         # rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
-        return
+        # return
+        pass
 
       # if time_to_collision < 2:
       #   rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
@@ -94,6 +100,8 @@ def check_collision(data):
   # if collisions > MIN_COLLISIONS_FOR_BRAKE:
   #   brake.data = True
   #   rospy.loginfo("DETECTED OBSTACLE. AUTOBRAKING.")
+
+  rospy.loginfo("MIN OBSTACLE: " + str(min_obstacle))
   pub.publish(brake)
 
 def set_vars(data):
