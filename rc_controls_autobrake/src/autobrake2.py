@@ -9,7 +9,7 @@ from ackermann_msgs.msg import AckermannDrive
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
-AUTOBRAKE_TIME = .2 # .45
+AUTOBRAKE_TIME = .4 # .45
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 
@@ -85,8 +85,8 @@ def check_collision(data):
       # # if time_to_collision < AUTOBRAKE_TIME:
         collisions += 1
 
-      if circum_dist_to_obstacle_angle < 1:
-        collisions += 1
+      # if circum_dist_to_obstacle_angle < 1:
+      #   collisions += 1
 
       if collisions >= MIN_COLLISIONS_FOR_BRAKE:
         brake.data = True
