@@ -28,11 +28,12 @@ def check_collision(data):
   global velocity
   global steering_angle
   global target_velocity
+  global brake
 
   steering_angle = steering_angle
   velocity = velocity
   target_velocity = target_velocity
-  brake = Bool()
+  brake = brake
 
   if target_velocity < 0:
     brake.data = False
