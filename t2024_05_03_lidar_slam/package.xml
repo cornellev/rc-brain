@@ -1,0 +1,10 @@
+<package format="2">
+    <name>t2024_05_03_lidar_slam</name>
+    <version>1.2.4</version>
+    <description>
+        This package contains launch and config files for testing the rc cars with rtabmap. The point of loading with rtabmap is to be able to create a visual in RViz for debugging lidar/autobrake code.
+    </description>
+    <maintainer email="jak532@cornell.edu">Jason Klein</maintainer>
+    <license>MIT</license>
+    <buildtool_depend>catkin</buildtool_depend>
+</package>
