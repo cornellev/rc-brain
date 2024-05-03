@@ -35,9 +35,9 @@ def check_collision(data):
   target_velocity = target_velocity
   brake = brake
 
-  rospy.loginfo("VELOCITY: " + str(velocity))
-  rospy.loginfo("TARGET VELOCITY: " + str(target_velocity))
-  rospy.loginfo("STEERING ANGLE: " + str(steering_angle))
+  # rospy.loginfo("VELOCITY: " + str(velocity))
+  # rospy.loginfo("TARGET VELOCITY: " + str(target_velocity))
+  # rospy.loginfo("STEERING ANGLE: " + str(steering_angle))
 
   if target_velocity < 0:
     brake.data = False
@@ -86,7 +86,7 @@ def check_collision(data):
       # rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
 
       if time_to_collision < max(AUTOBRAKE_TIME * max(velocity, target_velocity), AUTOBRAKE_TIME) or circum_dist_to_obstacle_angle < .4:
-        rospy.loginfo("MIN OBSTACLE: " + str(circum_dist_to_obstacle_angle))
+        # rospy.loginfo("MIN OBSTACLE: " + str(circum_dist_to_obstacle_angle))
       # # if time_to_collision < AUTOBRAKE_TIME:
         collisions += 1
 
@@ -108,7 +108,7 @@ def check_collision(data):
 
   brake.data = False
 
-  rospy.loginfo("MIN OBSTACLE: " + str(min_obstacle))
+  # rospy.loginfo("MIN OBSTACLE: " + str(min_obstacle))
   pub.publish(brake)
 
 def set_vars(data):
