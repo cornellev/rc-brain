@@ -9,11 +9,12 @@ from ackermann_msgs.msg import AckermannDrive
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
-AUTOBRAKE_TIME = .4 # .45
+AUTOBRAKE_TIME = .25 # .45
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 
 LIDAR_START_ANGLE = math.pi
+LIDAR_HORIZONTAL_TRANSFORM = .035
 
 def turning_radius(steering_angle):
   if abs(steering_angle) < .01:
@@ -64,7 +65,7 @@ def check_collision(data):
 
   for obs in range(len(data.ranges)):
     obstacle = (data.ranges[obs], (obs * increment + angle_start) % 2*math.pi)
-    obstacle_x = flag * obstacle[0] * math.cos(obstacle[1])
+    obstacle_x = flag * (obstacle[0]-LIDAR_HORIZONTAL_TRANSFORM) * math.cos(obstacle[1]) # Left Right
     obstacle_y = obstacle[0] * math.sin(obstacle[1])
     obstacle_center_dist = math.sqrt((obstacle_x - circle_center[0])**2 + (obstacle_y - circle_center[1])**2)
     obstacle_center_angle = math.atan2(obstacle_y - circle_center[1], obstacle_x - circle_center[0])
@@ -81,7 +82,7 @@ def check_collision(data):
 
       # rospy.loginfo("TIME TO COLLISION: " + str(time_to_collision))
 
-      if time_to_collision < max(AUTOBRAKE_TIME * max(velocity, target_velocity), AUTOBRAKE_TIME) or circum_dist_to_obstacle_angle < .5:
+      if time_to_collision < max(AUTOBRAKE_TIME * max(velocity, target_velocity), AUTOBRAKE_TIME) or circum_dist_to_obstacle_angle < .4:
       # # if time_to_collision < AUTOBRAKE_TIME:
         collisions += 1
 
