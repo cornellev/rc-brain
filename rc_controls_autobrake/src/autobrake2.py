@@ -16,7 +16,7 @@ MIN_COLLISIONS_FOR_BRAKE = 1
 LIDAR_START_ANGLE = math.pi
 
 def turning_radius(steering_angle):
-  if steering_angle == 0:
+  if abs(steering_angle) < .01:
     return 1000000000000
 
   return VEHICLE_LENGTH / math.tan(steering_angle)
