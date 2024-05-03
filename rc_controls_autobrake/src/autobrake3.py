@@ -45,6 +45,8 @@ def check_collision(data: LaserScan):
 
     turning_radius = VEHICLE_LENGTH / math.tan(invert_flag * steering_angle) if abs(steering_angle) > .01 else float('inf')
 
+    rospy.loginfo("TURNING RADIUS: " + str(turning_radius))
+
     if turning_radius == float('inf'):
         for i in range(len(data.ranges)):
             theta = (data.angle_min + i * data.angle_increment)
