@@ -13,7 +13,7 @@ AUTOBRAKE_TIME = .45 # .45
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 
-LIDAR_START_ANGLE = math.pi
+LIDAR_START_ANGLE = 0
 
 def turning_radius(steering_angle):
   if abs(steering_angle) < .01:
