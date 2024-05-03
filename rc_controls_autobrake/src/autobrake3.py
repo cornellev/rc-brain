@@ -119,6 +119,7 @@ if __name__ == '__main__':
     rate = rospy.Rate(30)
 
     while not rospy.is_shutdown():
+        rospy.loginfo("MEOW")
         pub.publish(brake)
         rate.sleep()
 
