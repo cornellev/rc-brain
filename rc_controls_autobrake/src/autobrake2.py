@@ -9,7 +9,7 @@ from ackermann_msgs.msg import AckermannDrive
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
-AUTOBRAKE_TIME = .45 # .45
+AUTOBRAKE_TIME = .2 # .45
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 
@@ -60,7 +60,7 @@ def check_collision(data):
   angle_start = data.angle_min
   increment = data.angle_increment
 
-  min_obstacle = float('inf')
+  # min_obstacle = float('inf')
 
   for obs in range(len(data.ranges)):
     obstacle = (data.ranges[obs], obs * increment + angle_start)
@@ -104,7 +104,7 @@ def check_collision(data):
 
   brake.data = False
 
-  rospy.loginfo("MIN OBSTACLE: " + str(min_obstacle))
+  # rospy.loginfo("MIN OBSTACLE: " + str(min_obstacle))
   pub.publish(brake)
 
 def set_vars(data):
