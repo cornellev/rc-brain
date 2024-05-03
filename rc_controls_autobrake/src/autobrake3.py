@@ -7,6 +7,7 @@ import math
 from rc_localization_odometry.msg import SensorCollect
 from ackermann_msgs.msg import AckermannDrive
 import math
+import time
 
 """
 R = L / tan(steering_angle)
@@ -24,11 +25,12 @@ NOTE: LIDAR'S 0 is forward, and angles increment clockwise
 """
 
 VEHICLE_LENGTH = .3
-VEHICLE_WIDTH = 0.25
-AUTOBRAKE_TIME = .25 # .45
-AUTOBRAKE_DISTANCE = .2
+VEHICLE_WIDTH = 0.2
+AUTOBRAKE_TIME = .8 # .45
+AUTOBRAKE_DISTANCE = .5
 
 MIN_COLLISIONS_FOR_BRAKE = 1
+LIDAR_ROTATIONAL_OFFSET = math.pi
 LIDAR_HORIZONTAL_OFFSET = .035 # From center of front axle
 
 steering_angle = 0
@@ -37,6 +39,8 @@ brake = Bool()
 brake.data = False
 
 def check_collision(data: LaserScan):
+    start_time = time.time()
+
     invert_flag = 1
     num_collisions = 0
 
@@ -46,10 +50,14 @@ def check_collision(data: LaserScan):
     turning_radius = VEHICLE_LENGTH / math.tan(invert_flag * steering_angle) if abs(steering_angle) > .01 else float('inf')
 
     min_dist = float('inf')
+    min_time = float('inf')
 
     if turning_radius == float('inf'):
         for i in range(len(data.ranges)):
-            theta = (data.angle_min + i * data.angle_increment)
+            if data.ranges[i] < data.range_min or data.ranges[i] > data.range_max:
+                continue
+
+            theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
             r = data.ranges[i]
             x = r * math.sin(theta) + LIDAR_HORIZONTAL_OFFSET
             y = r * math.cos(theta)
@@ -57,15 +65,24 @@ def check_collision(data: LaserScan):
             if abs(x) < VEHICLE_WIDTH/2:
                 dist_to_obstacle = y
                 time_to_hit = dist_to_obstacle / velocity if velocity != 0 else float('inf')
-                
-                if dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME:
+
+                if dist_to_obstacle >= 0:
+                    min_dist = min(min_dist, dist_to_obstacle)
+
+                if time_to_hit >= 0:
+                    min_time = min(min_time, time_to_hit)
+
+                if dist_to_obstacle >= 0 and time_to_hit >= 0 and (dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME):
                     num_collisions += 1
     else:
         left_wheel_radius = turning_radius - VEHICLE_WIDTH/2
         right_wheel_radius = turning_radius + VEHICLE_WIDTH/2
 
         for i in range(len(data.ranges)):
-            theta = (data.angle_min + i * data.angle_increment)
+            if data.ranges[i] < data.range_min or data.ranges[i] > data.range_max:
+                continue
+
+            theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
             r = data.ranges[i]
             x = invert_flag * (r * math.sin(theta) + LIDAR_HORIZONTAL_OFFSET)
             y = r * math.cos(theta)
@@ -83,8 +100,15 @@ def check_collision(data: LaserScan):
                 circum_dist_to_obstacle = turning_radius * angle_from_center_to_obstacle
                 time_to_hit = circum_dist_to_obstacle / velocity if velocity != 0 else float('inf')
 
-                if circum_dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME:
+                if dist_to_obstacle >= 0:
                     min_dist = min(min_dist, circum_dist_to_obstacle)
+
+                if time_to_hit >= 0:
+                    min_time = min(min_time, time_to_hit)
+
+                if circum_dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME:
+                    # rospy.loginfo("dist to OBSTACLE: " + str(circum_dist_to_obstacle))
+                    # rospy.loginfo("TEIRJER" + str(time_to_hit))
                     num_collisions += 1
 
     if num_collisions >= MIN_COLLISIONS_FOR_BRAKE:
@@ -92,18 +116,17 @@ def check_collision(data: LaserScan):
     else:
         brake.data = False
 
-    rospy.loginfo("MIN DIST: " + str(min_dist))
+    end_time = time.time() - start_time
+
+    rospy.loginfo("MIN DIST: " + str(min_dist) + " MIN TIME: " + str(min_time))
 
 
 def set_vars(data):
   global velocity
   global steering_angle
 
-  rospy.loginfo("SETTING VELOCITY TO " + str(velocity))
-  rospy.loginfo("SETTING STEERING ANGLE TO " + str(steering_angle))
-
   velocity = data.velocity
-  steering_angle = -math.radians(data.steering_angle)
+  steering_angle = math.radians(data.steering_angle)
 
 def set_targets(data):
   global target_velocity
@@ -127,7 +150,3 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         pub.publish(brake)
         rate.sleep()
-
-
-    
-
