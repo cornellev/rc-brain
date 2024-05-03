@@ -45,7 +45,7 @@ def check_collision(data: LaserScan):
 
     turning_radius = VEHICLE_LENGTH / math.tan(invert_flag * steering_angle) if abs(steering_angle) > .01 else float('inf')
 
-    rospy.loginfo("TURNING RADIUS: " + str(turning_radius))
+    min_dist = float('inf')
 
     if turning_radius == float('inf'):
         for i in range(len(data.ranges)):
@@ -84,12 +84,15 @@ def check_collision(data: LaserScan):
                 time_to_hit = circum_dist_to_obstacle / velocity if velocity != 0 else float('inf')
 
                 if circum_dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= AUTOBRAKE_TIME:
+                    min_dist = min(min_dist, circum_dist_to_obstacle)
                     num_collisions += 1
 
     if num_collisions >= MIN_COLLISIONS_FOR_BRAKE:
         brake.data = True
     else:
         brake.data = False
+
+    rospy.loginfo("MIN DIST: " + str(min_dist))
 
 
 def set_vars(data):
@@ -119,7 +122,6 @@ if __name__ == '__main__':
     rate = rospy.Rate(30)
 
     while not rospy.is_shutdown():
-        rospy.loginfo("MEOW")
         pub.publish(brake)
         rate.sleep()
 
