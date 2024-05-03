@@ -35,6 +35,10 @@ def check_collision(data):
   target_velocity = target_velocity
   brake = brake
 
+  rospy.loginfo("VELOCITY: " + str(velocity))
+  rospy.loginfo("TARGET VELOCITY: " + str(target_velocity))
+  rospy.loginfo("STEERING ANGLE: " + str(steering_angle))
+
   if target_velocity < 0:
     brake.data = False
     pub.publish(brake)
