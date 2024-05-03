@@ -99,6 +99,9 @@ def set_vars(data):
   global velocity
   global steering_angle
 
+  rospy.loginfo("SETTING VELOCITY TO " + str(velocity))
+  rospy.loginfo("SETTING STEERING ANGLE TO " + str(steering_angle))
+
   velocity = data.velocity
   steering_angle = -math.radians(data.steering_angle)
 
