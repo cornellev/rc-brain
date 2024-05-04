@@ -3,6 +3,7 @@ import rospy
 from sensor_msgs.msg import Joy
 from ackermann_msgs.msg import AckermannDrive
 
+import math
 from gamepads import LogitechRead
 
 class JoyInterpreter:
@@ -12,7 +13,7 @@ class JoyInterpreter:
 		rospy.Subscriber("joy", Joy, self.joy_to_twist)
 
 		self.deadzone = rospy.get_param(param_name='joy_interpreter/teleop/deadzone', default=0.1)
-		self.max_turning_angle = rospy.get_param(param_name='joy_interpreter/teleop/max_turning_angle', default=20.0)
+		self.max_turning_angle = rospy.get_param(param_name='joy_interpreter/teleop/max_turning_angle', default=math.radians(20.0))
 		self.max_velocity = rospy.get_param(param_name='joy_interpreter/teleop/max_velocity', default=1.5)
 
 		rospy.loginfo(f"Parameter max_turning_angle={self.max_turning_angle}")
