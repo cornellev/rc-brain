@@ -25,7 +25,7 @@ NOTE: LIDAR'S 0 is forward, and angles increment clockwise
 """
 
 VEHICLE_LENGTH = .3
-VEHICLE_WIDTH = 0.214
+VEHICLE_WIDTH = 0.2
 AUTOBRAKE_TIME = .7 # .45
 AUTOBRAKE_DISTANCE = .2
 
@@ -64,7 +64,7 @@ def check_collision(data: LaserScan):
 
         theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
         r = data.ranges[i]
-        x = r * math.sin(theta) + LIDAR_HORIZONTAL_OFFSET
+        x = invert_flag * (r * math.sin(theta) + LIDAR_HORIZONTAL_OFFSET)
         y = r * math.cos(theta)
 
         if turning_radius == float('inf'):  # Straight line forward
