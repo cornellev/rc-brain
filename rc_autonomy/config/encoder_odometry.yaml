@@ -1,4 +1,5 @@
-frame: encoder
+odom_frame: odom
+mount_frame: encoder_link
 sensor_topic: /sensor_collect
 odom_topic: /odometry/encoder
 publish_rate: 20
