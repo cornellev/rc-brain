@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from std_msgs.msg import Bool
+from std_msgs.msg import Float32
 from sensor_msgs.msg import LaserScan
 import math
 from rc_localization_odometry.msg import SensorCollect
@@ -27,6 +27,7 @@ VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.2
 AUTOBRAKE_TIME = .7
 AUTOBRAKE_DISTANCE = .2
+MAX_VEL = 2.07
 
 MIN_COLLISIONS_FOR_BRAKE = 3
 LIDAR_ROTATIONAL_OFFSET = math.pi
@@ -35,11 +36,16 @@ LIDAR_HORIZONTAL_OFFSET = .035 # From center of front axle
 steering_angle = 0
 velocity = 0
 target_velocity = 0
-brake = Bool()
-brake.data = False
+brake = Float32()
+brake.data = MAX_VEL
 
 def max_velocity(dist):
-    dist = max(dist, 0)
+    if dist < 0:
+        return MAX_VEL
+
+    if dist < AUTOBRAKE_DISTANCE:
+        return 0
+
     return max(0, -3.5 + math.sqrt(49 + 40*dist)/2)
 
 def autobrake_time(vel):
@@ -47,8 +53,8 @@ def autobrake_time(vel):
 
 def check_collision(data: LaserScan):
     invert_flag = 1
-    num_collisions = 0
-    vel = max(velocity, target_velocity)  # Set velocity to the max of the current velocity and the target velocity to be safe
+
+    min_vel = MAX_VEL
 
     if steering_angle < 0:  # If the steering angle negative, flip all coordinates across the x-axis to keep calculations consistent
         invert_flag = -1
@@ -64,7 +70,6 @@ def check_collision(data: LaserScan):
             continue
 
         dist_to_obstacle = float('inf')
-        time_to_hit = float('inf')
 
         theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
         r = data.ranges[i]
@@ -74,7 +79,6 @@ def check_collision(data: LaserScan):
         if turning_radius == float('inf'):  # Straight line forward
             if abs(x) < VEHICLE_WIDTH/2:  # If the obstacle is within the width of the vehicle, then record dist and time to collision
                 dist_to_obstacle = y  # Calculate distance to obstacle
-                time_to_hit = dist_to_obstacle / vel if vel != 0 else float('inf')  # Calculate time to hit obstacle
             else:  # Otherwise, continue to next obstacle
                 continue
         else:
@@ -89,14 +93,13 @@ def check_collision(data: LaserScan):
                 angle_from_center_to_obstacle %= 2 * math.pi
 
                 dist_to_obstacle = turning_radius * angle_from_center_to_obstacle  # Calculate circumferential distance to obstacle
-                time_to_hit = dist_to_obstacle / vel if vel != 0 else float('inf')  # Calculate time to hit obstacle
             else:
                 continue
 
-        if dist_to_obstacle >= 0 and time_to_hit >= 0 and (dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= autobrake_time(vel)):  # If the obstacle is within the autobrake distance or time, then increment the collision counter
-            num_collisions += 1
+        if dist_to_obstacle >= 0:
+            min_vel = min(min_vel, max_velocity(dist_to_obstacle))
 
-    brake.data = num_collisions >= MIN_COLLISIONS_FOR_BRAKE  # If the number of collisions is greater than the minimum number of collisions for braking, then set the brake flag to True
+    brake.data = min_vel
 
 
 def set_vars(data):
@@ -119,7 +122,7 @@ if __name__ == '__main__':
     sub = rospy.Subscriber('sensor_collect', SensorCollect, set_vars)
     sub = rospy.Subscriber('rc_movement_msg', AckermannDrive, set_targets)
 
-    pub = rospy.Publisher('autobrake', Bool, queue_size=1)
+    pub = rospy.Publisher('autobrake', Float32, queue_size=1)
 
     rospy.loginfo("Autobrake node initialized.")
 
