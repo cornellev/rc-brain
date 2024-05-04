@@ -25,7 +25,7 @@ NOTE: LIDAR'S 0 is forward, and angles increment clockwise
 
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.2
-AUTOBRAKE_TIME = .7 # .45
+AUTOBRAKE_TIME = .7
 AUTOBRAKE_DISTANCE = .2
 
 MIN_COLLISIONS_FOR_BRAKE = 3
@@ -37,6 +37,10 @@ velocity = 0
 target_velocity = 0
 brake = Bool()
 brake.data = False
+
+def max_velocity(dist):
+    dist = max(dist, 0)
+    return max(0, -3.5 + math.sqrt(49 + 40*dist)/2)
 
 def autobrake_time(vel):
     return AUTOBRAKE_TIME + vel * .1 + (.3 if vel > 1.8 else 0)
