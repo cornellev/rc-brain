@@ -9,7 +9,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <rc_localization_odometry/SensorCollect.h>
 
-const double BIKE_LENGTH = 19.0 / 100;
+const double BIKE_LENGTH_M = 19.0 / 100;
 const double WHEEL_DIAMETER_M = 9.5 / 100;
 const double TICKS_PER_REV = 827.2;
 const double TICKS_TO_M = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_M / 2));
@@ -25,6 +25,7 @@ std::vector<float> velo_var;
 
 bool first = true;
 uint32_t last_timestamp;
+ros::Time time_computed;
 
 double steer_angle = 0;
 double x = 0, y = 0, theta = 0, x_dot = 0, y_dot = 0, theta_dot = 0;
@@ -35,19 +36,21 @@ void data_callback(rc_localization_odometry::SensorCollect current)
     {
         first = false;
         last_timestamp = current.timestamp;
+        time_computed = ros::Time::now();
         return;
     }
 
     ros::Duration dt = ros::Duration((current.timestamp - last_timestamp) / 1000.0);
 
     last_timestamp = current.timestamp;
+    time_computed = ros::Time::now();
 
     double v = current.velocity;
     double steer_angle = current.steering_angle;
 
     x_dot = v * std::cos(theta);
     y_dot = v * std::sin(theta);
-    theta_dot = v * std::tan(steer_angle) / BIKE_LENGTH;
+    theta_dot = v * std::tan(steer_angle) / BIKE_LENGTH_M;
 
     x += x_dot * dt.toSec();
     y += y_dot * dt.toSec();
@@ -57,6 +60,8 @@ void data_callback(rc_localization_odometry::SensorCollect current)
 nav_msgs::Odometry build_odom_packet()
 {
     nav_msgs::Odometry odom;
+
+    odom.header.stamp = time_computed;
 
     odom.header.frame_id = odom_frame;
     odom.child_frame_id = mount_frame;
