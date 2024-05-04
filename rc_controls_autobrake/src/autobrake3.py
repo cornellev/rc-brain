@@ -43,87 +43,56 @@ def autobrake_time(vel):
     return AUTOBRAKE_TIME + vel * .1
 
 def check_collision(data: LaserScan):
-    start_time = time.time()
-
     invert_flag = 1
     num_collisions = 0
-    vel = max(velocity, target_velocity)
+    vel = max(velocity, target_velocity)  # Set velocity to the max of the current velocity and the target velocity to be safe
 
-    if steering_angle < 0:
+    if steering_angle < 0:  # If the steering angle negative, flip all coordinates across the x-axis to keep calculations consistent
         invert_flag = -1
 
-    turning_radius = VEHICLE_LENGTH / math.tan(invert_flag * steering_angle) if abs(steering_angle) > .01 else float('inf')
+    turning_radius = VEHICLE_LENGTH / math.tan(invert_flag * steering_angle) if abs(steering_angle) > .01 else float('inf')  # Calculate turning radius
 
-    min_dist = float('inf')
-    min_time = float('inf')
+    # Calculate turning radii of inside and outside wheels
+    inner_wheel_radius = turning_radius - VEHICLE_WIDTH/2
+    outer_wheel_radius = turning_radius + VEHICLE_WIDTH/2
 
-    if turning_radius == float('inf'):
-        for i in range(len(data.ranges)):
-            if data.ranges[i] < data.range_min or data.ranges[i] > data.range_max:
+    for i in range(len(data.ranges)):
+        if data.ranges[i] < data.range_min or data.ranges[i] > data.range_max:
+            continue
+
+        dist_to_obstacle = float('inf')
+
+        theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
+        r = data.ranges[i]
+        x = r * math.sin(theta) + LIDAR_HORIZONTAL_OFFSET
+        y = r * math.cos(theta)
+
+        if turning_radius == float('inf'):  # Straight line forward
+            if abs(x) < VEHICLE_WIDTH/2:  # If the obstacle is within the width of the vehicle, then record dist and time to collision
+                dist_to_obstacle = y  # Calculate distance to obstacle
+                time_to_hit = dist_to_obstacle / vel if vel != 0 else float('inf')  # Calculate time to hit obstacle
+            else:  # Otherwise, continue to next obstacle
                 continue
+        else:
+            radius_dist_to_obstacle = math.sqrt((x + turning_radius)**2 + y**2)  # Calculate radius from center of movement circle to obstacle
 
-            theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
-            r = data.ranges[i]
-            x = r * math.sin(theta) + LIDAR_HORIZONTAL_OFFSET
-            y = r * math.cos(theta)
-
-            if abs(x) < VEHICLE_WIDTH/2:
-                dist_to_obstacle = y
-                time_to_hit = dist_to_obstacle / vel if vel != 0 else float('inf')
-
-                if dist_to_obstacle >= 0:
-                    min_dist = min(min_dist, dist_to_obstacle)
-
-                if time_to_hit >= 0:
-                    min_time = min(min_time, time_to_hit)
-
-                if dist_to_obstacle >= 0 and time_to_hit >= 0 and (dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= autobrake_time(vel)):
-                    num_collisions += 1
-    else:
-        left_wheel_radius = turning_radius - VEHICLE_WIDTH/2
-        right_wheel_radius = turning_radius + VEHICLE_WIDTH/2
-
-        for i in range(len(data.ranges)):
-            if data.ranges[i] < data.range_min or data.ranges[i] > data.range_max:
-                continue
-
-            theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
-            r = data.ranges[i]
-            x = invert_flag * (r * math.sin(theta) + LIDAR_HORIZONTAL_OFFSET)
-            y = r * math.cos(theta)
-
-            dist_to_obstacle = math.sqrt((x + turning_radius)**2 + y**2)
-
-            if right_wheel_radius < dist_to_obstacle < left_wheel_radius or left_wheel_radius < dist_to_obstacle < right_wheel_radius:
-                angle_from_center_to_obstacle = math.atan2(y, turning_radius + x)
+            if outer_wheel_radius < radius_dist_to_obstacle < inner_wheel_radius or inner_wheel_radius < radius_dist_to_obstacle < outer_wheel_radius:  # Check if obstacle within bounds of wheel circles
+                angle_from_center_to_obstacle = math.atan2(y, turning_radius + x)  # Calculate angle from center of movement circle to obstacle
 
                 if angle_from_center_to_obstacle < 0:
                     angle_from_center_to_obstacle += 2 * math.pi
                 
                 angle_from_center_to_obstacle %= 2 * math.pi
 
-                circum_dist_to_obstacle = turning_radius * angle_from_center_to_obstacle
-                time_to_hit = circum_dist_to_obstacle / vel if vel != 0 else float('inf')
+                dist_to_obstacle = turning_radius * angle_from_center_to_obstacle  # Calculate circumferential distance to obstacle
+                time_to_hit = dist_to_obstacle / vel if vel != 0 else float('inf')  # Calculate time to hit obstacle
+            else:
+                continue
 
-                if dist_to_obstacle >= 0:
-                    min_dist = min(min_dist, circum_dist_to_obstacle)
+        if dist_to_obstacle >= 0 and time_to_hit >= 0 and (dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= autobrake_time(vel)):  # If the obstacle is within the autobrake distance or time, then increment the collision counter
+            num_collisions += 1
 
-                if time_to_hit >= 0:
-                    min_time = min(min_time, time_to_hit)
-
-                if circum_dist_to_obstacle >= 0 and time_to_hit >= 0 and (circum_dist_to_obstacle <= AUTOBRAKE_DISTANCE or time_to_hit <= autobrake_time(vel)):
-                    # rospy.loginfo("dist to OBSTACLE: " + str(circum_dist_to_obstacle))
-                    # rospy.loginfo("TEIRJER" + str(time_to_hit))
-                    num_collisions += 1
-
-    if num_collisions >= MIN_COLLISIONS_FOR_BRAKE:
-        brake.data = True
-    else:
-        brake.data = False
-
-    end_time = time.time() - start_time
-
-    rospy.loginfo("MIN DIST: " + str(min_dist) + " MIN TIME: " + str(min_time))
+    brake.data = num_collisions >= MIN_COLLISIONS_FOR_BRAKE  # If the number of collisions is greater than the minimum number of collisions for braking, then set the brake flag to True
 
 
 def set_vars(data):
@@ -155,4 +124,4 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         pub.publish(brake)
         rate.sleep()
-        
+
