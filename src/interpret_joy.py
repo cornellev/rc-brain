@@ -21,7 +21,7 @@ class JoyInterpreter:
 
 	def joy_to_twist(self, data):
 		gamepad_data = self.joystick_read_type(data.axes, data.buttons)
-		turn = gamepad_data.get_right_stick_x() * self.max_turning_angle  # Positive angle turns left, so counterclockwise
+		turn = -gamepad_data.get_right_stick_x() * self.max_turning_angle  # Positive angle turns left, so counterclockwise
 
 		if abs(turn) < self.deadzone:   
 			turn = 0.0
