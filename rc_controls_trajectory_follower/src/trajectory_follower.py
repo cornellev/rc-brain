@@ -82,6 +82,7 @@ class TrajectoryFollower:
         )
         self.pub = rospy.Publisher("/rc_movement_msg", AckermannDrive, queue_size=1)
         self.trajectory = None
+        self.odom = None
         self.pose = None
         self.pid = PID(angle_kp, angle_ki, angle_kd, (-angle_i_max, angle_i_max))
 
