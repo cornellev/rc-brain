@@ -122,7 +122,7 @@ if __name__ == '__main__':
     sub = rospy.Subscriber('sensor_collect', SensorCollect, set_vars)
     sub = rospy.Subscriber('rc_movement_msg', AckermannDrive, set_targets)
 
-    pub = rospy.Publisher('autobrake', Float32, queue_size=1)
+    pub = rospy.Publisher('auto_max_vel', Float32, queue_size=1)
 
     rospy.loginfo("Autobrake node initialized.")
 
