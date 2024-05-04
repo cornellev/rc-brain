@@ -40,7 +40,7 @@ brake = Bool()
 brake.data = False
 
 def autobrake_time(vel):
-    return AUTOBRAKE_TIME + vel * .1
+    return AUTOBRAKE_TIME + vel * .1 + (.3 if vel > 1.8 else 0)
 
 def check_collision(data: LaserScan):
     invert_flag = 1
