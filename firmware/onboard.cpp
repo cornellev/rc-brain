@@ -4,7 +4,8 @@
 #include <Servo.h>
 #include <rc_localization_odometry/SensorCollect.h>
 #include <ackermann_msgs/AckermannDrive.h>
-#include <std_msgs/Bool.h>
+// #include <std_msgs/Bool.h>
+#include <std_msgs/Float32.h>
 
 #define EN_A 5
 #define IN_1 A1
@@ -52,7 +53,7 @@ long last_update_time;
 long last_push_time;
 long last_error_time;
 
-bool autobrake = false;
+float autobrake = MAX_VELOCITY;
 
 // SID controller values
 float kP = .002; // Proportional gain for SID controller
@@ -127,11 +128,9 @@ void writeAckermann(float angle, float speed) {
 void updateAckermann() {
   float target_vel = target_velocity;
 
-  if (autobrake) {
-    target_vel = min(0, target_vel);
-  }
+  target_vel = min(target_velocity, autobrake);
 
-  if (target_vel == 0) {
+  if (autobrake < current_velocity) {
     given_power = 0;
     kP = 3;
   } else {
@@ -167,7 +166,7 @@ void ackermannDriveCallback(const ackermann_msgs::AckermannDrive& msg) {
   target_velocity = msg.speed;
 }
 
-void autobrakeCallback(const std_msgs::Bool& msg) {
+void autobrakeCallback(const std_msgs::Float32& msg) {
   autobrake = msg.data;
 }
 
@@ -209,7 +208,7 @@ ros::NodeHandle nh;
 rc_localization_odometry::SensorCollect msg;
 ros::Publisher sensor_collect_pub("sensor_collect", &msg); // Publishes all sensor data
 ros::Subscriber<ackermann_msgs::AckermannDrive> sub("rc_movement_msg", &ackermannDriveCallback); // Listens to ackermann drive messages and drives the vehicle
-ros::Subscriber<std_msgs::Bool> autoSub("autobrake", &autobrakeCallback); // Listens to autobrake message
+ros::Subscriber<std_msgs::Float32> autoSub("auto_max_vel", &autobrakeCallback); // Listens to autobrake message
 
 void setup()
 {
