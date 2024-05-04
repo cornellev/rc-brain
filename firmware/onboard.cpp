@@ -23,6 +23,9 @@
 #define SERVO_PIN 9
 #define POTENTIOMETER_PIN A5
 
+#define TO_RAD(angle) ((angle) * M_PI / 180.0)
+#define TO_DEG(angle) ((angle) * 180.0 / M_PI)
+
 const float MAX_VELOCITY = 2.07; // Max velocity of vehicle in m/s
 const float MIN_VELOCITY = -2.07; // Min velocity of vehicle in m/s
 
@@ -75,6 +78,7 @@ Servo servo;
    @param angle: Angle to turn the servo to. Positive values turn the wheels to the right, negative values turn the wheels to the left. Zero is straight ahead.
 */
 void writeAngle(float angle) {
+  angle = TO_DEG(angle);
   angle = -angle;
   angle = max(min(STEERING_ZERO_ANGLE + angle, STEERING_ZERO_ANGLE + MAX_INPUT_STEER), STEERING_ZERO_ANGLE - MAX_INPUT_STEER);
   servo.write(angle);
