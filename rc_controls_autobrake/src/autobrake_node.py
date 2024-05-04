@@ -27,7 +27,7 @@ VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.2
 AUTOBRAKE_TIME = .7
 AUTOBRAKE_DISTANCE = .2
-MAX_VEL = 2.07
+MAX_VEL = 1.5
 
 MIN_COLLISIONS_FOR_BRAKE = 3
 LIDAR_ROTATIONAL_OFFSET = math.pi
@@ -46,7 +46,7 @@ def max_velocity(dist):
     if dist < AUTOBRAKE_DISTANCE:
         return 0
 
-    return max(0, -3.5 + math.sqrt(49 + 40*dist)/2 - .1)
+    return max(0, -3.5 + math.sqrt(49 + 40*dist)/2 - .2)
 
 def autobrake_time(vel):
     return AUTOBRAKE_TIME + vel * .1 + (.3 if vel > 1.8 else 0)
