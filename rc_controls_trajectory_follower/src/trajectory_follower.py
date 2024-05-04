@@ -108,6 +108,13 @@ class TrajectoryFollower:
                 The trajectory follower may behave unpredictably."
             )
 
+        if msg.child_frame_id != base_link_frame:
+            rospy.logwarn(
+                "Odometry message is expected to provide the pose of base_link_frame \
+                relative to odom_frame, but it does not. child_frame_id should be the \
+                same frame as base_link_frame. The trajectory follower may behave unpredictably."
+            )
+
     def cross_track_error(
         self, path0: npt.NDArray, path1: npt.NDArray, pos: npt.NDArray
     ) -> float:
@@ -173,6 +180,8 @@ if __name__ == "__main__":
     rospy.init_node("rc_controls_trajectory_follower")
 
     odom_frame = rospy.get_param("~odom_frame", "odom")
+    base_link_frame = rospy.get_param("~base_link_frame", "base_link")
+
     steering_config = rospy.get_param("~steering")
     angle_kp = steering_config["kp"]
     angle_ki = steering_config["ki"]
@@ -180,7 +189,7 @@ if __name__ == "__main__":
     angle_kf = steering_config["kf"]
     angle_i_max = steering_config["i_max"]
 
-    rospy.loginfo("Odom frame: %s", odom_frame)
+    rospy.loginfo("odom frame = %s, base link frame = %s", odom_frame, base_link_frame)
     rospy.loginfo(
         "Steering control parameters: kp=%.3f, ki=%.3f, kd=%.3f, kf=%.3f, i_max=%.3f",
         angle_kp,
@@ -193,7 +202,7 @@ if __name__ == "__main__":
     follower = TrajectoryFollower()
     rospy.loginfo("Trajectory follower node initialized.")
 
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(30)
 
     while not rospy.is_shutdown():
         if follower.ready():
