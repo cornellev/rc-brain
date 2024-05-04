@@ -132,7 +132,7 @@ void updateAckermann() {
 
   if (autobrake < current_velocity) {
     given_power = 0;
-    kP = 4;
+    kP = 4.5;
   } else {
     kP = .002;
   }
