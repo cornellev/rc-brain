@@ -7,7 +7,6 @@ import math
 from rc_localization_odometry.msg import SensorCollect
 from ackermann_msgs.msg import AckermannDrive
 import math
-import time
 
 """
 R = L / tan(steering_angle)
