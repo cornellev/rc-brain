@@ -4,5 +4,5 @@
   </node>
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_encoder_static_transform"
-      output="screen" args="-189.38 0 0 0 0 0 base_link encoder_link 100" />
+      output="screen" args="-0.18938 0 0 0 0 0 base_link encoder_link" />
 </launch>
