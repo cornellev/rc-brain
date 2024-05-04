@@ -74,7 +74,7 @@ nav_msgs::Odometry build_odom_packet()
     odom.pose.covariance[35] = pose_var[2];
 
     tf2::Quaternion q;
-    q.setEuler(theta, 0, 0);
+    q.setEuler(0, 0, theta);
     odom.pose.pose.orientation = tf2::toMsg(q);
 
     odom.twist.twist.linear.x = x_dot;
