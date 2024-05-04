@@ -66,11 +66,12 @@ def check_collision(data: LaserScan):
     outer_wheel_radius = turning_radius + VEHICLE_WIDTH/2
 
     for i in range(len(data.ranges)):
-        if data.ranges[i] < data.range_min or data.ranges[i] > data.range_max:
+        if data.ranges[i] < data.range_min or data.ranges[i] > data.range_max:  # Ignore bad scans (outisde lidar range)
             continue
 
         dist_to_obstacle = float('inf')
 
+        # X and Y coordinates of obstacle relative to vehicle
         theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
         r = data.ranges[i]
         x = invert_flag * (r * math.sin(theta) + LIDAR_HORIZONTAL_OFFSET)
@@ -81,7 +82,7 @@ def check_collision(data: LaserScan):
                 dist_to_obstacle = y  # Calculate distance to obstacle
             else:  # Otherwise, continue to next obstacle
                 continue
-        else:
+        else:  # Curving
             radius_dist_to_obstacle = math.sqrt((x + turning_radius)**2 + y**2)  # Calculate radius from center of movement circle to obstacle
 
             if outer_wheel_radius < radius_dist_to_obstacle < inner_wheel_radius or inner_wheel_radius < radius_dist_to_obstacle < outer_wheel_radius:  # Check if obstacle within bounds of wheel circles
@@ -107,7 +108,7 @@ def set_vars(data):
   global steering_angle
 
   velocity = data.velocity
-  steering_angle = math.radians(data.steering_angle)
+  steering_angle = -math.radians(data.steering_angle)
 
 def set_targets(data):
   global target_velocity

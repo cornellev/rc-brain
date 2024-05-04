@@ -16,12 +16,12 @@ import matplotlib.pyplot as plt
 VEHICLE_LENGTH = .3
 VEHICLE_WIDTH = 0.25
 AUTOBRAKE_TIME = .5 # .45
-AUTOBRAKE_DISTANCE = .5
+AUTOBRAKE_DISTANCE = 2
 
 MIN_COLLISIONS_FOR_BRAKE = 1
 LIDAR_HORIZONTAL_OFFSET = .035
 
-steering_angle = 0
+steering_angle = math.pi/8
 velocity = 0
 
 class LidarScan:
