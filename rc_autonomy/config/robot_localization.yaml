@@ -69,8 +69,6 @@ odom_frame: odom            # Defaults to "odom" if unspecified
 base_link_frame: base_link  # Defaults to "base_link" if unspecified
 world_frame: odom           # Defaults to the value of odom_frame if unspecified
 
-imu0_remove_gravitational_acceleration: true
-
 odom0: /odometry/encoder
 odom0_config: [false, false, false,
                false, false, true,
