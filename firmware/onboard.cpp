@@ -136,6 +136,12 @@ void updateAckermann() {
   } else {
     kP = .002;
   }
+
+  if (target_vel > MAX_VELOCITY) {
+    target_vel = MAX_VELOCITY;
+  } else if (target_vel < MIN_VELOCITY) {
+    target_vel = MIN_VELOCITY;
+  }
   
   long current_time = millis();
 
@@ -153,7 +159,11 @@ void updateAckermann() {
 //  if (((given_power + target_velocity / MAX_VELOCITY) < .2 && (given_power + target_velocity / MAX_VELOCITY) > -.2) || target_velocity == 0.0) {
 //    writeAckermann(target_angle, 0);
 //  } else {
-  writeAckermann(target_angle, given_power + (target_vel / MAX_VELOCITY));
+  if (abs(current_velocity < .01) && abs(target_vel) < .01) {
+    writeAckermann(target_angle, 0);
+  } else {
+    writeAckermann(target_angle, given_power + (target_vel / MAX_VELOCITY));
+  }
 //  }
 }
 
