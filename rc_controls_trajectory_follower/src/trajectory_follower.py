@@ -173,6 +173,8 @@ class TrajectoryFollower:
             start.steering_angle, end.steering_angle, percent_along
         )
 
+        return result
+
     def ready(self) -> bool:
         return self.trajectory is not None and self.odom is not None
 
