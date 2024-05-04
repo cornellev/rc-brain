@@ -12,6 +12,9 @@
 
   <node name="autobrake" pkg="rc_controls_autobrake" type="autobrake_node.py" />
 
+
+  <node name="test_node" pkg="rc_controls_trajectory_follower" type="test_node.py" />
+
   <node name="trajectory_follower" pkg="rc_controls_trajectory_follower" type="trajectory_follower.py" output="screen">
     <rosparam command="load" file="$(find rc_autonomy)/config/trajectory_follower.yaml" />
   </node>
