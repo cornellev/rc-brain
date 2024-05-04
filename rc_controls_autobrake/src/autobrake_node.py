@@ -108,7 +108,7 @@ def set_vars(data):
   global steering_angle
 
   velocity = data.velocity
-  steering_angle = -math.radians(data.steering_angle)
+  steering_angle = -data.steering_angle
 
 def set_targets(data):
   global target_velocity
