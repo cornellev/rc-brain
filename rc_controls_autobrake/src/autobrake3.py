@@ -61,6 +61,7 @@ def check_collision(data: LaserScan):
             continue
 
         dist_to_obstacle = float('inf')
+        time_to_hit = float('inf')
 
         theta = (LIDAR_ROTATIONAL_OFFSET + data.angle_min + i * data.angle_increment)
         r = data.ranges[i]
