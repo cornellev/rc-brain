@@ -1,5 +1,5 @@
 <launch>
   <node name="encoder_odom" pkg="rc_localization_odometry" type="encoder_odometry_node" output="screen">
-    <rosparam command="load" file="$(find rc_localization_odometry)/params/encoders.yaml" />
+    <rosparam command="load" file="$(find rc_localization_odometry)/config/encoders.yaml" />
   </node>
 </launch>

@@ -14,7 +14,9 @@ const double WHEEL_DIAMETER_M = 9.5 / 100;
 const double TICKS_PER_REV = 827.2;
 const double TICKS_TO_M = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_M / 2));
 
-std::string frame;
+std::string odom_frame;
+std::string mount_frame;
+
 std::string sensor_topic;
 std::string odom_topic;
 int pub_rate;
@@ -22,30 +24,27 @@ std::vector<float> pose_var;
 std::vector<float> velo_var;
 
 bool first = true;
-rc_localization_odometry::SensorCollect last;
+uint32_t last_timestamp;
 
-double steer_angle = 0.0;
-double x, y, theta, x_dot, y_dot, theta_dot = 0;
+double steer_angle = 0;
+double x = 0, y = 0, theta = 0, x_dot = 0, y_dot = 0, theta_dot = 0;
 
 void data_callback(rc_localization_odometry::SensorCollect current)
 {
     if (first)
     {
         first = false;
-        last = current;
+        last_timestamp = current.timestamp;
         return;
     }
 
-    ros::Duration dt = ros::Duration((current.timestamp - last.timestamp) / 1000.0);
+    ros::Duration dt = ros::Duration((current.timestamp - last_timestamp) / 1000.0);
 
-    double delta_enc_m = current.velocity;
+    last_timestamp = current.timestamp;
 
-    last = current;
-
-    double v = delta_enc_m / dt.toSec();
+    double v = current.velocity;
     double steer_angle = current.steering_angle;
 
-    // should be new theta?
     x_dot = v * std::cos(theta);
     y_dot = v * std::sin(theta);
     theta_dot = v * std::tan(steer_angle) / BIKE_LENGTH;
@@ -59,7 +58,8 @@ nav_msgs::Odometry build_odom_packet()
 {
     nav_msgs::Odometry odom;
 
-    odom.header.frame_id = frame;
+    odom.header.frame_id = odom_frame;
+    odom.child_frame_id = mount_frame;
 
     odom.pose.pose.position.x = x;
     odom.pose.pose.position.y = y;
@@ -90,10 +90,14 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nh("~");
 
-    nh.getParam("frame", frame);
+    nh.getParam("odom_frame", odom_frame);
+    nh.getParam("mount_frame", mount_frame);
+
     nh.getParam("sensor_topic", sensor_topic);
     nh.getParam("odom_topic", odom_topic);
+
     nh.getParam("publish_rate", pub_rate);
+
     nh.getParam("pose_variance", pose_var);
     nh.getParam("velo_variance", velo_var);
 
