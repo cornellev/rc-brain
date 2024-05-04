@@ -39,9 +39,6 @@ const float TICKS_TO_METERS = (1 / TICKS_PER_REV) * (2 * M_PI * (WHEEL_DIAMETER_
 const float POTENTIOMETER_ZERO = 370.0; // Calibrated potentiometer value corresponding to a steering angle of 0  TODO: Calibrate
 const float POTENTIOMETER_RANGE = 50.0; // Range of potentiometer values corresponding to a steering angle of -MAX_INPUT_STEER to MAX_INPUT_STEER  TODO: Calibrate
 
-float current_angle = 0.0;
-float data_points = 0.0;
-
 float current_velocity;
 float target_velocity;
 float target_angle;
@@ -78,6 +75,7 @@ Servo servo;
    @param angle: Angle to turn the servo to. Positive values turn the wheels to the right, negative values turn the wheels to the left. Zero is straight ahead.
 */
 void writeAngle(float angle) {
+  angle = -angle;
   angle = max(min(STEERING_ZERO_ANGLE + angle, STEERING_ZERO_ANGLE + MAX_INPUT_STEER), STEERING_ZERO_ANGLE - MAX_INPUT_STEER);
   servo.write(angle);
 }
@@ -201,18 +199,6 @@ void updateVelocity() {
   last_update_time = current_time;
 }
 
-void updateAngle() {
-  float poten = (analogRead(POTENTIOMETER_PIN) - POTENTIOMETER_ZERO) / POTENTIOMETER_RANGE * MAX_INPUT_STEER;
-  float multiplier = max(poten - current_angle, current_angle - poten) * 4.0;
-
-  current_angle = (current_angle * data_points + multiplier * poten) / (data_points + multiplier);
-  data_points += 1.0;
-}
-
-void resetAngle() {
-  data_points = 100;
-}
-
 // Setup ROS interface
 ros::NodeHandle nh;
 rc_localization_odometry::SensorCollect msg;
@@ -248,8 +234,8 @@ void setup()
   target_angle = 0.0;
   current_velocity = 0.0;
 
-  last_encoder_left = -right_encoder.read() * TICKS_TO_METERS;
-  last_encoder_right = -right_encoder.read() * TICKS_TO_METERS;
+  last_encoder_left = -left_encoder.read() * TICKS_TO_METERS;
+  last_encoder_right = right_encoder.read() * TICKS_TO_METERS;
   delay(2000);
   last_update_time = millis();
   last_push_time = millis();
@@ -262,7 +248,6 @@ void loop()
 
   if (3 < current_time - last_update_time) { // Run once every ~5 ms
     updateVelocity();
-    updateAngle();
     updateAckermann();
   }
   
@@ -280,8 +265,6 @@ void loop()
 //     msg.velocity = next_vel;
 //   msg.steering_angle = (float) right_encoder.read();
 //   msg.velocity = (float) left_encoder.read();
-
-    resetAngle();
 
     // Publish the sensor data
     sensor_collect_pub.publish(&msg);
