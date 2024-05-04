@@ -8,7 +8,7 @@ import math
 if __name__ == "__main__":
     rospy.init_node("test_node")
 
-    dT = 1 / 6
+    dt = rospy.Duration.from_sec(1 / 6)
 
     state_steps = []
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     msg = TrajectoryMsg()
     msg.header.stamp = rospy.Time.now()
     msg.header.frame_id = "odom"
-    msg.dt = dT
+    msg.dt = dt
     msg.trajectory = state_steps
 
     rate = rospy.Rate(1)
