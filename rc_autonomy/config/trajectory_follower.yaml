@@ -1,4 +1,5 @@
 odom_frame: odom
+base_link_frame: base_link
 steering:
   kp: 0
   ki: 0
