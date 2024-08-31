@@ -1,0 +1,3 @@
+std_msgs/Header header
+rc_controls_trajectory_follower/TrajectoryPointMsg[] trajectory
+duration dt
