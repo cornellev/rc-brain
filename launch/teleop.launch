@@ -1,0 +1,8 @@
+<launch>
+    <node name="joy_node" pkg="joy" type="joy_node">
+        <param name="dev" value="/dev/input/js0"/>
+    </node>
+
+    <node name="interpret_joy" pkg="rc-teleop" type="interpret_joy.py" output="screen" />
+</launch>
+
