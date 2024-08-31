@@ -1,0 +1,7 @@
+odom_frame: odom
+mount_frame: encoder_link
+sensor_topic: /sensor_collect
+odom_topic: /odometry/encoder
+publish_rate: 20
+pose_variance: [ 0.05, 0.05, 0.05 ]  # x, y, theta
+velo_variance: [ 0.05, 0.05, 0.05 ]  # x, y, theta

@@ -1,0 +1,80 @@
+<launch>
+
+    <arg name="using_teleop" default="true"/>
+
+    <!-- 
+        ARDUINO TOPICS:
+            - /sensor_collect - publishes sensor collect messages, velocity and steering data
+            - /rc_ackermann_msg - reads steer messages
+
+        Creates a bi-directional communication channel between the arduino and the rasperry pi -->
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+        <param name="port" value="/dev/ttyUSB0"/>
+    </node>
+
+    <!--
+        SENSOR NODES:
+            - imu_node: starts IMU
+            - base_link_imu_static_transform: publishes where the IMU is on the base link
+
+        SENSOR TOPICS:
+            /imu - has imu data published to it
+
+    -->
+    <node name="imu_node" pkg="witmotion_ros" type="witmotion_ros_node" output="screen">
+        <rosparam command="load" file="$(find rc_localization_imu)/params/imu.yaml" />
+    </node>
+
+    <node pkg="tf2_ros" 
+        type="static_transform_publisher" 
+        name="base_link_imu_static_transform" 
+        output="screen" args="0 0 0 0 0 0 base_link imu 100" />
+
+    <include file="$(find rplidar)/lauch/rplidar_a1.launch" />
+
+    <!-- 
+        ODOMETRY NODES:
+             - encoder_odom: calculates odom estimate from wheel data
+             - robot_localization: reads imu data, encoder data, publishes a fused version
+
+        ODOMETRY TOPICS:
+            /odometry/encoder has the encoder estimate of the odometry uploaded to it
+            /odometry/filtered has the sensor fused odometry estimate uploaded to it
+     -->
+    <node name="encoder_odom" pkg="rc_localization_odometry" type="encoder_odometry_node" output="screen">
+        <rosparam command="load" file="$(find rc_autonomy)/config/encoders.yaml" />
+    </node>
+
+    <node name="ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
+        <rosparam command="load" file="$(find rc_autonomy)/config/robot_localization.yaml" />
+    </node>
+
+
+    <!-- TELEOP NODES:
+            - using_teleop starts three nodes: 
+                - joy_node (reads joystick), 
+                - interpret_joy (creates ackermann drive messages from joystick)
+
+            - if not using_teleop
+
+        TELEOP TOPICS:
+            - see launch file and rosjoy for topics relating to joystick function
+            - /rc_ackermann_msg writes ackermann messages
+
+    -->
+    <group if="$(arg using_teleop)">
+        <include file="$(find rc-teleop)/launch/teleop.launch" />
+    </group>
+
+    <!-- LOCAL PLANNING NODES:
+
+        LOCAL PLANNING TOPICS:
+            - /rc_ackermann_msg writes ackermann messages
+
+    -->
+    <group unless="$(arg using_teleops)">
+        
+    </group>
+
+
+</launch>

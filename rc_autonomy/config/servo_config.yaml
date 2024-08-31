@@ -1,0 +1,6 @@
+max_steer_pwm: 0.3
+min_steer_pwm: -0.15
+signal_forward: 0.08
+
+servo_angle_min: -90
+servo_angle_max: 90
