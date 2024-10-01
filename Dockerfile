@@ -41,19 +41,20 @@ ENV LANG=C.UTF-8 \
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "source /root/hogsmeade/install/setup.bash" >> ~/.bashrc
 
+RUN mkdir -p /root/hogsmeade/src
 COPY . /root/hogsmeade/src
-
-RUN mkdir -p ~/hogsmeade/src
 
 WORKDIR /root/hogsmeade
 
-RUN source /opt/ros/$ROS_DISTRO/setup.bash \
-    && cd ~/hogsmeade/src \
-    && rosdep update --include-eol-distros \
-    && rosdep install --from-paths . -i -y --include-eol-distros
+RUN sudo apt update
 
 RUN source /opt/ros/$ROS_DISTRO/setup.bash \
-    && cd ~/hogsmeade \
+    && cd /root/hogsmeade \
+    && rosdep update --include-eol-distros \
+    && rosdep install --from-paths src -r -y --include-eol-distros
+
+RUN source /opt/ros/$ROS_DISTRO/setup.bash \
+    && cd /root/hogsmeade \
     && colcon build
 
 EXPOSE 4567
