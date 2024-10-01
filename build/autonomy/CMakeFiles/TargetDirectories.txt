@@ -1,0 +1,9 @@
+/root/hogsmeade/src/build/autonomy/CMakeFiles/uninstall.dir
+/root/hogsmeade/src/build/autonomy/CMakeFiles/autonomy_uninstall.dir
+/root/hogsmeade/src/build/autonomy/CMakeFiles/test.dir
+/root/hogsmeade/src/build/autonomy/CMakeFiles/edit_cache.dir
+/root/hogsmeade/src/build/autonomy/CMakeFiles/rebuild_cache.dir
+/root/hogsmeade/src/build/autonomy/CMakeFiles/list_install_components.dir
+/root/hogsmeade/src/build/autonomy/CMakeFiles/install.dir
+/root/hogsmeade/src/build/autonomy/CMakeFiles/install/local.dir
+/root/hogsmeade/src/build/autonomy/CMakeFiles/install/strip.dir

@@ -1,0 +1,6 @@
+Invoking command in '/root/hogsmeade/src/build/autonomy': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /root/hogsmeade/src/autonomy -DCMAKE_INSTALL_PREFIX=/root/hogsmeade/src/install/autonomy
+Invoked command in '/root/hogsmeade/src/build/autonomy' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /root/hogsmeade/src/autonomy -DCMAKE_INSTALL_PREFIX=/root/hogsmeade/src/install/autonomy
+Invoking command in '/root/hogsmeade/src/build/autonomy': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /root/hogsmeade/src/build/autonomy -- -j20 -l20
+Invoked command in '/root/hogsmeade/src/build/autonomy' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /root/hogsmeade/src/build/autonomy -- -j20 -l20
+Invoking command in '/root/hogsmeade/src/build/autonomy': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /root/hogsmeade/src/build/autonomy
+Invoked command in '/root/hogsmeade/src/build/autonomy' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /root/hogsmeade/src/build/autonomy

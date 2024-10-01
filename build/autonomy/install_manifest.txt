@@ -1,0 +1,15 @@
+/root/hogsmeade/src/install/autonomy/share/ament_index/resource_index/package_run_dependencies/autonomy
+/root/hogsmeade/src/install/autonomy/share/ament_index/resource_index/parent_prefix_path/autonomy
+/root/hogsmeade/src/install/autonomy/share/autonomy/environment/ament_prefix_path.sh
+/root/hogsmeade/src/install/autonomy/share/autonomy/environment/ament_prefix_path.dsv
+/root/hogsmeade/src/install/autonomy/share/autonomy/environment/path.sh
+/root/hogsmeade/src/install/autonomy/share/autonomy/environment/path.dsv
+/root/hogsmeade/src/install/autonomy/share/autonomy/local_setup.bash
+/root/hogsmeade/src/install/autonomy/share/autonomy/local_setup.sh
+/root/hogsmeade/src/install/autonomy/share/autonomy/local_setup.zsh
+/root/hogsmeade/src/install/autonomy/share/autonomy/local_setup.dsv
+/root/hogsmeade/src/install/autonomy/share/autonomy/package.dsv
+/root/hogsmeade/src/install/autonomy/share/ament_index/resource_index/packages/autonomy
+/root/hogsmeade/src/install/autonomy/share/autonomy/cmake/autonomyConfig.cmake
+/root/hogsmeade/src/install/autonomy/share/autonomy/cmake/autonomyConfig-version.cmake
+/root/hogsmeade/src/install/autonomy/share/autonomy/package.xml
