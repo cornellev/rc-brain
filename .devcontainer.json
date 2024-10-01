@@ -1,0 +1,38 @@
+{
+    "name": "Mini Cars Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/root/hogsmeade/src,type=bind",
+    "workspaceFolder": "/root/hogsmeade/src",
+    "runArgs": [
+        "--rm",
+        "--network=host",
+        "--ipc=host",
+        "--privileged"
+    ],
+    "containerEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}"
+    },
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+    ],
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.profiles.linux": {
+                    "bash": {
+                        "path": "/bin/bash"
+                    }
+                }
+            },
+            "extensions": [
+                "ms-iot.vscode-ros",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-python.black-formatter"
+            ]
+        }
+    },
+    "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"
+}
