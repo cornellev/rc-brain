@@ -1,7 +1,7 @@
 {
     "name": "Mini Cars Dev Container",
     "build": {
-        "dockerfile": "Dockerfile"
+        "dockerfile": "Dockerfile.dev"
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/root/hogsmeade/src,type=bind",
     "workspaceFolder": "/root/hogsmeade/src",

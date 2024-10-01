@@ -41,6 +41,8 @@ ENV LANG=C.UTF-8 \
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "source /root/hogsmeade/install/setup.bash" >> ~/.bashrc
 
+RUN mkdir -p ~/hogsmeade/src
+
 WORKDIR /root/hogsmeade
 
 RUN source /opt/ros/$ROS_DISTRO/setup.bash \
@@ -53,18 +55,3 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash \
     && colcon build
 
 EXPOSE 4567
-
-# Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-
-# Make entrypoint.sh executable
-RUN chmod +x /entrypoint.sh
-
-# Run entrypoint.sh on start
-# CMD ["/bin/bash", "/entrypoint.sh"]
-# CMD ["/bin/bash"]
-# Sleep infinity
-CMD ["sleep", "infinity"]
-
-# What is the command to run an image and delete after it exits?
-# docker run --rm -it --name hogsmeade hogsmeade:latest
