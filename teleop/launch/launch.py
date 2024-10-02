@@ -14,11 +14,7 @@ def generate_launch_description():
                 package="joy",
                 executable="joy_node",
                 name="joy_node",
-                parameters=[
-                    {
-                        "device_id": "/dev/input/js0"
-                    }
-                ]
+                parameters=[] #ros2 uses events, so don't try and direct this to /dev
             ),
         ]
     )
