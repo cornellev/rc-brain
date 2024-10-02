@@ -8,9 +8,17 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(ackermann_msgs REQUIRED)
+
+add_executable(joy_interpreter src/joy_interpreter.cpp)
+ament_target_dependencies(joy_interpreter rclcpp sensor_msgs ackermann_msgs)
+
+install(TARGETS
+  joy_interpreter
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch
