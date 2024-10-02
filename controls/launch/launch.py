@@ -10,12 +10,6 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 def generate_launch_description():
     return LaunchDescription(
         [
-            Node(
-                package="teleop",
-                executable="joy_interpreter",
-                name="joy_interpreter",
-                parameters=[]
-            )
         ]
     )
 
