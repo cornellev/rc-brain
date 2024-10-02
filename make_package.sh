@@ -3,6 +3,7 @@
 ros2 pkg create --build-type ament_cmake $1
 cd $1
 mkdir config
+touch config/.gitkeep
 mkdir launch
 
 echo """

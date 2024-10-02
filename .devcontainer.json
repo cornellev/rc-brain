@@ -3,8 +3,8 @@
     "build": {
         "dockerfile": "Dockerfile.dev"
     },
-    "workspaceMount": "source=${localWorkspaceFolder},target=/root/hogsmeade/src,type=bind",
-    "workspaceFolder": "/root/hogsmeade/src",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/hogsmeade/src/rc-brain,type=bind",
+    "workspaceFolder": "/home/hogsmeade/src/rc-brain",
     "runArgs": [
         "--rm",
         "--network=host",

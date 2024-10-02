@@ -23,7 +23,7 @@ RUN rosdep update --rosdistro $ROS_DISTRO
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "source $WORKSPACE_DIR/install/setup.bash" >> ~/.bashrc
 
-# Temporarily copy directory in so rosdep installs dependencies
+# Copy files
 RUN mkdir -p src/$FOLDER_NAME
 COPY . src/$FOLDER_NAME
 
@@ -33,8 +33,10 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r
 # Build
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
 
-# Remove copied stuff
-RUN rm -r src/$FOLDER_NAME
-
 # Clean up apt cache to make container smaller
 RUN apt-get clean
+
+# Copy entrypoint script
+COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
+CMD ["/bin/bash", "entrypoint.sh"]
