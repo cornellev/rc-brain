@@ -1,4 +1,4 @@
-# Start with the official ROS Humble ROS-Core image based on Ubuntu Jammy
+# syntax=docker/dockerfile:1.7-labs
 FROM ros:humble
 
 SHELL ["/bin/bash", "-c"]
@@ -7,16 +7,11 @@ ARG FOLDER_NAME=rc-brain
 ARG WORKSPACE_DIR=/home/hogsmeade
 WORKDIR $WORKSPACE_DIR
 
-# Install basic build tools and ROS2 development dependencies
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    build-essential \
-    git \
-    python3-colcon-common-extensions \
-    python3-colcon-mixin \
-    python3-rosdep \
-    python3-vcstool 
-
 # Init rosdep and update dependencies
+RUN rm /var/lib/dpkg/info/libc-bin.*
+RUN apt-get clean
+RUN apt-get update
+RUN apt-get install libc-bin
 RUN rosdep update --rosdistro $ROS_DISTRO
 
 # Source the ROS2 environment automatically when a new shell is created
@@ -25,18 +20,19 @@ RUN echo "source $WORKSPACE_DIR/install/setup.bash" >> ~/.bashrc
 
 # Copy files
 RUN mkdir -p src/$FOLDER_NAME
-COPY . src/$FOLDER_NAME
+COPY --parents ./*/package.xml src/$FOLDER_NAME
 
 # Install dependencies with rosdep
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
 
-# Build
-RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
-
 # Clean up apt cache to make container smaller
 RUN apt-get clean
+
+# Build
+COPY . src/$FOLDER_NAME
+RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
 
 # Copy entrypoint script
 COPY entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
-CMD ["/bin/bash", "entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/home/hogsmeade/entrypoint.sh"]
