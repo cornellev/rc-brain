@@ -1,19 +1,23 @@
 #!/bin/bash
 
-TARGET_USER="cev"
-TARGET_IP="mini-uno-v-2"
-IMAGE_NAME="mini-deploy"
+TARGET_USER=cev
+TARGET_CAR=$0
+IMAGE_NAME=mini-deploy
+CONTAINER_NAME=mini-deployed
+SERVER_NAME=mini-server
+SERVER_PORT=5000
+SERVER_USER=cev
 
-# echo "Building Docker image."
-# docker build -t ${IMAGE_NAME} -f Dockerfile.prod .
+echo "Building image..."
+docker build --platform=linux/arm64 -t $SERVER_NAME:$SERVER_PORT/$IMAGE_NAME -f Dockerfile.prod .
 
-echo "Saving image..."
-docker save ${IMAGE_NAME} -o ${IMAGE_NAME}.tar
+echo "Pushing to local registry $SERVER_NAME..."
+docker push $SERVER_NAME:$SERVER_PORT/$SERVER_USER/$IMAGE_NAME
 
-echo "Transferring image..."
-rsync -avz --progress ${IMAGE_NAME}.tar rsync://${TARGET_USER}@${TARGET_IP}:/cev_home
-
-echo "Loading image on mini car..."
-ssh -tt ${TARGET_USER}@${TARGET_IP} "docker image rm ${IMAGE_NAME}; docker load < /home/${TARGET_USER}/${IMAGE_NAME}.tar"
-
-# rm ${IMAGE_NAME}.tar
+echo "Pulling down on car $TARGET_CAR and starting..."
+ssh $TARGET_USER@$TARGET_CAR << EOF
+    docker stop $CONTAINER_NAME &&
+    docker container rm $CONTAINER_NAME &&
+    docker pull $SERVER_NAME:$SERVER_PORT/$IMAGE_NAME &&
+    docker run $IMAGE_NAME --name $CONTAINER_NAME --network=host
+EOF
