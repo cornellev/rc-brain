@@ -19,6 +19,13 @@ Add the following configuration to `/etc/docker/daemon.json`:
 }
 ```
 
+Then, restart the docker daemon (with `systemctl restart docker` on linux).
+
+If you have errors regarding buildx or buildkit, please make sure you have Docker BuildX installed.
+
+If there are still errors regarding some "Exec format error", then run
+`docker run --privileged --rm tonistiigi/binfmt --install all`
+which will install qemu for cross-platform compilation.
 
 ## Packages
 

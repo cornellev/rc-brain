@@ -18,8 +18,12 @@ RUN rosdep update --rosdistro $ROS_DISTRO
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "source $WORKSPACE_DIR/install/setup.bash" >> ~/.bashrc
 
-# Copy files
 RUN mkdir -p src/$FOLDER_NAME
+
+# Clone packages
+RUN cd src && git clone https://github.com/Slamtec/sllidar_ros2.git
+
+# Copy files
 COPY --parents ./*/package.xml src/$FOLDER_NAME
 
 # Install dependencies with rosdep
