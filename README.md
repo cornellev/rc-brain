@@ -10,7 +10,12 @@ One repo to rule them all
 If you're not using the DevContainer, please make sure to install `clang-format`, ideally version 19! This will help keep the formatting of our C++ code formatted consistently. Python code is formatted by `black`. The DevContainer will install the `Black` extension for you, which ships with `black`, but otherwise you'll need to install it in VSCode or whatever other IDE you're using.
 
 ### Deploying
-Our deployment pipeline works by pushing Docker images to a local registry and pulling them down on the mini cars. This avoids both long build times on the mini cars and the long time it takes to transfer whole images (as we can take advantage of Docker's cache).
+
+#### Regular deployment
+If you're just developing, building Docker images will probably take too long. You can deploy normally just by running `scripts/deploy.sh`. It will drop you into an interactive session at the end so you can launch whatever you want to.
+
+#### Docker deployment
+Our Docker deployment pipeline works by pushing Docker images to a local registry and pulling them down on the mini cars. This avoids both long build times on the mini cars and the long time it takes to transfer whole images (as we can take advantage of Docker's cache).
 
 You'll have to do a bit of setup to get your computer to use the local registry. Note that you must be connected to `cev-router`.
 
