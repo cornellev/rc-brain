@@ -33,3 +33,15 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
 # Install self dependencies with rosdep
 COPY --parents ./*/package.xml src/$FOLDER_NAME
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
+
+# Clean up apt cache to make container smaller
+RUN apt-get clean
+
+# Build
+COPY . src/$FOLDER_NAME
+RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
+
+# Copy entrypoint script
+COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
+ENTRYPOINT ["/bin/bash", "/home/hogsmeade/entrypoint.sh"]
