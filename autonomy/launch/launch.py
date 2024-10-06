@@ -20,6 +20,12 @@ def generate_launch_description():
         "autobrake_launch.py"
     )
 
+    serial_com_launch_path = os.path.join(
+        get_package_share_directory("serial_com"),
+        "launch",
+        "launch.py"
+    )
+
     rplidar_launch_path = os.path.join(
         get_package_share_directory("sllidar_ros2"),
         "launch",
@@ -48,6 +54,11 @@ def generate_launch_description():
             # Launch controls
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(autobrake_launch_path),
+                launch_arguments={}.items(),
+            ),
+            # Launch serial communication
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(serial_com_launch_path),
                 launch_arguments={}.items(),
             ),
         ]

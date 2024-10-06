@@ -10,11 +10,21 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(serial REQUIRED)
+find_package(ackermann_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+
+add_executable(arduino_read src/arduino_read.cpp)
+ament_target_dependencies(arduino_read rclcpp serial)
+
+add_executable(arduino_write src/arduino_write.cpp)
+ament_target_dependencies(arduino_write rclcpp serial ackermann_msgs std_msgs)
 
 add_executable(arduino_com src/arduino_com.cpp)
-ament_target_dependencies(arduino_com rclcpp serial)
+ament_target_dependencies(arduino_com rclcpp serial ackermann_msgs std_msgs)
 
 install(TARGETS
+  arduino_read
+  arduino_write
   arduino_com
   DESTINATION lib/${PROJECT_NAME}
 )
