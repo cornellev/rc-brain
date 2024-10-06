@@ -18,7 +18,7 @@ echo "Building image..."
 docker build --platform=linux/arm64 -t $IMAGE_TAG -f Dockerfile.deploy .
 if [ $? -ne 0 ]; then
     echo "Failed to build image."
-     exit 1
+    exit 1
 fi
 
 echo "Pushing to local registry $SERVER_NAME..."

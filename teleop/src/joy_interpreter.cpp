@@ -1,8 +1,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "ackermann_msgs/msg/ackermann_drive.hpp"
-#include <vector>
 #include <cmath>
+#include <vector>
 
 class LogitechRead {
 public:
@@ -28,18 +28,20 @@ private:
 
 class JoyInterpreter : public rclcpp::Node {
 public:
-    JoyInterpreter() : Node("joy_interpreter") {
-        movement_pub_ = this->create_publisher<ackermann_msgs::msg::AckermannDrive>("rc_movement_msg", 10);
-        joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
-            "joy", 10, std::bind(&JoyInterpreter::joy_to_twist, this, std::placeholders::_1)
-        );
+    JoyInterpreter(): Node("joy_interpreter") {
+        movement_pub_ =
+            this->create_publisher<ackermann_msgs::msg::AckermannDrive>("rc_movement_msg", 10);
+        joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>("joy", 10,
+            std::bind(&JoyInterpreter::joy_to_twist, this, std::placeholders::_1));
 
         this->declare_parameter<double>("joy_interpreter/teleop/deadzone", 0.1);
-        this->declare_parameter<double>("joy_interpreter/teleop/max_turning_angle", M_PI / 9);  // 20 degrees in radians
+        this->declare_parameter<double>("joy_interpreter/teleop/max_turning_angle",
+            M_PI / 9);  // 20 degrees in radians
         this->declare_parameter<double>("joy_interpreter/teleop/max_velocity", 1.5);
 
         deadzone_ = this->get_parameter("joy_interpreter/teleop/deadzone").as_double();
-        max_turning_angle_ = this->get_parameter("joy_interpreter/teleop/max_turning_angle").as_double();
+        max_turning_angle_ =
+            this->get_parameter("joy_interpreter/teleop/max_turning_angle").as_double();
         max_velocity_ = this->get_parameter("joy_interpreter/teleop/max_velocity").as_double();
 
         RCLCPP_INFO(this->get_logger(), "Parameter max_turning_angle=%f", max_turning_angle_);
@@ -58,7 +60,8 @@ private:
         }
 
         // Calculate velocity
-        float drive = (gamepad_data.get_right_trigger() - gamepad_data.get_left_trigger()) * max_velocity_;
+        float drive = (gamepad_data.get_right_trigger() - gamepad_data.get_left_trigger())
+                      * max_velocity_;
 
         // Publish AckermannDrive message
         auto ackermann_msg = ackermann_msgs::msg::AckermannDrive();
