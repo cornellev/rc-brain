@@ -1,6 +1,18 @@
 # rc-brain
 One repo to rule them all
 
+## Packages
+
+### TELEOP
+The joystick is connected to `/dev/input/event0` by default. To be able to access it, the user launching ros must have the `input` group.
+
+### SERIAL
+Arduino Uno seems to connect to `/dev/ttyACM0`
+To run, the `serial-ros2` library must be cloned to the parent workspace.
+The user launching ros must have the `dialout` group.
+
+### CONTROLS
+To run, the `sllidar_ros2` library must be cloned to the parent workspace
 
 ## Developing
 
@@ -33,8 +45,3 @@ If you have errors regarding buildx or buildkit, please make sure you have Docke
 If there are still errors regarding some "Exec format error", then run
 `docker run --privileged --rm tonistiigi/binfmt --install all`
 which will install qemu for cross-platform compilation.
-
-## Packages
-
-### teleop
-The joystick is connected to `/dev/input/event0` by default. To be able to access it, the user launching ros must have the `input` group.
