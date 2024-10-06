@@ -44,20 +44,20 @@ private:
     serial::Serial serial_port_;
     rclcpp::TimerBase::SharedPtr comm_timer_;
 
-    // Variables to store subscribed data
+    // Data to publish to arduino
     float steering_angle_;
     float velocity_;
     float max_velocity_;
 
-    // Variables for parsed serial data
-    int32_t int_value_;
-    float float_value1_, float_value2_;
+    // Parsed serial data from arduino
+    int32_t reported_timestamp;
+    float reported_velocity, reported_steering_angle;
 
-    // Subscriber objects
+    // Subscribed topics to send over serial
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDrive>::SharedPtr rc_movement_sub_;
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr auto_max_vel_sub_;
     
-    // Publisher object for sensor data
+    // Publisher for sensor data to SensorCollect message
     rclcpp::Publisher<cev_msgs::msg::SensorCollect>::SharedPtr sensor_collect_pub_;
 
     // Callback for the rc_movement_msg topic
@@ -81,10 +81,10 @@ private:
                 if (!message.empty()) {
                     RCLCPP_DEBUG(this->get_logger(), "Raw message received: '%s'", message.c_str());
 
-                    // Parse the received message into int and floats
+                    // Parse the received message into reported sensor data
                     if (parseMessage(message)) {
                         RCLCPP_DEBUG(this->get_logger(), "Parsed values - Int: %d, Float1: %f, Float2: %f",
-                                    int_value_, float_value1_, float_value2_);
+                                    reported_timestamp, reported_velocity, reported_steering_angle);
 
                         // Publish the parsed data
                         publishSensorData();
@@ -116,6 +116,7 @@ private:
 
     // Helper function to parse incoming serial message
     bool parseMessage(const std::string& message) {
+        // Split by spaces
         size_t first_space = message.find(' ');
         size_t second_space = message.find(' ', first_space + 1);
 
@@ -124,9 +125,9 @@ private:
         }
 
         try {
-            int_value_ = std::stoi(message.substr(0, first_space));
-            float_value1_ = std::stof(message.substr(first_space + 1, second_space - first_space - 1));
-            float_value2_ = std::stof(message.substr(second_space + 1));
+            reported_timestamp = std::stoi(message.substr(0, first_space));
+            reported_velocity = std::stof(message.substr(first_space + 1, second_space - first_space - 1));
+            reported_steering_angle = std::stof(message.substr(second_space + 1));
             return true;
         } catch (const std::exception& e) {
             return false; // Parsing failed
@@ -135,10 +136,10 @@ private:
 
     // Function to publish sensor data
     void publishSensorData() {
-        auto sensor_msg = cev_msgs::msg::SensorCollect(); // Create message instance
-        sensor_msg.timestamp = static_cast<uint32_t>(time(0)); // Get current timestamp
-        sensor_msg.velocity = float_value1_; // Assuming float_value1_ holds velocity
-        sensor_msg.steering_angle = float_value2_; // Assuming float_value2_ holds steering angle
+        auto sensor_msg = cev_msgs::msg::SensorCollect();
+        sensor_msg.timestamp = static_cast<uint32_t>(time(0));
+        sensor_msg.velocity = reported_velocity;
+        sensor_msg.steering_angle = reported_steering_angle;
 
         sensor_collect_pub_->publish(sensor_msg); // Publish the message
         RCLCPP_DEBUG(this->get_logger(), "Published sensor data: Timestamp: %u, Velocity: %f, Steering Angle: %f",
