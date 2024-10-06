@@ -11,27 +11,12 @@ WORKDIR $WORKSPACE_DIR
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "source $WORKSPACE_DIR/install/setup.bash" >> ~/.bashrc
 
-# Install dev tools
-RUN apt-get update
-RUN apt-get install -y curl
-RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-RUN cat /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-RUN echo $'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main\n' \
-    $'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy main\n' \
-    $'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main\n' \
-    $'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main\n' \
-    $'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main\n' \
-    $'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main\n' \
-    | tee -a /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y clang-format clang-format-19
-
 # Init rosdep and update package index
 # for some reason we need to do this
 RUN rm /var/lib/dpkg/info/libc-bin.* 
 RUN apt-get clean
 RUN apt-get update
-RUN apt-get install -y libc-bin
+RUN apt-get install libc-bin
 RUN rosdep update --rosdistro $ROS_DISTRO
 
 RUN mkdir -p src/$FOLDER_NAME
@@ -48,3 +33,15 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
 # Install self dependencies with rosdep
 COPY --parents ./*/package.xml src/$FOLDER_NAME
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
+
+# Clean up apt cache to make container smaller
+RUN apt-get clean
+
+# Build
+COPY . src/$FOLDER_NAME
+RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
+
+# Copy entrypoint script
+COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
+ENTRYPOINT ["/bin/bash", "/home/hogsmeade/entrypoint.sh"]
