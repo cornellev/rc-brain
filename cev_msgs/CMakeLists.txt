@@ -1,6 +1,5 @@
-
 cmake_minimum_required(VERSION 3.8)
-project(serial_com)
+project(cev_msgs)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -8,27 +7,15 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(serial REQUIRED)
-find_package(ackermann_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(cev_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
-add_executable(arduino_com src/arduino_com.cpp)
-ament_target_dependencies(arduino_com rclcpp serial ackermann_msgs std_msgs cev_msgs)
+# uncomment the following section in order to fill in
+# further dependencies manually.
+# find_package(<dependency> REQUIRED)
 
-install(TARGETS
-  arduino_com
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
-)
-
-install(DIRECTORY config/
-  DESTINATION share/${PROJECT_NAME}/config
-)
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/SensorCollect.msg"
+ )
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

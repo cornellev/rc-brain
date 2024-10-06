@@ -3,6 +3,7 @@
 #include <string>
 #include "std_msgs/msg/float32.hpp"
 #include "ackermann_msgs/msg/ackermann_drive.hpp"
+#include "cev_msgs/msg/sensor_collect.hpp" // Include your custom message header
 
 class SerialHandlerNode : public rclcpp::Node {
 public:
@@ -31,25 +32,17 @@ public:
         auto_max_vel_sub_ = this->create_subscription<std_msgs::msg::Float32>(
             "auto_max_vel", 1, std::bind(&SerialHandlerNode::maxVelocityCallback, this, std::placeholders::_1));
 
-        // Timer for sending serial data periodically
-        // serial_timer_ = this->create_wall_timer(
-        //     std::chrono::milliseconds(10), std::bind(&SerialHandlerNode::sendSerialData, this));
+        // Publisher for sensor data
+        sensor_collect_pub_ = this->create_publisher<cev_msgs::msg::SensorCollect>("sensor_collect", 1);
 
-        // // Timer for reading serial data periodically
-        read_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(10), std::bind(&SerialHandlerNode::readSerialData, this));
+        // Timer for reading serial data periodically
+        comm_timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(10), std::bind(&SerialHandlerNode::commSerialData, this));
     }
-
-    // ~SerialHandlerNode() {
-    //     if (serial_port_.isOpen()) {
-    //         serial_port_.close();
-    //     }
-    // }
 
 private:
     serial::Serial serial_port_;
-    rclcpp::TimerBase::SharedPtr serial_timer_;
-    rclcpp::TimerBase::SharedPtr read_timer_;
+    rclcpp::TimerBase::SharedPtr comm_timer_;
 
     // Variables to store subscribed data
     float steering_angle_;
@@ -63,6 +56,9 @@ private:
     // Subscriber objects
     rclcpp::Subscription<ackermann_msgs::msg::AckermannDrive>::SharedPtr rc_movement_sub_;
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr auto_max_vel_sub_;
+    
+    // Publisher object for sensor data
+    rclcpp::Publisher<cev_msgs::msg::SensorCollect>::SharedPtr sensor_collect_pub_;
 
     // Callback for the rc_movement_msg topic
     void rcMovementCallback(const ackermann_msgs::msg::AckermannDrive::SharedPtr msg) {
@@ -75,32 +71,8 @@ private:
         max_velocity_ = msg->data;
     }
 
-    // Function to send serial data periodically
-    void sendSerialData() {
-        if (rclcpp::ok() && serial_port_.isOpen()) {
-            try {
-                // Use ostringstream to control the precision of the float values
-                std::ostringstream serial_message;
-                serial_message << std::fixed << std::setprecision(2)
-                            << velocity_ << " "
-                            << steering_angle_ << " "
-                            << max_velocity_ << "\n";
-
-                // Send the message over the serial port
-                serial_port_.write(serial_message.str());
-                RCLCPP_INFO(this->get_logger(), "Serial message sent: '%s'", serial_message.str().c_str());
-
-                // Sleep for 100ms before sending the next message
-            } catch (const serial::IOException& e) {
-                RCLCPP_ERROR(this->get_logger(), "Serial write error: %s", e.what());
-            }
-        } else {
-            RCLCPP_INFO(this->get_logger(), "NOT OPEN!");
-        }
-    }
-
-    // Function to read serial data periodically
-    void readSerialData() {
+    // Read and write serial data periodically
+    void commSerialData() {
         if (serial_port_.isOpen()) {
             try {
                 // Read a line (until newline character)
@@ -111,8 +83,11 @@ private:
 
                     // Parse the received message into int and floats
                     if (parseMessage(message)) {
-                        RCLCPP_INFO(this->get_logger(), "Parsed values - Int: %d, Float1: %f, Float2: %f",
+                        RCLCPP_DEBUG(this->get_logger(), "Parsed values - Int: %d, Float1: %f, Float2: %f",
                                     int_value_, float_value1_, float_value2_);
+
+                        // Publish the parsed data
+                        publishSensorData();
                     } else {
                         RCLCPP_DEBUG(this->get_logger(), "Failed to parse message: '%s'", message.c_str());
                     }
@@ -131,10 +106,8 @@ private:
 
                 // Send the message over the serial port
                 serial_port_.write(serial_message.str());
-                RCLCPP_INFO(this->get_logger(), "Serial message sent: '%s'", serial_message.str().c_str());
+                RCLCPP_DEBUG(this->get_logger(), "Serial message sent: '%s'", serial_message.str().c_str());
 
-                // Sleep for 100ms before sending the next message
-                // std::this_thread::sleep_for(std::chrono::milliseconds(100));
             } catch (const serial::IOException& e) {
                 RCLCPP_ERROR(this->get_logger(), "Serial write error: %s", e.what());
             }
@@ -158,6 +131,18 @@ private:
         } catch (const std::exception& e) {
             return false; // Parsing failed
         }
+    }
+
+    // Function to publish sensor data
+    void publishSensorData() {
+        auto sensor_msg = cev_msgs::msg::SensorCollect(); // Create message instance
+        sensor_msg.timestamp = static_cast<uint32_t>(time(0)); // Get current timestamp
+        sensor_msg.velocity = float_value1_; // Assuming float_value1_ holds velocity
+        sensor_msg.steering_angle = float_value2_; // Assuming float_value2_ holds steering angle
+
+        sensor_collect_pub_->publish(sensor_msg); // Publish the message
+        RCLCPP_DEBUG(this->get_logger(), "Published sensor data: Timestamp: %u, Velocity: %f, Steering Angle: %f",
+                     sensor_msg.timestamp, sensor_msg.velocity, sensor_msg.steering_angle);
     }
 };
 
