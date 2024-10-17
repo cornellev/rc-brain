@@ -3,7 +3,7 @@
 #include <string>
 #include "std_msgs/msg/float32.hpp"
 #include "ackermann_msgs/msg/ackermann_drive.hpp"
-#include "cev_msgs/msg/sensor_collect.hpp" // Include your custom message header
+#include "cev_msgs/msg/sensor_collect.hpp"
 
 class SerialHandlerNode : public rclcpp::Node {
 public:
