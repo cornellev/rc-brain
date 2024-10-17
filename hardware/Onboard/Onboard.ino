@@ -6,7 +6,7 @@
 #define IN_1 A1
 #define IN_2 A2
 
-#define EN_B 6
+#define EN_B 10
 #define IN_3 A3
 #define IN_4 A4
 
@@ -15,7 +15,7 @@
 #define ENCODER_RIGHT_C1 3
 #define ENCODER_RIGHT_C2 12
 
-#define SERVO_PIN 9
+#define SERVO_PIN 6
 #define POTENTIOMETER_PIN A5
 
 #define TO_RAD(angle) ((angle) * M_PI / 180.0)
@@ -27,7 +27,7 @@ const float MIN_VELOCITY = -2.07; // Min velocity of vehicle in m/s
 const float MAX_POWER_SPEED = 1.0; // Max percent speed of vehicle
 const float MIN_POWER_SPEED = -1.0; // Min percent speed
 
-const float STEERING_ZERO_ANGLE = 95.0; // Calibrated servo angle corresponding to a steering angle of 0  TODO: Calibrate
+const float STEERING_ZERO_ANGLE = 89.27; // Calibrated servo angle corresponding to a steering angle of 0  TODO: Calibrate
 const float MAX_INPUT_STEER = 20.0; // Steering range is from -MAX_INPUT_STEER to MAX_INPUT_STEER (Degrees)  TODO: Calibrate
 
 const float WHEEL_DIAMETER_METERS = 9.5 / 100;
@@ -74,8 +74,7 @@ Servo servo;
 */
 void writeAngle(float angle) {
   angle = TO_DEG(angle);
-  angle = -angle;
-  angle = max(min(STEERING_ZERO_ANGLE + angle, STEERING_ZERO_ANGLE + MAX_INPUT_STEER), STEERING_ZERO_ANGLE - MAX_INPUT_STEER);
+  angle = max(min(STEERING_ZERO_ANGLE - angle, STEERING_ZERO_ANGLE + MAX_INPUT_STEER), STEERING_ZERO_ANGLE - MAX_INPUT_STEER);
   servo.write(angle);
 }
 
@@ -129,7 +128,7 @@ void updateAckermann() {
 
   target_vel = min(target_velocity, autobrake);
 
-  if (autobrake < current_velocity) {
+  if (autobrake < (current_velocity - .2)) {
     given_power = 0;
     kP = 4.5;
   } else {
@@ -251,6 +250,8 @@ void setup() {
   target_velocity = 0.0;
   target_angle = 0.0;
   current_velocity = 0.0;
+
+  servo.attach(SERVO_PIN);
 
   last_encoder_left = -left_encoder.read() * TICKS_TO_METERS;
   last_encoder_right = right_encoder.read() * TICKS_TO_METERS;
