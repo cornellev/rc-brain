@@ -47,3 +47,7 @@ If you have errors regarding buildx or buildkit, please make sure you have Docke
 If there are still errors regarding some "Exec format error", then run
 `docker run --privileged --rm tonistiigi/binfmt --install all`
 which will install qemu for cross-platform compilation.
+
+
+## IMU Notes
+IMU connects to 232R/T

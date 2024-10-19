@@ -5,7 +5,7 @@ import os
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
-def launch(package, file, launch_folder="launch"):
+def launch(package, file, launch_folder="launch", arguments={}):
     return IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -13,7 +13,8 @@ def launch(package, file, launch_folder="launch"):
                 launch_folder,
                 file
             )
-        )
+        ),
+        launch_arguments=arguments.items()
     )
 
 def generate_launch_description():
@@ -109,7 +110,7 @@ def generate_launch_description():
             # Serial Communicator
             launch("serial_com", "launch.py"),
             # RPLidar
-            launch("sllidar_ros2", "sllidar_a1_launch.py"),
+            launch("sllidar_ros2", "sllidar_a1_launch.py", arguments={"serial_port": "/dev/ttyUSB1"}),
             # Encoder Odometry (Ackermann)
             launch("encoder_odometry", "launch.py"),
         ]
