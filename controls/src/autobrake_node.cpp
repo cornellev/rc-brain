@@ -42,7 +42,7 @@ public:
         brake_pub_ = this->create_publisher<std_msgs::msg::Float32>("auto_max_vel", 1);
 
         timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(40),
+            std::chrono::milliseconds(10),
             std::bind(&AutobrakeNode::publishBrake, this)
         );
 
@@ -78,7 +78,9 @@ private:
         if (dist < AUTOBRAKE_DISTANCE)
             return 0;
 
-        return std::max(0.0f, -3.5f + std::sqrt(49 + 40 * dist) / 2 - 0.2f);
+        float adjusted_dist = dist / 2.0;
+
+        return std::max(0.0f, -3.5f + std::sqrt(49 + 40 * adjusted_dist) / 2 - 0.2f);
     }
 
     // LIDAR'S 0 is forward, and angles increment clockwise
@@ -152,7 +154,7 @@ private:
     void setVars(const cev_msgs::msg::SensorCollect::SharedPtr data)
     {
         velocity_ = data->velocity;
-        steering_angle_ = -data->steering_angle;  // Invert the steering angle // TODO: FIX THIS IN HARDWARE
+        steering_angle_ = -data->steering_angle;  // Invert the steering angle
     }
 
     // Callback to set the target velocity from the AckermannDrive topic

@@ -6,13 +6,13 @@
 #define IN_1 A1
 #define IN_2 A2
 
-#define EN_B 10
+#define EN_B 3
 #define IN_3 A3
 #define IN_4 A4
 
 #define ENCODER_LEFT_C1 2
 #define ENCODER_LEFT_C2 11
-#define ENCODER_RIGHT_C1 3
+#define ENCODER_RIGHT_C1 4
 #define ENCODER_RIGHT_C2 12
 
 #define SERVO_PIN 6
@@ -54,12 +54,15 @@ float autobrake = MAX_VELOCITY;
 float kP = .002; // Proportional gain for SID controller
 const float kI = .005; // Integral gain for SID controller
 const float kD = .002; // Derivative gain for SID controller // .003
+// const float kD = 0.0;
 //float integral = 0;
 float last_error = 0.0;
 float total_error = 0.0;
 
 float given_power = 0.0;
 float max_speed = 0.0;
+
+float reported_val = 1.6;
 
 // Initialize hardware/sensors
 Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
@@ -124,12 +127,14 @@ void writeAckermann(float angle, float speed) {
   Update the target power and steering angle based on set targets and feedback.
  */
 void updateAckermann() {
-  float target_vel = target_velocity;
+  // float target_vel = target_velocity;
 
-  target_vel = min(target_velocity, autobrake);
+  float target_vel = min(target_velocity, autobrake);
 
-  if (autobrake < (current_velocity - .2)) {
-    given_power = 0;
+  reported_val = target_vel;
+
+  if ((autobrake < .6 && target_vel > 0.0) || autobrake < current_velocity) {
+    given_power = 0.0;
     kP = 4.5;
   } else {
     kP = .002;
@@ -159,8 +164,10 @@ void updateAckermann() {
 //  } else {
   if (abs(current_velocity < .01) && abs(target_vel) < .01) {
     writeAckermann(target_angle, 0);
+    // reported_val = 0.0;
   } else {
     writeAckermann(target_angle, given_power + (target_vel / MAX_VELOCITY));
+    // reported_val = given_power + (target_vel / MAX_VELOCITY);
   }
 //  }
 }
@@ -186,7 +193,6 @@ void updateVelocity() {
   // Store values for next update
   last_encoder_left = encoder_left;
   last_encoder_right = encoder_right;
-  last_update_time = current_time;
 }
 
 /**
@@ -203,7 +209,7 @@ void ackermannDriveCallback(float angle, float velocity) {
   Callback for autobrake message. Sets the maximum allowed velocity.
   @param max_vel: Maximum velocity allowed by autobrake
  */
-void autobrakeCallback(bool max_vel) {
+void autobrakeCallback(float max_vel) {
   autobrake = max_vel;
 }
 
@@ -231,7 +237,7 @@ void parseMessage(String received_data) {
         // Serial.print("Parsed Max Velocity: ");
         // Serial.println(autobrake);
     } else {
-      target_velocity = 0.0;
+      // target_velocity = 0.0;
     }
 }
 
@@ -262,23 +268,35 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    // Read the incoming data as a string
-    String received_data = Serial.readStringUntil('\n');
-    
-    parseMessage(received_data);
-  }
-  
   long current_time = millis();
 
-  if (3 < current_time - last_update_time) { // Run once every ~5 ms
+  if (5 < (current_time - last_update_time)) { // Run once every ~3 ms
     updateVelocity();
     updateAckermann();
+    last_update_time = current_time;
   }
 
   // writeAckermann(.2, .2);
 
-  if (10 < current_time - last_push_time) { // Run once every ~50 ms
+  if (10 < (current_time - last_push_time)) { // Run once every ~10 ms
+    // updateVelocity();
+    // updateAckermann();
+    // last_update_time = current_time;
+    // updateVelocity();
+    // updateAckermann();
+    // last_update_time = current_time;
+
+    // if (autobrake < reported_val) {
+    //   reported_val = autobrake;
+    // }
+
+    if (Serial.available() > 0) {
+      // Read the incoming data as a string
+      String received_data = Serial.readStringUntil('\n');
+      
+      parseMessage(received_data);
+    }
+
     if (current_velocity > max_speed) {
       max_speed = current_velocity;
     }
@@ -287,7 +305,7 @@ void loop() {
 
     Serial.print(current_time);
     Serial.print(" ");
-    Serial.print(current_velocity);
+    Serial.print(current_velocity, 4);
     Serial.print(" ");
     Serial.println(target_angle);
   }

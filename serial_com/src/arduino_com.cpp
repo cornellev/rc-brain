@@ -79,11 +79,11 @@ private:
                 std::string message = serial_port_.readline();
 
                 if (!message.empty()) {
-                    RCLCPP_DEBUG(this->get_logger(), "Raw message received: '%s'", message.c_str());
+                    RCLCPP_INFO(this->get_logger(), "Raw message received: '%s'", message.c_str());
 
                     // Parse the received message into reported sensor data
                     if (parseMessage(message)) {
-                        RCLCPP_DEBUG(this->get_logger(), "Parsed values - Int: %d, Float1: %f, Float2: %f",
+                        RCLCPP_INFO(this->get_logger(), "Parsed values - Int: %d, Float1: %f, Float2: %f",
                                     reported_timestamp, reported_velocity, reported_steering_angle);
 
                         // Publish the parsed data
