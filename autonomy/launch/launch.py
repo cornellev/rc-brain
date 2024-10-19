@@ -5,37 +5,22 @@ import os
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
+def launch(package, file, launch_folder="launch"):
+    return IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory(package),
+                launch_folder,
+                file
+            )
+        )
+    )
 
 def generate_launch_description():
-    # Path to the simulator bringup launch file
-    teleop_launch_path = os.path.join(
-        get_package_share_directory("teleop"),
-        "launch",
-        "launch.py",
-    )
-
-    autobrake_launch_path = os.path.join(
-        get_package_share_directory("controls"),
-        "launch",
-        "autobrake_launch.py"
-    )
-
-    serial_com_launch_path = os.path.join(
-        get_package_share_directory("serial_com"),
-        "launch",
-        "launch.py"
-    )
-
-    rplidar_launch_path = os.path.join(
-        get_package_share_directory("sllidar_ros2"),
-        "launch",
-        "sllidar_a1_launch.py"
-    )
-
-    encoder_odometry_launch_path = os.path.join(
-        get_package_share_directory("encoder_odometry"),
-        "launch",
-        "launch.py"
+    imu_config = os.path.join(
+        get_package_share_directory('autonomy'),
+        'config',
+        'imu.yml'
     )
 
     return LaunchDescription(
@@ -83,13 +68,24 @@ def generate_launch_description():
                 name='static_transform_publisher_base_link_lidar',
                 output='screen',
                 arguments=[
-                    '0.035', '0.04', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
+                    '-0.035', '0.04', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
                     '0', '0', '1', '0', # Rotation: M_PI
                     'base_link',
                     'laser_frame'
                 ]
             ),
-
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='static_transform_publisher_base_link_imu',
+                output='screen',
+                arguments=[
+                    '-0.18', '0.07', '0',  # Translation: x = -0.18, y = 0.07, z = 0 (meters)
+                    '0', '0', '0', '1', # Rotation: 0
+                    'base_link',
+                    'imu'
+                ]
+            ),
             # Run joystick reader
             Node(
                 package="joy",
@@ -97,30 +93,24 @@ def generate_launch_description():
                 name="joy_node",
                 parameters=[] #ros2 uses events, so don't try and direct this to /dev
             ),
-            # Launch RPLidar A1
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(rplidar_launch_path),
-                launch_arguments={}.items(),
+            # IMU
+            Node(
+                package='witmotion_ros',
+                executable='witmotion_ros_node',
+                parameters=[imu_config]
             ),
-            # Launch teleop
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(teleop_launch_path),
-                launch_arguments={}.items(),
-            ),
-            # Launch autobrake
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(autobrake_launch_path),
-                launch_arguments={}.items(),
-            ),
-            # Launch serial communication
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(serial_com_launch_path),
-                launch_arguments={}.items(),
-            ),
-            # Launch encoder odometry
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(encoder_odometry_launch_path),
-                launch_arguments={}.items(),
-            ),
+
+            ## LAUNCH FILES
+
+            # Teleop
+            launch("teleop", "launch.py"),
+            # Autobrake
+            launch("controls", "autobrake_launch.py"),
+            # Serial Communicator
+            launch("serial_com", "launch.py"),
+            # RPLidar
+            launch("sllidar_ros2", "sllidar_a1_launch.py"),
+            # Encoder Odometry (Ackermann)
+            launch("encoder_odometry", "launch.py"),
         ]
     )
