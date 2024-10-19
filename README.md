@@ -17,16 +17,8 @@ To run, the `sllidar_ros2` library must be cloned to the parent workspace
 ## Developing
 
 ### Local Development
-curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-sudo mv ~/bin/arduino-cli /bin
-echo "alias arduino-cli='/bin/arduino-cli'" >> ~/.bashrc
-arduino-cli config init
-arduino-cli core update-index
-arduino-cli core install arduino:avr
-arduino-cli lib install Servo
-arduino-cli lib install Encoder
-arduino-cli compile --fqbn arduino:avr:uno ~/src/brain/hardware/Onboard
-arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno ~/src/brain/hardware/Onboard
+Run `./scripts/deploy/arduino_setup.sh` the first time arduino is setup.
+Run `./scripts/deploy/arduino_deploy.sh` to compile and flash code to the arduino.
 
 #### Formatting
 If you're not using the DevContainer, please make sure to install `clang-format`, ideally version 19! This will help keep the formatting of our C++ code formatted consistently. Python code is formatted by `black`. The DevContainer will install the `Black` extension for you, which ships with `black`, but otherwise you'll need to install it in VSCode or whatever other IDE you're using.

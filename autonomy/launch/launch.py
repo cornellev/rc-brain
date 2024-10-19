@@ -51,7 +51,7 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource(teleop_launch_path),
                 launch_arguments={}.items(),
             ),
-            # Launch controls
+            # Launch autobrake
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(autobrake_launch_path),
                 launch_arguments={}.items(),
