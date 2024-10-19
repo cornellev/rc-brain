@@ -49,7 +49,7 @@ public:
         RCLCPP_INFO(this->get_logger(), "Autobrake node initialized.");
     }
 
-private:
+private:  // TODO: Make these constants configurable and use transforms instead of direct lidar
     const float VEHICLE_LENGTH = 0.3;
     const float VEHICLE_WIDTH = 0.2;
     const float AUTOBRAKE_TIME = 0.7;

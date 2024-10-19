@@ -32,8 +32,64 @@ def generate_launch_description():
         "sllidar_a1_launch.py"
     )
 
+    encoder_odometry_launch_path = os.path.join(
+        get_package_share_directory("encoder_odometry"),
+        "launch",
+        "launch.py"
+    )
+
     return LaunchDescription(
         [
+            # STATIC TRANSFORMS
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='static_transform_publisher_world_map',
+                output='screen',
+                arguments=[
+                    '0', '0', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
+                    '0', '0', '0', '1', # Rotation: M_PI
+                    'world',
+                    'map'
+                ]
+            ),
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='static_transform_publisher_map_odom',
+                output='screen',
+                arguments=[
+                    '0', '0', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
+                    '0', '0', '0', '1', # Rotation: M_PI
+                    'map',
+                    'odom'
+                ]
+            ),
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='static_transform_publisher_odom_base_link',
+                output='screen',
+                arguments=[
+                    '0', '0', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
+                    '0', '0', '0', '1', # Rotation: M_PI
+                    'odom',
+                    'base_link'
+                ]
+            ),
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='static_transform_publisher_base_link_lidar',
+                output='screen',
+                arguments=[
+                    '0.035', '0.04', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
+                    '0', '0', '1', '0', # Rotation: M_PI
+                    'base_link',
+                    'laser_frame'
+                ]
+            ),
+
             # Run joystick reader
             Node(
                 package="joy",
@@ -59,6 +115,11 @@ def generate_launch_description():
             # Launch serial communication
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(serial_com_launch_path),
+                launch_arguments={}.items(),
+            ),
+            # Launch encoder odometry
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(encoder_odometry_launch_path),
                 launch_arguments={}.items(),
             ),
         ]
