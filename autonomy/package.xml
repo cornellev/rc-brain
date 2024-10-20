@@ -12,6 +12,23 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
+  <!--INTERNAL-->
+  <depend>cev_msgs</depend>
+  <depend>controls</depend>
+  <depend>encoder_odometry</depend>
+  <depend>hardware</depend>
+  <depend>serial_com</depend>
+  <depend>teleop</depend>
+
+  <!--EXTERNAL-->
+  <depend>sllidar_ros2</depend>
+  <depend>witmotion_ros</depend>
+  <depend>robot_localization</depend>
+  <depend>joy</depend>
+  <depend>tf2_ros</depend>
+  <depend>slam_toolbox</depend>
+
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>

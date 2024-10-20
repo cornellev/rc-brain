@@ -5,24 +5,24 @@ import os
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
+def get_path(package, dir, file):
+    return os.path.join(
+        get_package_share_directory(package),
+        dir,
+        file
+    )
+
 def launch(package, file, launch_folder="launch", arguments={}):
     return IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory(package),
-                launch_folder,
-                file
-            )
+            get_path(package, launch_folder, file)
         ),
         launch_arguments=arguments.items()
     )
 
 def generate_launch_description():
-    imu_config = os.path.join(
-        get_package_share_directory('autonomy'),
-        'config',
-        'imu.yml'
-    )
+    imu_config = get_path("autonomy", "config", "imu.yml")
+    robot_localization_config = get_path("autonomy", "config", "robot_localization.yml")
 
     return LaunchDescription(
         [
@@ -34,7 +34,7 @@ def generate_launch_description():
                 output='screen',
                 arguments=[
                     '0', '0', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
-                    '0', '0', '0', '1', # Rotation: M_PI
+                    '0', '0', '0', '1', # Rotation: 0
                     'world',
                     'map'
                 ]
@@ -46,7 +46,7 @@ def generate_launch_description():
                 output='screen',
                 arguments=[
                     '0', '0', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
-                    '0', '0', '0', '1', # Rotation: M_PI
+                    '0', '0', '0', '1', # Rotation: 0
                     'map',
                     'odom'
                 ]
@@ -58,7 +58,7 @@ def generate_launch_description():
                 output='screen',
                 arguments=[
                     '0', '0', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
-                    '0', '0', '0', '1', # Rotation: M_PI
+                    '0', '0', '0', '1', # Rotation: 0
                     'odom',
                     'base_link'
                 ]
@@ -69,10 +69,10 @@ def generate_launch_description():
                 name='static_transform_publisher_base_link_lidar',
                 output='screen',
                 arguments=[
-                    '-0.035', '0.04', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
+                    '-0.035', '-0.04', '0',  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
                     '0', '0', '1', '0', # Rotation: M_PI
                     'base_link',
-                    'laser_frame'
+                    'laser'
                 ]
             ),
             Node(
@@ -81,7 +81,7 @@ def generate_launch_description():
                 name='static_transform_publisher_base_link_imu',
                 output='screen',
                 arguments=[
-                    '-0.18', '0.07', '0',  # Translation: x = -0.18, y = 0.07, z = 0 (meters)
+                    '-0.18', '0.0', '0',  # Translation: x = -0.18, y = 0.07, z = 0 (meters)
                     '0', '0', '0', '1', # Rotation: 0
                     'base_link',
                     'imu'
@@ -99,6 +99,44 @@ def generate_launch_description():
                 package='witmotion_ros',
                 executable='witmotion_ros_node',
                 parameters=[imu_config]
+            ),
+            # Robot Localization
+            Node(
+                package="robot_localization",
+                executable="ekf_node",
+                name="ekf_filter_node",
+                parameters=[
+                    robot_localization_config
+                ]
+            ),
+            # SLAM TOOLBOX
+            Node(
+                package="slam_toolbox",
+                executable="sync_slam_toolbox_node",
+                name="sync_slam_toolbox_node",
+                parameters=[
+                    {
+                        "odom_frame": "odom",
+                        "base_frame": "base_link",
+                        "map_frame": "map",
+                        "scan_topic": "/scan",
+                        "scan_queue_size": 10,
+                        "map_update_interval": 0.05,
+                        # "position_covariance_scale": 1.0,
+                        # "yaw_covariance_scale": 1.0,
+                        "resolution": .13,
+                        "min_laser_range": .15,
+                        "max_laser_range": 12.0,
+                        "use_scan_matching": True,
+                        "do_loop_closing": True,
+                        "use_scan_barycenter": True,
+                        "minimum_travel_distance": .05,
+                        "minimum_travel_heading": .05,
+                        "correlation_search_space_dimension": .2,
+                        "loop_search_space_dimension": 3.0,
+                        "angle_variance_penalty": 0.0
+                    }
+                ]
             ),
 
             ## LAUNCH FILES

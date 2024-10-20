@@ -51,3 +51,11 @@ which will install qemu for cross-platform compilation.
 
 ## IMU Notes
 IMU connects to 232R/T
+
+# REMOTE CONNECTION
+To send and receive data over ros while on the same network, simply run
+`
+export ROS_DOMAIN_ID=0
+export ROS_LOCALHOST_ONLY=0
+`
+on all devices.
