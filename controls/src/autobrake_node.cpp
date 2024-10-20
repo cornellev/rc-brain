@@ -49,7 +49,7 @@ public:
         RCLCPP_INFO(this->get_logger(), "Autobrake node initialized.");
     }
 
-private:
+private:  // TODO: Make these constants configurable and use transforms instead of direct lidar
     const float VEHICLE_LENGTH = 0.3;
     const float VEHICLE_WIDTH = 0.2;
     const float AUTOBRAKE_TIME = 0.7;
@@ -78,9 +78,7 @@ private:
         if (dist < AUTOBRAKE_DISTANCE)
             return 0;
 
-        float adjusted_dist = dist / 2.0;
-
-        return std::max(0.0f, -3.5f + std::sqrt(49 + 40 * adjusted_dist) / 2 - 0.2f);
+        return std::max(0.0f, -3.5f + std::sqrt(49 + 40 * dist) / 2 - 0.2f);
     }
 
     // LIDAR'S 0 is forward, and angles increment clockwise

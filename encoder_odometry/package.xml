@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>autonomy</name>
+  <name>encoder_odometry</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="sidharthmrao@gmail.com">root</maintainer>
+  <maintainer email="sidharthmrao@gmail.com">sloth</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -12,22 +12,11 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
-  <!--INTERNAL-->
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
   <depend>cev_msgs</depend>
-  <depend>controls</depend>
-  <depend>encoder_odometry</depend>
-  <depend>hardware</depend>
-  <depend>serial_com</depend>
-  <depend>teleop</depend>
-
-  <!--EXTERNAL-->
-  <depend>sllidar_ros2</depend>
-  <depend>witmotion_ros</depend>
-  <depend>robot_localization</depend>
-  <depend>joy</depend>
+  <depend>nav_msgs</depend>
   <depend>tf2_ros</depend>
-  <depend>slam_toolbox</depend>
-
 
   <export>
     <build_type>ament_cmake</build_type>

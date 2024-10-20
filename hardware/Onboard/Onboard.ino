@@ -182,10 +182,11 @@ void updateVelocity() {
   // float encoder_left =  left_encoder.read() * TICKS_TO_METERS;
   float encoder_left = -left_encoder.read() * TICKS_TO_METERS;
   float encoder_right = right_encoder.read() * TICKS_TO_METERS;
-  float avg_dist = (
-    (encoder_left - last_encoder_left) + 
-    (encoder_right - last_encoder_right)
-  ) / 2.0;
+  // float avg_dist = (
+  //   (encoder_left - last_encoder_left) + 
+  //   (encoder_right - last_encoder_right)
+  // ) / 2.0;
+  float avg_dist = encoder_left - last_encoder_left; // TODO: Temporarily remove right encoder bc not working
   
   // Velocity calculations
   current_velocity = avg_dist / ((current_time - last_update_time) / 1000.0);
