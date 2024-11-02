@@ -37,7 +37,7 @@ public:
 
         // Timer for reading serial data periodically
         comm_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(10), std::bind(&SerialHandlerNode::commSerialData, this));
+            std::chrono::milliseconds(20), std::bind(&SerialHandlerNode::commSerialData, this));
     }
 
 private:

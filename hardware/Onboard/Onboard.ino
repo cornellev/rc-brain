@@ -279,7 +279,7 @@ void loop() {
 
   // writeAckermann(.2, .2);
 
-  if (10 < (current_time - last_push_time)) { // Run once every ~10 ms
+  if (20 < (current_time - last_push_time)) { // Run once every ~10 ms
     // updateVelocity();
     // updateAckermann();
     // last_update_time = current_time;
