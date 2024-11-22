@@ -17,7 +17,7 @@ public:
             serial_port_.open();
 
             if (serial_port_.isOpen()) {
-                RCLCPP_INFO(this->get_logger(), "Serial port initialized successfully.");
+                RCLCPP_DEBUG(this->get_logger(), "Serial port initialized successfully.");
             } else {
                 RCLCPP_ERROR(this->get_logger(), "Failed to open serial port.");
             }
