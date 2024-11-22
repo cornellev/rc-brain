@@ -7,11 +7,11 @@
 #define IN_2 A3
 
 #define EN_B 3
-#define IN_3 A5
-#define IN_4 A4
+#define IN_3 A4
+#define IN_4 A5
 
-#define ENCODER_LEFT_C1 9
-#define ENCODER_LEFT_C2 8
+#define ENCODER_LEFT_C1 8
+#define ENCODER_LEFT_C2 9
 #define ENCODER_RIGHT_C1 6
 #define ENCODER_RIGHT_C2 7
 
@@ -41,9 +41,6 @@ float current_velocity;
 float target_velocity;
 float target_angle;
 float next_vel = 0;
-
-float debug_right_encoder = 0.0;
-float debug_left_encoder = 0.0;
 
 float last_encoder_left;
 float last_encoder_right;
@@ -175,11 +172,6 @@ void updateAckermann() {
 //  }
 }
 
-void updateEncoders() {
-  debug_right_encoder = left_encoder.read() * TICKS_TO_METERS;
-  debug_left_encoder = -right_encoder.read() * TICKS_TO_METERS;
-}
-
 /**
   Use encoder value changes to update current velocity.
  */
@@ -188,21 +180,16 @@ void updateVelocity() {
     
   // Encoder delta calculations
   // float encoder_left =  left_encoder.read() * TICKS_TO_METERS;
+  float encoder_left = -left_encoder.read() * TICKS_TO_METERS;
+  float encoder_right = right_encoder.read() * TICKS_TO_METERS;
   // float avg_dist = (
   //   (encoder_left - last_encoder_left) + 
   //   (encoder_right - last_encoder_right)
-
-  float encoder_left = left_encoder.read() * TICKS_TO_METERS;
-  float encoder_right = -right_encoder.read() * TICKS_TO_METERS;
-
   // ) / 2.0;
-  float avg_dist = ((encoder_left - last_encoder_left) + (encoder_right - last_encoder_right)) / 2.0; // TODO: Temporarily remove right encoder bc not working
-  // float avg_dist = encoder_left;
+  float avg_dist = encoder_left - last_encoder_left; // TODO: Temporarily remove right encoder bc not working
   
   // Velocity calculations
   current_velocity = avg_dist / ((current_time - last_update_time) / 1000.0);
-  // current_velocity = avg_dist;
-  // current_velocity = encoder_right;
 
   // Store values for next update
   last_encoder_left = encoder_left;
@@ -273,8 +260,8 @@ void setup() {
 
   servo.attach(SERVO_PIN);
 
-  last_encoder_left = left_encoder.read() * TICKS_TO_METERS;
-  last_encoder_right = -right_encoder.read() * TICKS_TO_METERS;
+  last_encoder_left = -left_encoder.read() * TICKS_TO_METERS;
+  last_encoder_right = right_encoder.read() * TICKS_TO_METERS;
   delay(2000);
   last_update_time = millis();
   last_push_time = millis();
@@ -282,46 +269,11 @@ void setup() {
 }
 
 void loop() {
-  long current_time = millis();
-  updateEncoders();
+    digitalWrite(IN_1, LOW );
+    digitalWrite(IN_2, HIGH  );
+    digitalWrite(IN_3, HIGH );
+    digitalWrite(IN_4, LOW  );
 
-  if (5 < (current_time - last_update_time)) { // Run once every ~3 ms
-    updateVelocity();
-    updateAckermann();
-    last_update_time = current_time;
-  }
-
-  // writeAckermann(.2, .2);
-
-  if (20 < (current_time - last_push_time)) { // Run once every ~10 ms
-    // updateVelocity();
-    // updateAckermann();
-    // last_update_time = current_time;
-    // updateVelocity();
-    // updateAckermann();
-    // last_update_time = current_time;
-
-    // if (autobrake < reported_val) {
-    //   reported_val = autobrake;
-    // }
-
-    if (Serial.available() > 0) {
-      // Read the incoming data as a string
-      String received_data = Serial.readStringUntil('\n');
-      
-      parseMessage(received_data);
-    }
-
-    if (current_velocity > max_speed) {
-      max_speed = current_velocity;
-    }
-
-    last_push_time = current_time;
-
-    Serial.print(current_time);
-    Serial.print(" ");
-    Serial.print(current_velocity, 4);
-    Serial.print(" ");
-    Serial.println(target_angle, 4);
-  }
+    analogWrite (EN_A, 255  );
+    analogWrite (EN_B, 255  );
 }

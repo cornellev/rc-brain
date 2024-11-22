@@ -51,7 +51,7 @@ public:
 
 private:  // TODO: Make these constants configurable and use transforms instead of direct lidar
     const float VEHICLE_LENGTH = 0.3;
-    const float VEHICLE_WIDTH = 0.2;
+    const float VEHICLE_WIDTH = 0.18;
     const float AUTOBRAKE_TIME = 0.7;
     const float AUTOBRAKE_DISTANCE = 0.2;
     const float MAX_VEL = 1.5;
