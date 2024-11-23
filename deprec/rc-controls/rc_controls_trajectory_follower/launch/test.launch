@@ -1,5 +1,0 @@
-<launch>
-  <node name="trajectory_follower" pkg="rc_controls_trajectory_follower" type="trajectory_follower.py" output="screen">
-    <rosparam command="load" file="$(find rc_controls_trajectory_follower)/config/test.yaml" />
-  </node>
-</launch>
