@@ -14,7 +14,6 @@ def generate_launch_description():
                 package="encoder_odometry",
                 executable="odometry",
                 name="encoder_odometry_node",
-                parameters=[]
             )
         ]
     )

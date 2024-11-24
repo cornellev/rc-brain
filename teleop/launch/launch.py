@@ -14,7 +14,6 @@ def generate_launch_description():
                 package="teleop",
                 executable="joy_interpreter",
                 name="joy_interpreter",
-                parameters=[]
             )
         ]
     )

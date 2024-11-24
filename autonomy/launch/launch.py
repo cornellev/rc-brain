@@ -37,7 +37,7 @@ def generate_launch_description():
                     '0', '0', '0', '1', # Rotation: 0
                     'world',
                     'map'
-                ]
+                ],
             ),
             Node(
                 package='tf2_ros',
@@ -49,7 +49,7 @@ def generate_launch_description():
                     '0', '0', '0', '1', # Rotation: 0
                     'map',
                     'odom'
-                ]
+                ],
             ),
             Node(
                 package='tf2_ros',
@@ -61,7 +61,7 @@ def generate_launch_description():
                     '0', '0', '0', '1', # Rotation: 0
                     'odom',
                     'base_link'
-                ]
+                ],
             ),
             Node(
                 package='tf2_ros',
@@ -73,7 +73,7 @@ def generate_launch_description():
                     '0', '0', '1', '0', # Rotation: M_PI
                     'base_link',
                     'laser'
-                ]
+                ],
             ),
             Node(
                 package='tf2_ros',
@@ -85,20 +85,21 @@ def generate_launch_description():
                     '0', '0', '0', '1', # Rotation: 0
                     'base_link',
                     'imu'
-                ]
+                ],
             ),
             # Run joystick reader
             Node(
                 package="joy",
                 executable="joy_node",
-                name="joy_node",
-                parameters=[] #ros2 uses events, so don't try and direct this to /dev
+                name="joy_node", #ros2 uses events, so don't try and direct this to /dev
             ),
             # IMU
             Node(
                 package='witmotion_ros',
                 executable='witmotion_ros_node',
-                parameters=[imu_config]
+                parameters=[
+                    imu_config
+                ]
             ),
             # Robot Localization
             Node(

@@ -4,6 +4,7 @@
 #include "std_msgs/msg/float32.hpp"
 #include "ackermann_msgs/msg/ackermann_drive.hpp"
 #include "cev_msgs/msg/sensor_collect.hpp"
+#include <iostream>
 
 class SerialHandlerNode : public rclcpp::Node {
 public:
@@ -137,12 +138,18 @@ private:
     // Function to publish sensor data
     void publishSensorData() {
         auto sensor_msg = cev_msgs::msg::SensorCollect();
-        sensor_msg.timestamp = static_cast<uint32_t>(time(0));
+
+        auto current_time = this->now().nanoseconds();
+        double current_time_seconds = current_time / 1e9;
+        // std::cout << current_time << std::endl;
+
+        sensor_msg.timestamp = current_time_seconds;
+        // sensor_msg.timestamp = this->now().nanoseconds() / 1e9;
         sensor_msg.velocity = reported_velocity;
         sensor_msg.steering_angle = reported_steering_angle;
 
         sensor_collect_pub_->publish(sensor_msg); // Publish the message
-        RCLCPP_DEBUG(this->get_logger(), "Published sensor data: Timestamp: %u, Velocity: %f, Steering Angle: %f",
+        RCLCPP_DEBUG(this->get_logger(), "Published sensor data: Timestamp: %f, Velocity: %f, Steering Angle: %f",
                      sensor_msg.timestamp, sensor_msg.velocity, sensor_msg.steering_angle);
     }
 };
