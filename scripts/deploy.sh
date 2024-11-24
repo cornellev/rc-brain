@@ -15,7 +15,10 @@ if [ -z "${TARGET_CAR}" ]; then
 fi
 
 printf "${BLUE}Copying files...${NC}\n"
-rsync -avzP --stats --mkpath . $TARGET_USER@$TARGET_CAR:/home/$TARGET_USER/ws/src/$FOLDER_NAME
+rsync -avzP --stats --exclude .git \
+    --rsync-path="mkdir -p /home/$TARGET_USER/ws/src/$FOLDER_NAME && rsync" \
+    . $TARGET_USER@$TARGET_CAR:/home/$TARGET_USER/ws/src/$FOLDER_NAME
+
 if [ $? -ne 0 ]; then
     printf "${RED}Failed to copy files.${NC}\n"
     exit 1
