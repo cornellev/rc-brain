@@ -38,7 +38,6 @@ def generate_launch_description():
                     'world',
                     'map'
                 ],
-                parameters=[{'use_sim_time': True}],
             ),
             Node(
                 package='tf2_ros',
@@ -51,7 +50,6 @@ def generate_launch_description():
                     'map',
                     'odom'
                 ],
-                parameters=[{'use_sim_time': True}],
             ),
             Node(
                 package='tf2_ros',
@@ -64,7 +62,6 @@ def generate_launch_description():
                     'odom',
                     'base_link'
                 ],
-                parameters=[{'use_sim_time': True}],
             ),
             Node(
                 package='tf2_ros',
@@ -77,7 +74,6 @@ def generate_launch_description():
                     'base_link',
                     'laser'
                 ],
-                parameters=[{'use_sim_time': True}],
             ),
             Node(
                 package='tf2_ros',
@@ -90,14 +86,12 @@ def generate_launch_description():
                     'base_link',
                     'imu'
                 ],
-                parameters=[{'use_sim_time': True}],
             ),
             # Run joystick reader
             Node(
                 package="joy",
                 executable="joy_node",
-                name="joy_node",
-                parameters=[{'use_sim_time': True}], #ros2 uses events, so don't try and direct this to /dev
+                name="joy_node", #ros2 uses events, so don't try and direct this to /dev
             ),
             # IMU
             Node(

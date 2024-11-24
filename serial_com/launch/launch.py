@@ -14,7 +14,6 @@ def generate_launch_description():
                 package="serial_com",
                 executable="arduino_com",
                 name="arduino_com",
-                parameters=[{'use_sim_time': True}],
             )
         ]
     )
