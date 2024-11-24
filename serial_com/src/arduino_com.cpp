@@ -137,12 +137,12 @@ private:
     // Function to publish sensor data
     void publishSensorData() {
         auto sensor_msg = cev_msgs::msg::SensorCollect();
-        sensor_msg.timestamp = static_cast<uint32_t>(time(0));
+        sensor_msg.timestamp = this->get_clock()->now().nanoseconds() / 1e9;
         sensor_msg.velocity = reported_velocity;
         sensor_msg.steering_angle = reported_steering_angle;
 
         sensor_collect_pub_->publish(sensor_msg); // Publish the message
-        RCLCPP_DEBUG(this->get_logger(), "Published sensor data: Timestamp: %u, Velocity: %f, Steering Angle: %f",
+        RCLCPP_DEBUG(this->get_logger(), "Published sensor data: Timestamp: %f, Velocity: %f, Steering Angle: %f",
                      sensor_msg.timestamp, sensor_msg.velocity, sensor_msg.steering_angle);
     }
 };

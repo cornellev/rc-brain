@@ -13,7 +13,7 @@ def generate_launch_description():
                 package="controls",
                 executable="autobrake_node",
                 name="autobrake_node",
-                parameters=[]
+                parameters=[{'use_sim_time': True}],
             )
         ]
     )
