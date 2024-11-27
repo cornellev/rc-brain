@@ -141,9 +141,7 @@ class OccupancyTransformerNode(rclpy.node.Node):
         ]
         in_range = cells
 
-        # grid[in_range] = 255
-        for x, y in in_range:
-            grid[x, y] = 255
+        grid[in_range[:, 0], in_range[:, 1]] = 255
 
         # nav_msgs/OccupancyGrid:
         # The map data, in row-major order, starting with (0,0).
