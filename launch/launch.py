@@ -25,37 +25,37 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            launch(
-                "zed_wrapper",
-                "zed_camera.launch.py",
-                arguments={
-                    "camera_model": "zed2",
-                    # "publish_urdf": "false",
-                    "publish_tf": "false",
-                    "publish_map_tf": "false",
-                    # "publish_imu_tf": "false",
-                },
-            ),
-            Node(
-                package="tf2_ros",
-                executable="static_transform_publisher",
-                name="zed_camera_base_link",
-                arguments=[
-                    "0",
-                    "0",
-                    "0",
-                    "0",
-                    "0",
-                    "0",
-                    "base_link",
-                    "zed_camera_link",
-                ],
-            ),
+            # launch(
+            #     "zed_wrapper",
+            #     "zed_camera.launch.py",
+            #     arguments={
+            #         "camera_model": "zed2",
+            #         # "publish_urdf": "false",
+            #         "publish_tf": "false",
+            #         "publish_map_tf": "false",
+            #         # "publish_imu_tf": "false",
+            #     },
+            # ),
+            # Node(
+            #     package="tf2_ros",
+            #     executable="static_transform_publisher",
+            #     name="zed_camera_base_link",
+            #     arguments=[
+            #         "0",
+            #         "0",
+            #         "0",
+            #         "0",
+            #         "0",
+            #         "0",
+            #         "base_link",
+            #         "zed_camera_link",
+            #     ],
+            # ),
             Node(
                 package="vision",
                 executable="occupancy_transformer",
                 name="occupancy_transformer",
-                parameters=[config],
+                parameters=[config, {"use_sim_time": True}],
             ),
         ]
     )
