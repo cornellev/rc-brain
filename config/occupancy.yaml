@@ -1,10 +1,11 @@
 occupancy_transformer:
   ros__parameters:
-    map_height_m: 10.0
-    map_width_m: 20.0
-    map_resolution_m: 0.1
-    ride_height_m: 0.1
-    car_height_m: 0.15
-    fuzz_threshold_m: 0.05
+    map_x_size: 10.0
+    map_y_size: 20.0
+    map_resolution: 0.1
+    fuzz_threshold: 0.02
+    base_link_height: 0.1
+    ride_height: 0.05
+    car_height: 0.15
     base_link_frame: base_link
     point_cloud_topic: /zed/zed_node/point_cloud/cloud_registered

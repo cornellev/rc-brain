@@ -10,6 +10,7 @@ import rclpy.time
 import tf2_ros
 from geometry_msgs.msg import Point, Pose, Quaternion
 from nav_msgs.msg import OccupancyGrid
+from rcl_interfaces.msg import ParameterDescriptor
 from sensor_msgs.msg import PointCloud2, PointField
 
 
@@ -17,14 +18,67 @@ class OccupancyTransformerNode(rclpy.node.Node):
     def __init__(self):
         super().__init__("occupancy_transformer")
 
-        self.declare_parameter("point_cloud_topic", "point_cloud")
-        self.declare_parameter("map_height_m", 10.0)
-        self.declare_parameter("map_width_m", 10.0)
-        self.declare_parameter("map_resolution_m", 0.1)
-        self.declare_parameter("ride_height_m", rclpy.Parameter.Type.DOUBLE)
-        self.declare_parameter("car_height_m", rclpy.Parameter.Type.DOUBLE)
-        self.declare_parameter("fuzz_threshold_m", rclpy.Parameter.Type.DOUBLE)
-        self.declare_parameter("base_link_frame", "base_link")
+        self.declare_parameter(
+            "point_cloud_topic",
+            "point_cloud",
+            ParameterDescriptor(
+                description="The topic to subscribe to for point cloud data"
+            ),
+        )
+        self.declare_parameter(
+            "map_x_size",
+            10.0,
+            ParameterDescriptor(
+                description="The size of the map in meters along the x-axis of base_link_frame"
+            ),
+        )
+        self.declare_parameter(
+            "map_y_size",
+            10.0,
+            ParameterDescriptor(
+                description="The size of the map in meters along the y-axis of base_link_frame"
+            ),
+        )
+        self.declare_parameter(
+            "map_resolution",
+            0.1,
+            ParameterDescriptor(
+                description="The resolution of the map in meters per cell"
+            ),
+        )
+        self.declare_parameter(
+            "fuzz_threshold",
+            0.1,
+            ParameterDescriptor(
+                description="The threshold (in meters) beyond car dimensions to consider a point as an obstacle."
+            ),
+        )
+        self.declare_parameter(
+            "base_link_height",
+            rclpy.Parameter.Type.DOUBLE,
+            ParameterDescriptor(
+                description="The height (in meters) of base_link_frame above the ground."
+            ),
+        )
+        self.declare_parameter(
+            "ride_height",
+            rclpy.Parameter.Type.DOUBLE,
+            ParameterDescriptor(
+                description="The height (in meters) above the ground plane of the tallest traversable obstacle."
+            ),
+        )
+        self.declare_parameter(
+            "car_height",
+            rclpy.Parameter.Type.DOUBLE,
+            ParameterDescriptor(
+                description="The height (in meters) of the tallest point on the car."
+            ),
+        )
+        self.declare_parameter(
+            "base_link_frame",
+            "base_link",
+            ParameterDescriptor(description="The frame_id of the base link frame."),
+        )
 
         self.subscription = self.create_subscription(
             PointCloud2,
@@ -38,16 +92,17 @@ class OccupancyTransformerNode(rclpy.node.Node):
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
     def pc_callback(self, cloud: PointCloud2):
-        map_height_m = self.get_parameter("map_height_m").value
-        map_width_m = self.get_parameter("map_width_m").value
-        map_resolution_m = self.get_parameter("map_resolution_m").value
+        map_x_m = self.get_parameter("map_x_size").value
+        map_y_m = self.get_parameter("map_y_size").value
+        map_res_m = self.get_parameter("map_resolution").value
 
-        map_height_cells = int(map_height_m / map_resolution_m)
-        map_width_cells = int(map_width_m / map_resolution_m)
+        map_x_cells = int(map_x_m / map_res_m)
+        map_y_cells = int(map_y_m / map_res_m)
 
-        ride_height_m = self.get_parameter("ride_height_m").value
-        car_height_m = self.get_parameter("car_height_m").value
-        fuzz_threshold_m = self.get_parameter("fuzz_threshold_m").value
+        base_link_height_m = self.get_parameter("base_link_height").value
+        ride_height_m = self.get_parameter("ride_height").value
+        car_height_m = self.get_parameter("car_height").value
+        fuzz_threshold_m = self.get_parameter("fuzz_threshold").value
 
         base_link_frame = self.get_parameter("base_link_frame").value
         transform = self.tf_buffer.lookup_transform(
@@ -66,22 +121,22 @@ class OccupancyTransformerNode(rclpy.node.Node):
 
         pc_z = base_link_pc[:, 2]
         filtered_pc = base_link_pc[
-            (pc_z < (car_height_m + fuzz_threshold_m))
-            & (pc_z > (-ride_height_m - fuzz_threshold_m))
+            (pc_z < (car_height_m - base_link_height_m + fuzz_threshold_m))
+            & (pc_z > (-(base_link_height_m - ride_height_m) - fuzz_threshold_m))
         ]
 
-        grid = np.zeros((map_height_cells, map_width_cells), dtype=np.int8)
+        grid = np.zeros((map_x_cells, map_y_cells), dtype=np.int8)
 
-        cell_rows = filtered_pc[:, 0] / map_resolution_m
-        cell_cols = (filtered_pc[:, 1] + map_width_m / 2) / map_resolution_m
-        cells = np.stack((cell_rows, cell_cols), axis=-1).astype(np.int32)
+        cell_x = filtered_pc[:, 0] / map_res_m
+        cell_y = (filtered_pc[:, 1] + map_y_m / 2) / map_res_m
+        cells = np.stack((cell_x, cell_y), axis=-1).astype(np.int32)
 
         in_range = cells[
             (
                 (cells[:, 0] >= 0)
-                & (cells[:, 0] < map_height_cells)
+                & (cells[:, 0] < map_x_cells)
                 & (cells[:, 1] >= 0)
-                & (cells[:, 1] < map_width_cells)
+                & (cells[:, 1] < map_y_cells)
             )
         ]
         in_range = cells
@@ -90,16 +145,16 @@ class OccupancyTransformerNode(rclpy.node.Node):
         for x, y in in_range:
             grid[x, y] = 255
 
-        flat = grid.flatten(order="C")  # row-major order
-
-        # hmmm. width for rviz is along the x axis, height is along the y axis. this is not in line with what we have done.
-        # from their docs:
-        # # The map data, in row-major order, starting with (0,0).
+        # nav_msgs/OccupancyGrid:
+        # The map data, in row-major order, starting with (0,0).
         # Cell (1, 0) will be listed second, representing the next cell in the x direction.
         # Cell (0, 1) will be at the index equal to info.width, followed by (1, 1).
         # The values inside are application dependent, but frequently,
         # 0 represents unoccupied, 1 represents definitely occupied, and
         # -1 represents unknown.
+
+        # flatten in column-major order, as we've made our rows constant x but that is not what nav_msgs/OccupancyGrid wants
+        flat = grid.flatten(order="F")
 
         occupancy_grid = OccupancyGrid()
 
@@ -107,13 +162,13 @@ class OccupancyTransformerNode(rclpy.node.Node):
         occupancy_grid.header.frame_id = base_link_frame
 
         occupancy_grid.info.map_load_time = cloud.header.stamp
-        occupancy_grid.info.resolution = map_resolution_m
-        occupancy_grid.info.width = map_width_cells
-        occupancy_grid.info.height = map_height_cells
+        occupancy_grid.info.resolution = map_res_m
+        occupancy_grid.info.width = map_x_cells
+        occupancy_grid.info.height = map_y_cells
 
-        origin_offset = (-map_width_cells * map_resolution_m) / 2
+        origin_offset = (-map_y_cells * map_res_m) / 2
         map_origin = Pose(
-            position=Point(x=0.0, y=origin_offset, z=0.0),
+            position=Point(x=0.0, y=origin_offset, z=-base_link_height_m),
             orientation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
         )
         occupancy_grid.info.origin = map_origin
