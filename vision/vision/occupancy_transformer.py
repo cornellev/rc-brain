@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import rclpy
 import rclpy.node
+import rclpy.parameter
 import rclpy.qos
 import rclpy.time
 import tf2_ros
@@ -20,9 +21,9 @@ class OccupancyTransformerNode(rclpy.node.Node):
         self.declare_parameter("map_height_m", 10.0)
         self.declare_parameter("map_width_m", 10.0)
         self.declare_parameter("map_resolution_m", 0.1)
-        self.declare_parameter("ride_height_m")
-        self.declare_parameter("car_height_m")
-        self.declare_parameter("fuzz_threshold_m")
+        self.declare_parameter("ride_height_m", rclpy.Parameter.Type.DOUBLE)
+        self.declare_parameter("car_height_m", rclpy.Parameter.Type.DOUBLE)
+        self.declare_parameter("fuzz_threshold_m", rclpy.Parameter.Type.DOUBLE)
         self.declare_parameter("base_link_frame", "base_link")
 
         self.subscription = self.create_subscription(
@@ -60,31 +61,45 @@ class OccupancyTransformerNode(rclpy.node.Node):
         )
 
         point_cloud = parse_points(cloud)
+        point_cloud = point_cloud[~np.isnan(point_cloud).any(axis=1)]
         base_link_pc = point_cloud @ rotation.T + translation
 
         pc_z = base_link_pc[:, 2]
         filtered_pc = base_link_pc[
-            (pc_z < car_height_m + fuzz_threshold_m)
-            & (pc_z > ride_height_m - fuzz_threshold_m)
+            (pc_z < (car_height_m + fuzz_threshold_m))
+            & (pc_z > (-ride_height_m - fuzz_threshold_m))
         ]
 
         grid = np.zeros((map_height_cells, map_width_cells), dtype=np.int8)
 
-        cell_x = filtered_pc[:, 0] / map_resolution_m
-        cell_y = (filtered_pc[:, 1] + map_width_m / 2) / map_resolution_m
-        cell_pc = np.stack((cell_x, cell_y), axis=-1).astype(np.int32)
+        cell_rows = filtered_pc[:, 0] / map_resolution_m
+        cell_cols = (filtered_pc[:, 1] + map_width_m / 2) / map_resolution_m
+        cells = np.stack((cell_rows, cell_cols), axis=-1).astype(np.int32)
 
-        in_range = cell_pc[
+        in_range = cells[
             (
-                (cell_pc[:, 0] >= 0)
-                & (cell_pc[:, 0] < map_height_cells)
-                & (cell_pc[:, 1] >= 0)
-                & (cell_pc[:, 1] < map_width_cells)
+                (cells[:, 0] >= 0)
+                & (cells[:, 0] < map_height_cells)
+                & (cells[:, 1] >= 0)
+                & (cells[:, 1] < map_width_cells)
             )
         ]
+        in_range = cells
 
-        grid[in_range] = 1
-        flat = grid.flatten()
+        # grid[in_range] = 255
+        for x, y in in_range:
+            grid[x, y] = 255
+
+        flat = grid.flatten(order="C")  # row-major order
+
+        # hmmm. width for rviz is along the x axis, height is along the y axis. this is not in line with what we have done.
+        # from their docs:
+        # # The map data, in row-major order, starting with (0,0).
+        # Cell (1, 0) will be listed second, representing the next cell in the x direction.
+        # Cell (0, 1) will be at the index equal to info.width, followed by (1, 1).
+        # The values inside are application dependent, but frequently,
+        # 0 represents unoccupied, 1 represents definitely occupied, and
+        # -1 represents unknown.
 
         occupancy_grid = OccupancyGrid()
 
