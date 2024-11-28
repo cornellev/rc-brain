@@ -1,3 +1,0 @@
-float32 steering_angle
-float32 speed
-geometry_msgs/Point position

@@ -1,8 +1,0 @@
-odom_frame: odom
-base_link_frame: base_link
-steering:
-  kp: 0
-  ki: 0
-  kd: 0
-  kf: 1
-  i_max: 10
