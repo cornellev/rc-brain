@@ -21,7 +21,7 @@ public:
     }
 
 private:
-    const float WHEELBASE = 0.3;
+    const float WHEELBASE = 0.185;
 
     double x_ = 0.0; // Forward of base_link is x
     double y_ = 0.0;
