@@ -63,7 +63,8 @@ private:
         double delta_distance = data->velocity * dt;
 
         double new_steering_angle = data->steering_angle;
-        double average_steering_angle = (new_steering_angle + old_steering_angle_) / 2.0;
+        double average_steering_angle = new_steering_angle;
+        // double average_steering_angle = (new_steering_angle + old_steering_angle_) / 2.0;
 
         double turning_radius = WHEELBASE / std::tan(average_steering_angle);
 

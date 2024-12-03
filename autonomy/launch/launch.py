@@ -111,34 +111,34 @@ def generate_launch_description():
                 ]
             ),
             # SLAM TOOLBOX
-            # Node(
-            #     package="slam_toolbox",
-            #     executable="sync_slam_toolbox_node",
-            #     name="sync_slam_toolbox_node",
-            #     parameters=[
-            #         {
-            #             "odom_frame": "odom",
-            #             "base_frame": "base_link",
-            #             "map_frame": "map",
-            #             "scan_topic": "/scan",
-            #             "scan_queue_size": 10,
-            #             "map_update_interval": 0.05,
-            #             # "position_covariance_scale": 1.0,
-            #             # "yaw_covariance_scale": 1.0,
-            #             "resolution": .13,
-            #             "min_laser_range": .15,
-            #             "max_laser_range": 12.0,
-            #             "use_scan_matching": True,
-            #             "do_loop_closing": True,
-            #             "use_scan_barycenter": True,
-            #             "minimum_travel_distance": .05,
-            #             "minimum_travel_heading": .05,
-            #             "correlation_search_space_dimension": .2,
-            #             "loop_search_space_dimension": 3.0,
-            #             "angle_variance_penalty": 0.0
-            #         }
-            #     ]
-            # ),
+            Node(
+                package="slam_toolbox",
+                executable="sync_slam_toolbox_node",
+                name="sync_slam_toolbox_node",
+                parameters=[
+                    {
+                        "odom_frame": "odom",
+                        "base_frame": "meow_link",
+                        "map_frame": "map",
+                        "scan_topic": "/scan",
+                        "scan_queue_size": 10,
+                        "map_update_interval": 0.05,
+                        # "position_covariance_scale": 1.0,
+                        # "yaw_covariance_scale": 1.0,
+                        "resolution": .13,
+                        "min_laser_range": .15,
+                        "max_laser_range": 12.0,
+                        "use_scan_matching": True,
+                        "do_loop_closing": True,
+                        "use_scan_barycenter": True,
+                        "minimum_travel_distance": .05,
+                        "minimum_travel_heading": .05,
+                        "correlation_search_space_dimension": .2,
+                        "loop_search_space_dimension": 3.0,
+                        "angle_variance_penalty": 0.0
+                    }
+                ]
+            ),
 
             ## LAUNCH FILES
 
