@@ -102,14 +102,14 @@ def generate_launch_description():
                 ]
             ),
             # Robot Localization
-            Node(
-                package="robot_localization",
-                executable="ekf_node",
-                name="ekf_filter_node",
-                parameters=[
-                    robot_localization_config
-                ]
-            ),
+            # Node(
+            #     package="robot_localization",
+            #     executable="ekf_node",
+            #     name="ekf_filter_node",
+            #     parameters=[
+            #         robot_localization_config
+            #     ]
+            # ),
             # SLAM TOOLBOX
             Node(
                 package="slam_toolbox",
@@ -118,7 +118,7 @@ def generate_launch_description():
                 parameters=[
                     {
                         "odom_frame": "odom",
-                        "base_frame": "meow_link",
+                        "base_frame": "base_link",
                         "map_frame": "map",
                         "scan_topic": "/scan",
                         "scan_queue_size": 10,
@@ -139,6 +139,9 @@ def generate_launch_description():
                     }
                 ]
             ),
+
+            # CEV Localization
+            launch("cev_localization", "launch.py"),
 
             ## LAUNCH FILES
 
