@@ -29,6 +29,7 @@ public:
     AutobrakeNode() : Node("autobrake")
     {
         forward_brake_.data = MAX_VEL;
+        backward_brake_.data = MAX_VEL;
 
         scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
             "scan", 1, std::bind(&AutobrakeNode::checkCollision, this, _1));
@@ -39,7 +40,8 @@ public:
         rc_movement_sub_ = this->create_subscription<ackermann_msgs::msg::AckermannDrive>(
             "rc_movement_msg", 1, std::bind(&AutobrakeNode::setTargets, this, _1));
 
-        forward_brake_pub_ = this->create_publisher<std_msgs::msg::Float32>("auto_max_vel", 1);
+        forward_brake_pub_ = this->create_publisher<std_msgs::msg::Float32>("auto_max_vel/forward", 1);
+        backward_brake_pub_ = this->create_publisher<std_msgs::msg::Float32>("auto_max_vel/backward", 1);
 
         timer_ = this->create_wall_timer(
             std::chrono::milliseconds(10),
@@ -51,10 +53,10 @@ public:
 
 private:  // TODO: Make these constants configurable and use transforms instead of direct lidar
     const float VEHICLE_LENGTH = 0.185;
-    const float VEHICLE_WIDTH = 0.18;
-    const float AUTOBRAKE_TIME = 0.7;
-    const float AUTOBRAKE_DISTANCE = 0.2;
-    const float MAX_VEL = 1.5;
+    const float VEHICLE_WIDTH = 0.20;
+    const float AUTOBRAKE_TIME = 1.0;
+    const float AUTOBRAKE_DISTANCE = 0.3;
+    const float MAX_VEL = 2.0;
     const int MIN_COLLISIONS_FOR_BRAKE = 3;
     const float LIDAR_ROTATIONAL_OFFSET = M_PI;
     const float LIDAR_HORIZONTAL_OFFSET = 0.035;
@@ -62,6 +64,7 @@ private:  // TODO: Make these constants configurable and use transforms instead 
     float steering_angle_ = 0;
     float velocity_ = 0;
     float target_velocity_ = 0;
+    
     std_msgs::msg::Float32 forward_brake_;
 
     rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
