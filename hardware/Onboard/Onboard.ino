@@ -54,10 +54,10 @@ long last_error_time;
 float autobrake = MAX_VELOCITY;
 
 // SID controller values (Sproportional Integral Derivative)
-float kP = .002; // Proportional gain for SID controller
-const float kI = .005; // Integral gain for SID controller
-const float kD = .002; // Derivative gain for SID controller // .003
-// const float kD = 0.0;
+float kP = 10.0; // Proportional gain for SID controller
+const float kI = 0.0; // Integral gain for SID controller //.005
+const float kD = 0.0; // Derivative gain for SID controller // .002
+
 //float integral = 0;
 float last_error = 0.0;
 float total_error = 0.0;
@@ -66,6 +66,9 @@ float given_power = 0.0;
 float max_speed = 0.0;
 
 float reported_val = 1.6;
+
+float error; 
+float velocity_setpoint;
 
 // Initialize hardware/sensors
 Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
@@ -126,42 +129,51 @@ void writeAckermann(float angle, float speed) {
   writePercent(speed);
 }
 
+void writeAckermann2(float angle, float speed) {
+  writeAngle(angle);
+  writePercent(speed);
+}
+
 /**
   Update the target power and steering angle based on set targets and feedback.
  */
 void updateAckermann() {
-  // float target_vel = target_velocity;
+  velocity_setpoint = target_velocity; //min(target_velocity, autobrake);
+  velocity_setpoint = constrain(velocity_setpoint, MIN_VELOCITY, MAX_VELOCITY);
 
-  float target_vel = min(target_velocity, autobrake);
+  long current_time = millis();
+  error = velocity_setpoint - current_velocity;
+  float delta_error = error - last_error;
 
-  reported_val = target_vel;
+  given_power = velocity_setpoint / MAX_VELOCITY;
+  //given_power = (kP*error) + (kI*total_error) + (kD*((error - last_error) / ((current_time - last_error_time) / 1000.0)));
+  //given_power = constrain(given_power, -1.0, 1.0);
+
+  last_error = error;
+  total_error += error;
+  last_error_time = current_time;
+
+  if (abs(current_velocity < 0.01) && abs(velocity_setpoint) < 0.01) {
+    writeAckermann(target_angle, 0);
+  } else {
+    writeAckermann(target_angle, given_power);
+  }
+
+
+  /*
+  reported_val = target_vel; // i have no idea what this does -erica
 
   if ((autobrake < .6 && target_vel > 0.0) || autobrake < current_velocity) {
     given_power = 0.0;
     kP = 4.5;
   } else {
-    kP = .002;
+    kP = 4.5;
   }
-
-  if (target_vel > MAX_VELOCITY) {
-    target_vel = MAX_VELOCITY;
-  } else if (target_vel < MIN_VELOCITY) {
-    target_vel = MIN_VELOCITY;
-  }
-  
-  long current_time = millis();
-
-  float error = target_vel - current_velocity;
-  float delta_error = error - last_error;
 
   given_power = max(-1, min(1, (given_power + kP * error + kD * delta_error)));
 
   // given_power = kP * error + kI * total_error + kD * ((error - last_error) / ((current_time - last_error_time) / 1000.0));
-
-  last_error = error;
-//  total_error += error;
-  last_error_time = current_time;
-
+  
 //  if (((given_power + target_velocity / MAX_VELOCITY) < .2 && (given_power + target_velocity / MAX_VELOCITY) > -.2) || target_velocity == 0.0) {
 //    writeAckermann(target_angle, 0);
 //  } else {
@@ -173,6 +185,7 @@ void updateAckermann() {
     // reported_val = given_power + (target_vel / MAX_VELOCITY);
   }
 //  }
+  */
 }
 
 void updateEncoders() {
@@ -320,8 +333,8 @@ void loop() {
 
     Serial.print(current_time);
     Serial.print(" ");
-    Serial.print(current_velocity, 4);
+    Serial.print(given_power, 4);
     Serial.print(" ");
-    Serial.println(target_angle, 4);
+    Serial.println(error, 4);
   }
 }
