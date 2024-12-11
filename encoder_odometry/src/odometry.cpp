@@ -8,22 +8,21 @@
 
 using std::placeholders::_1;
 
-class OdometryNode : public rclcpp::Node
-{
+class OdometryNode : public rclcpp::Node {
 public:
-    OdometryNode() : Node("encoder_odometry") {
+    OdometryNode(): Node("encoder_odometry") {
         RCLCPP_INFO(this->get_logger(), "Initializing Ackermann Odometry Node");
 
         sensor_collect_sub_ = this->create_subscription<cev_msgs::msg::SensorCollect>(
             "sensor_collect", 1, std::bind(&OdometryNode::updateOdometry, this, _1));
-    
+
         odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("/encoder_odometry", 1);
     }
 
 private:
     const float WHEELBASE = 0.185;
 
-    double x_ = 0.0; // Forward of base_link is x
+    double x_ = 0.0;  // Forward of base_link is x
     double y_ = 0.0;
 
     double yaw_ = 0.0;
@@ -37,14 +36,8 @@ private:
 
     bool initialized = false;
 
-    double covariance_[36] = {
-        0.01, 0, 0, 0, 0, 0,
-        0, 0.01, 0, 0, 0, 0,
-        0, 0, 0.01, 0, 0, 0,
-        0, 0, 0, 0.01, 0, 0,
-        0, 0, 0, 0, 0.01, 0,
-        0, 0, 0, 0, 0, 0.01
-    };
+    double covariance_[36] = {0.01, 0, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0,
+        0, 0.01, 0, 0, 0, 0, 0, 0, 0.01, 0, 0, 0, 0, 0, 0, 0.01};
 
     rclcpp::Subscription<cev_msgs::msg::SensorCollect>::SharedPtr sensor_collect_sub_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher_;
@@ -75,14 +68,14 @@ private:
         y_ += delta_distance * std::sin(yaw_);
 
         publishOdometry(this->now(), data->velocity, delta_theta / dt);
-        
+
         // Update carry vars
         old_steering_angle_ = new_steering_angle;
         prev_time_ = current_time;
     }
 
-    void publishOdometry(const rclcpp::Time &current_time, double linear_velocity, double angular_velocity)
-    {
+    void publishOdometry(const rclcpp::Time& current_time, double linear_velocity,
+        double angular_velocity) {
         /**
          * Publish odometry message using current pose/twist along with calculated velocities.
          */
@@ -104,8 +97,7 @@ private:
         odom_msg.twist.twist.linear.x = linear_velocity;
         odom_msg.twist.twist.angular.z = angular_velocity;
 
-        for (int i = 0; i < 36; i++)
-        {
+        for (int i = 0; i < 36; i++) {
             odom_msg.pose.covariance[i] = covariance_[i];
         }
 
@@ -113,8 +105,7 @@ private:
     }
 };
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
     rclcpp::spin(std::make_shared<OdometryNode>());
     rclcpp::shutdown();
