@@ -95,16 +95,16 @@ void writePercent(float value) {
   value = max(min(value, 1), -1);
   
   if (value >= 0) {
-    digitalWrite(IN_1, HIGH);
-    digitalWrite(IN_2, LOW);
+    digitalWrite(IN_1, LOW);
+    digitalWrite(IN_2, HIGH);
     digitalWrite(IN_3, HIGH);
     digitalWrite(IN_4, LOW);
 
     analogWrite(EN_A, value * 255);
     analogWrite(EN_B, value * 255);
   } else {
-    digitalWrite(IN_1, LOW);
-    digitalWrite(IN_2, HIGH);
+    digitalWrite(IN_1, HIGH);
+    digitalWrite(IN_2, LOW);
     digitalWrite(IN_3, LOW);
     digitalWrite(IN_4, HIGH);
 
@@ -125,6 +125,8 @@ void writeAckermann(float angle, float speed) {
   writeAngle(angle);
   writePercent(speed);
 }
+
+float targeted_power = 0.0;
 
 /**
   Update the target power and steering angle based on set targets and feedback.
@@ -167,8 +169,10 @@ void updateAckermann() {
 //  } else {
   if (abs(current_velocity < .01) && abs(target_vel) < .01) {
     writeAckermann(target_angle, 0);
+    targeted_power = 0.0;
     // reported_val = 0.0;
   } else {
+    targeted_power = given_power + (target_vel / MAX_VELOCITY);
     writeAckermann(target_angle, given_power + (target_vel / MAX_VELOCITY));
     // reported_val = given_power + (target_vel / MAX_VELOCITY);
   }
@@ -177,7 +181,7 @@ void updateAckermann() {
 
 void updateEncoders() {
   debug_right_encoder = left_encoder.read() * TICKS_TO_METERS;
-  debug_left_encoder = -right_encoder.read() * TICKS_TO_METERS;
+  debug_left_encoder = right_encoder.read() * TICKS_TO_METERS;
 }
 
 /**
@@ -193,7 +197,7 @@ void updateVelocity() {
   //   (encoder_right - last_encoder_right)
 
   float encoder_left = left_encoder.read() * TICKS_TO_METERS;
-  float encoder_right = -right_encoder.read() * TICKS_TO_METERS;
+  float encoder_right = right_encoder.read() * TICKS_TO_METERS;
 
   // ) / 2.0;
   float avg_dist = ((encoder_left - last_encoder_left) + (encoder_right - last_encoder_right)) / 2.0; // TODO: Temporarily remove right encoder bc not working
@@ -274,7 +278,7 @@ void setup() {
   servo.attach(SERVO_PIN);
 
   last_encoder_left = left_encoder.read() * TICKS_TO_METERS;
-  last_encoder_right = -right_encoder.read() * TICKS_TO_METERS;
+  last_encoder_right = right_encoder.read() * TICKS_TO_METERS;
   delay(2000);
   last_update_time = millis();
   last_push_time = millis();
@@ -320,8 +324,8 @@ void loop() {
 
     Serial.print(current_time);
     Serial.print(" ");
-    Serial.print(current_velocity, 4);
+    Serial.print(targeted_power, 4);
     Serial.print(" ");
-    Serial.println(target_angle, 4);
+    Serial.println(right_encoder.read(), 4);
   }
 }
