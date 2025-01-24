@@ -14,6 +14,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(ackermann_msgs REQUIRED)
 find_package(cev_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(control_toolbox REQUIRED)
 
 add_executable(autobrake_node src/autobrake_node.cpp)
 add_executable(trajectory_follower_node src/trajectory_follower.cpp)

@@ -1,12 +1,28 @@
-#include <rclcpp/rclcpp.hpp>
-#include <ackermann_msgs/msg/ackermann_drive.hpp>
+#include <cmath>
+#include "rclcpp/rclcpp.hpp"
+#include "ackermann_msgs/msg/ackermann_drive.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "cev_msgs/msg/waypoint.hpp"
 #include "cev_msgs/msg/trajectory.hpp"
-#include <vector>
-#include <cmath>
 
 using std::placeholders::_1;
+
+struct Waypoint {
+    Waypoint(double x, double y, double v): x(x), y(y), v(v) {};
+
+    double x;
+    double y;
+    double v;
+};
+
+struct LineSegment {
+    LineSegment(double x0, double y0, double x1, double y1): x0(x0), y0(y0), x1(x1), y1(y1) {};
+
+    double x0;
+    double y0;
+    double x1;
+    double y1;
+};
 
 class TrajectoryFollower : public rclcpp::Node {
 public:
@@ -17,45 +33,65 @@ public:
         trajectory_sub_ = this->create_subscription<cev_msgs::msg::Trajectory>("trajectory", 1,
             std::bind(&TrajectoryFollower::trajectory_callback, this, _1));
 
-        ackermann_pub_ = this->create_publisher<ackermann_msgs::msg::AckermannDrive>("rc_movement_msg", 1);
+        ackermann_pub_ =
+            this->create_publisher<ackermann_msgs::msg::AckermannDrive>("rc_movement_msg", 1);
     }
 
 private:
-    float WB = 0.185;
+    double min_steering_angle = -20.0 * M_PI / 180.0;
+    double max_steering_angle = 20.0 * M_PI / 180.0;
 
-    float min_steering_angle = -20.0 * M_PI / 180.0;
-    float max_steering_angle = 20.0 * M_PI / 180.0;
-
-    float waypoint_radius = 0.3;
+    double waypoint_radius = 0.3;
 
     bool waypoints_initialized = false;
-    std::vector<cev_msgs::msg::Waypoint> waypoints;
-    int current_waypoint = 0;
+    std::vector<Waypoint> waypoints;
+    size_t current_target_wp = 0;
 
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odometry_sub_;
     rclcpp::Subscription<cev_msgs::msg::Trajectory>::SharedPtr trajectory_sub_;
     rclcpp::Publisher<ackermann_msgs::msg::AckermannDrive>::SharedPtr ackermann_pub_;
 
-    float dist_to_waypoint(float current_x, float current_y, float target_x, float target_y) {
+    double dist_to_waypoint(double current_x, double current_y, double target_x, double target_y) {
         return std::sqrt(std::pow(current_x - target_x, 2) + std::pow(current_y - target_y, 2));
     }
 
-    float angle_to_waypoint(float current_x, float current_y, float current_theta, float target_x, float target_y) {
+    double angle_to_waypoint(double current_x, double current_y, double current_theta,
+        double target_x, double target_y) {
         return std::atan2(target_y - current_y, target_x - current_x) - current_theta;
     }
 
-    bool check_waypoint_reached(float current_x, float current_y, float target_x, float target_y) {
-        return dist_to_waypoint(current_x, current_y, target_x, target_y) < waypoint_radius;
+    LineSegment track_segment_beginning_at(size_t waypoint) {
+        Waypoint wp_next = waypoints[waypoint + 1];
+        Waypoint wp = waypoints[waypoint];
+
+        return LineSegment(wp.x, wp.y, wp_next.x, wp_next.y);
     }
 
-    float find_steering_angle(float current_x, float current_y, float current_theta, float target_x, float target_y) {
-        float s = dist_to_waypoint(current_x, current_y, target_x, target_y);
-        float alpha = angle_to_waypoint(current_x, current_y, current_theta, target_x, target_y);
+    bool check_waypoint_reached(double current_x, double current_y) {
+        Waypoint wp = waypoints[current_target_wp];
+        double dist = std::sqrt(std::pow(current_x - wp.x, 2) + std::pow(current_y - wp.y, 2));
+        if (dist < waypoint_radius) {
+            return true;
+        }
 
-        return std::atan(2 * WB * std::sin(alpha) / s);
+        // TODO: current_target_wp = end
+        LineSegment segment = track_segment_beginning_at(current_target_wp);
+
+        double rel_x = current_x - segment.x0;
+        double rel_y = current_x - segment.y0;
+        double norm_x = segment.x1 - segment.x0;
+        double norm_y = segment.y1 - segment.y0;
+
+        double dot = rel_x * norm_x + rel_y * norm_y;
+
+        if (dot > 0) {
+            return true;
+        }
+
+        return false;
     }
 
-    void publish_ackermann_drive(float steering_angle, float speed) {
+    void publish_ackermann_drive(double steering_angle, double speed) {
         auto ackermann_msg = ackermann_msgs::msg::AckermannDrive();
         ackermann_msg.steering_angle = fmod(steering_angle, 2 * M_PI);
 
@@ -72,40 +108,42 @@ private:
 
     void odometry_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
         if (!waypoints_initialized) {
+            publish_ackermann_drive(0.0, 0.0);
             return;
         }
 
-        if (check_waypoint_reached(msg->pose.pose.position.x, msg->pose.pose.position.y,
-            waypoints[current_waypoint].x, waypoints[current_waypoint].y)) {
-            current_waypoint++;
-            if (current_waypoint >= waypoints.size()) {
+        if (check_waypoint_reached(msg->pose.pose.position.x, msg->pose.pose.position.y)) {
+            current_target_wp++;
+            if (current_target_wp >= waypoints.size()) {
                 waypoints_initialized = false;
-                publish_ackermann_drive(0.0, 0.0);
                 return;
             }
         }
 
-        float x = msg->pose.pose.position.x;
-        float y = msg->pose.pose.position.y;
-        
-        float theta = 2 * std::acos(msg->pose.pose.orientation.w);
-        float v = msg->twist.twist.linear.x;
+        double x = msg->pose.pose.position.x;
+        double y = msg->pose.pose.position.y;
 
-        cev_msgs::msg::Waypoint target = waypoints[current_waypoint];
+        double theta = 2 * std::acos(msg->pose.pose.orientation.w);
 
-        float steering_angle = find_steering_angle(x, y, theta, target.x, target.y);
-
-        RCLCPP_INFO(this->get_logger(), "Target Steering %f", steering_angle);
-
-        publish_ackermann_drive(steering_angle, target.v);
+        Waypoint target = waypoints[current_target_wp];
     }
 
     void trajectory_callback(const cev_msgs::msg::Trajectory::SharedPtr msg) {
-        if (!waypoints_initialized) {
-            waypoints_initialized = true;
+        if (msg->waypoints.size() < 2) {
+            RCLCPP_WARN(this->get_logger(),
+                "Invalid trajectory. Must contain at least 2 points but had %zu.",
+                msg->waypoints.size());
+            return;
         }
 
-        waypoints = msg->waypoints;
+        waypoints.clear();
+        waypoints.reserve(msg->waypoints.size());
+        for (const auto& wp_msg: msg->waypoints) {
+            waypoints.emplace_back(wp_msg.x, wp_msg.y, wp_msg.v);
+        }
+
+        current_target_wp = 0;
+        waypoints_initialized = true;
     }
 };
 

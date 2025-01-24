@@ -9,3 +9,4 @@ install/*
 ./log/*
 ./build/*
 ./install/*
+clangd
