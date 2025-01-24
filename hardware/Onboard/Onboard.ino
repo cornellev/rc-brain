@@ -324,8 +324,8 @@ void loop() {
 
     Serial.print(current_time);
     Serial.print(" ");
-    Serial.print(targeted_power, 4);
+    Serial.print(current_velocity, 4);
     Serial.print(" ");
-    Serial.println(right_encoder.read(), 4);
+    Serial.println(target_angle, 4);
   }
 }
