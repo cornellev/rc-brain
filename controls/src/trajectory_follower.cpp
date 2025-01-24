@@ -85,6 +85,8 @@ private:
             }
         }
 
+        RCLCPP_INFO(this->get_logger(), "Current waypoint: %d", current_waypoint);
+
         float x = msg->pose.pose.position.x;
         float y = msg->pose.pose.position.y;
         float theta = 2 * std::acos(msg->pose.pose.orientation.w);

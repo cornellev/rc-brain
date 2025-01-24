@@ -17,6 +17,7 @@ find_package(nav_msgs REQUIRED)
 
 add_executable(autobrake_node src/autobrake_node.cpp)
 add_executable(trajectory_follower_node src/trajectory_follower.cpp)
+add_executable(debug_trajectory src/debug_trajectory_publish.cpp)
 
 ament_target_dependencies(autobrake_node 
   rclcpp 
@@ -33,7 +34,15 @@ ament_target_dependencies(trajectory_follower_node
   cev_msgs
   nav_msgs)
 
-install(TARGETS autobrake_node trajectory_follower_node
+ament_target_dependencies(debug_trajectory
+  rclcpp 
+  std_msgs 
+  sensor_msgs 
+  ackermann_msgs 
+  cev_msgs
+  nav_msgs)
+
+install(TARGETS autobrake_node trajectory_follower_node debug_trajectory
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch/
