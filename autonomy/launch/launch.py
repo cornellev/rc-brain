@@ -163,10 +163,13 @@ def generate_launch_description():
             # CEV Localization
             launch("cev_localization", "launch.py"),
 
+            # Trajectory Launch
+            launch("controls", "trajectory_launch.py"),
+
             ## LAUNCH FILES
 
             # Teleop
-            launch("teleop", "launch.py"),
+            # launch("teleop", "launch.py"),
             # Autobrake
             # launch("controls", "autobrake_launch.py"),
             # Serial Communicator

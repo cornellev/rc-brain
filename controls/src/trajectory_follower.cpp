@@ -52,7 +52,7 @@ private:
         float s = dist_to_waypoint(current_x, current_y, target_x, target_y);
         float alpha = angle_to_waypoint(current_x, current_y, current_theta, target_x, target_y);
 
-        return std::atan2(2 * WB * std::sin(alpha) / s, 1.0);
+        return std::atan(2 * WB * std::sin(alpha) / s);
     }
 
     void publish_ackermann_drive(float steering_angle, float speed) {
@@ -85,16 +85,17 @@ private:
             }
         }
 
-        RCLCPP_INFO(this->get_logger(), "Current waypoint: %d", current_waypoint);
-
         float x = msg->pose.pose.position.x;
         float y = msg->pose.pose.position.y;
+        
         float theta = 2 * std::acos(msg->pose.pose.orientation.w);
         float v = msg->twist.twist.linear.x;
 
         cev_msgs::msg::Waypoint target = waypoints[current_waypoint];
 
         float steering_angle = find_steering_angle(x, y, theta, target.x, target.y);
+
+        RCLCPP_INFO(this->get_logger(), "Target Steering %f", steering_angle);
 
         publish_ackermann_drive(steering_angle, target.v);
     }
