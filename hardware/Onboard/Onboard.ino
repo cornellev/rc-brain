@@ -53,8 +53,10 @@ long last_error_time;
 
 float autobrake = MAX_VELOCITY;
 
+float KP_RAW = .003;
+
 // SID controller values (Sproportional Integral Derivative)
-float kP = .002; // Proportional gain for SID controller
+float kP = KP_RAW; // Proportional gain for SID controller
 const float kI = .005; // Integral gain for SID controller
 const float kD = .002; // Derivative gain for SID controller // .003
 // const float kD = 0.0;
@@ -142,7 +144,7 @@ void updateAckermann() {
     given_power = 0.0;
     kP = 4.5;
   } else {
-    kP = .002;
+    kP = KP_RAW;
   }
 
   if (target_vel > MAX_VELOCITY) {
