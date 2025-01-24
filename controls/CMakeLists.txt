@@ -13,8 +13,10 @@ find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(ackermann_msgs REQUIRED)
 find_package(cev_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 add_executable(autobrake_node src/autobrake_node.cpp)
+add_executable(trajectory_follower_node src/trajectory_follower.cpp)
 
 ament_target_dependencies(autobrake_node 
   rclcpp 
@@ -23,7 +25,15 @@ ament_target_dependencies(autobrake_node
   ackermann_msgs 
   cev_msgs)
 
-install(TARGETS autobrake_node
+ament_target_dependencies(trajectory_follower_node
+  rclcpp 
+  std_msgs 
+  sensor_msgs 
+  ackermann_msgs 
+  cev_msgs
+  nav_msgs)
+
+install(TARGETS autobrake_node trajectory_follower_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch/
