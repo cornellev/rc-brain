@@ -7,6 +7,16 @@
 #include <cmath>
 
 using std::placeholders::_1;
+using cev_msgs::msg::Waypoint;
+
+struct Coordinate {
+    Coordinate(float x, float y, float theta, float v): x(x), y(y), theta(theta), v(v) {}
+
+    float x;
+    float y;
+    float theta;
+    float v;
+};
 
 class TrajectoryFollower : public rclcpp::Node {
 public:
@@ -30,30 +40,46 @@ private:
     float waypoint_final_radius = .1;
 
     bool waypoints_initialized = false;
-    std::vector<cev_msgs::msg::Waypoint> waypoints;
+    std::vector<Waypoint> waypoints;
     size_t current_waypoint = 0;
 
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odometry_sub_;
     rclcpp::Subscription<cev_msgs::msg::Trajectory>::SharedPtr trajectory_sub_;
     rclcpp::Publisher<ackermann_msgs::msg::AckermannDrive>::SharedPtr ackermann_pub_;
 
-    float dist_to_waypoint(float current_x, float current_y, float target_x, float target_y) {
-        return std::sqrt(std::pow(current_x - target_x, 2) + std::pow(current_y - target_y, 2));
+    float dist_to_waypoint(Coordinate& current, Waypoint& target) {
+        return std::sqrt(std::pow(current.x - target.x, 2) + std::pow(current.y - target.y, 2));
     }
 
-    float angle_to_waypoint(float current_x, float current_y, float current_theta, float target_x, float target_y) {
-        return std::atan2(target_y - current_y, target_x - current_x) - current_theta;
+    float angle_to_waypoint(Coordinate& current, Waypoint& target) {
+        return std::atan2(target.y - current.y, target.x - current.x) - current.theta;
     }
 
-    bool check_waypoint_reached(float current_x, float current_y, float target_x, float target_y, bool final) {
-        float radius = final ? waypoint_final_radius : waypoint_radius;
+    bool check_waypoint_reached(Coordinate& current, Waypoint& target) {
+        float dist = dist_to_waypoint(current, target);
+
+        if (current_waypoint == waypoints.size() - 1) {
+            return dist < waypoint_final_radius;
+        }
+
+        bool within_radius = dist < waypoint_radius;
+        bool angle_passed = false;
         
-        dist_to_waypoint(current_x, current_y, target_x, target_y) < radius;
+        Waypoint next = waypoints[current_waypoint + 1];
+
+        // Take dot product of current to target and target to next
+        float dot = (target.x - current.x) * (next.x - target.x) + (target.y - current.y) * (next.y - target.y);
+
+        if (dot > 0) {
+            angle_passed = true;
+        }
+
+        return within_radius || angle_passed;
     }
 
-    float find_steering_angle(float current_x, float current_y, float current_theta, float target_x, float target_y) {
-        float s = dist_to_waypoint(current_x, current_y, target_x, target_y);
-        float alpha = angle_to_waypoint(current_x, current_y, current_theta, target_x, target_y);
+    float find_steering_angle(Coordinate& current, Waypoint& target) {
+        float s = dist_to_waypoint(current, target);
+        float alpha = angle_to_waypoint(current, target);
 
         return std::atan(2 * WB * std::sin(alpha) / s);
     }
@@ -78,25 +104,27 @@ private:
             return;
         }
 
-        if (check_waypoint_reached(msg->pose.pose.position.x, msg->pose.pose.position.y,
-            waypoints[current_waypoint].x, waypoints[current_waypoint].y), current_waypoint == waypoints.size() - 1)) {
+        Coordinate current = Coordinate(
+            msg->pose.pose.position.x, 
+            msg->pose.pose.position.y,
+            2 * std::acos(msg->pose.pose.orientation.w), 
+            msg->twist.twist.linear.x
+        );
+
+        Waypoint target = waypoints[current_waypoint];
+
+        // Skip reached waypoints
+        while (check_waypoint_reached(current, target)) {
             current_waypoint++;
             if (current_waypoint >= waypoints.size()) {
                 waypoints_initialized = false;
                 publish_ackermann_drive(0.0, 0.0);
                 return;
             }
+            Waypoint target = waypoints[current_waypoint];
         }
 
-        float x = msg->pose.pose.position.x;
-        float y = msg->pose.pose.position.y;
-        
-        float theta = 2 * std::acos(msg->pose.pose.orientation.w);
-        float v = msg->twist.twist.linear.x;
-
-        cev_msgs::msg::Waypoint target = waypoints[current_waypoint];
-
-        float steering_angle = find_steering_angle(x, y, theta, target.x, target.y);
+        float steering_angle = find_steering_angle(current, target);
 
         RCLCPP_INFO(this->get_logger(), "Target Steering %zu", current_waypoint);
 
