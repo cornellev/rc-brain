@@ -76,10 +76,10 @@ Servo servo;
 /**
    Turn steering servo to specified angle. Angle will be clamped to be between -MAX_INPUT_STEER and MAX_INPUT_STEER.
 
-   @param angle: Angle to turn the servo to. Positive values turn the wheels to the right, negative values turn the wheels to the left. Zero is straight ahead.
+   @param angle: Angle to turn the servo to. Positive values turn the wheels to the left, negative values turn the wheels to the right. Zero is straight ahead.
 */
 void writeAngle(float angle) {
-  angle = -TO_DEG(angle);
+  angle = TO_DEG(angle);
   angle = max(min(STEERING_ZERO_ANGLE - angle, STEERING_ZERO_ANGLE + MAX_INPUT_STEER), STEERING_ZERO_ANGLE - MAX_INPUT_STEER);
   servo.write(angle);
 }

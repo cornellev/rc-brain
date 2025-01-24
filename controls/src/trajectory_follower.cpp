@@ -27,10 +27,11 @@ private:
     float max_steering_angle = 20.0 * M_PI / 180.0;
 
     float waypoint_radius = 0.3;
+    float waypoint_final_radius = .1;
 
     bool waypoints_initialized = false;
     std::vector<cev_msgs::msg::Waypoint> waypoints;
-    int current_waypoint = 0;
+    size_t current_waypoint = 0;
 
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odometry_sub_;
     rclcpp::Subscription<cev_msgs::msg::Trajectory>::SharedPtr trajectory_sub_;
@@ -44,8 +45,10 @@ private:
         return std::atan2(target_y - current_y, target_x - current_x) - current_theta;
     }
 
-    bool check_waypoint_reached(float current_x, float current_y, float target_x, float target_y) {
-        return dist_to_waypoint(current_x, current_y, target_x, target_y) < waypoint_radius;
+    bool check_waypoint_reached(float current_x, float current_y, float target_x, float target_y, bool final) {
+        float radius = final ? waypoint_final_radius : waypoint_radius;
+        
+        dist_to_waypoint(current_x, current_y, target_x, target_y) < radius;
     }
 
     float find_steering_angle(float current_x, float current_y, float current_theta, float target_x, float target_y) {
@@ -76,7 +79,7 @@ private:
         }
 
         if (check_waypoint_reached(msg->pose.pose.position.x, msg->pose.pose.position.y,
-            waypoints[current_waypoint].x, waypoints[current_waypoint].y)) {
+            waypoints[current_waypoint].x, waypoints[current_waypoint].y), current_waypoint == waypoints.size() - 1)) {
             current_waypoint++;
             if (current_waypoint >= waypoints.size()) {
                 waypoints_initialized = false;
@@ -95,7 +98,7 @@ private:
 
         float steering_angle = find_steering_angle(x, y, theta, target.x, target.y);
 
-        RCLCPP_INFO(this->get_logger(), "Target Steering %f", steering_angle);
+        RCLCPP_INFO(this->get_logger(), "Target Steering %zu", current_waypoint);
 
         publish_ackermann_drive(steering_angle, target.v);
     }

@@ -31,11 +31,11 @@ private:
         trajectory_msg.header.stamp = this->now();
 
         add_waypoint(trajectory_msg, 0.0, 0.0, 0.9);
-        add_waypoint(trajectory_msg, 0.3, 0.0, 0.7);
-        add_waypoint(trajectory_msg, 0.6, 0.0, 0.5);
-        add_waypoint(trajectory_msg, 0.9, 0.0, 0.3);
-        add_waypoint(trajectory_msg, 1.2, 0.0, 0.2);
-        add_waypoint(trajectory_msg, 1.5, 0.0, 0.1);
+        add_waypoint(trajectory_msg, 0.3, 0.1, 0.7);
+        add_waypoint(trajectory_msg, 0.6, 0.2, 0.5);
+        add_waypoint(trajectory_msg, 0.9, 0.3, 0.3);
+        add_waypoint(trajectory_msg, 1.2, 0.4, 0.2);
+        add_waypoint(trajectory_msg, 1.5, 0.5, 0.1);
 
         trajectory_pub_->publish(trajectory_msg);
     }
