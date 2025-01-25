@@ -35,10 +35,11 @@ private:
     float min_steering_angle = -20.0 * M_PI / 180.0;
     float max_steering_angle = 20.0 * M_PI / 180.0;
 
-    float waypoint_radius = 0.3;
+    float waypoint_radius = .3;
     float waypoint_final_radius = .3;
 
     bool waypoints_initialized = false;
+    
     std::vector<Waypoint> waypoints;
     size_t current_waypoint = 0;
 
@@ -126,7 +127,7 @@ private:
             msg->twist.twist.linear.x);
 
         // Skip reached waypoints
-        if (waypoint_reached(current, current_waypoint)) {
+        while (waypoint_reached(current, current_waypoint)) {
             current_waypoint++;
             if (current_waypoint >= waypoints.size()) {
                 waypoints_initialized = false;
@@ -144,6 +145,7 @@ private:
 
     void trajectory_callback(const cev_msgs::msg::Trajectory::SharedPtr msg) {
         waypoints = msg->waypoints;
+        current_waypoint = 0;
         waypoints_initialized = true;
     }
 };
