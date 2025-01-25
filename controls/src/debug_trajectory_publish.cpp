@@ -35,7 +35,9 @@ private:
         add_waypoint(trajectory_msg, 0.6, 0.2, 0.5);
         add_waypoint(trajectory_msg, 0.9, 0.3, 0.3);
         add_waypoint(trajectory_msg, 1.2, 0.4, 0.2);
-        add_waypoint(trajectory_msg, 1.5, 0.5, 0.1);
+        add_waypoint(trajectory_msg, 1.5, 0.5, 0.2);
+        // add_waypoint(trajectory_msg, 0.6, 0.5, -.3);
+        // add_waypoint(trajectory_msg, 1.5, 0.0, 0.3);
 
         trajectory_pub_->publish(trajectory_msg);
     }
