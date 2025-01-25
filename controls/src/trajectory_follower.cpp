@@ -64,8 +64,14 @@ private:
     }
 
     float angle_to_waypoint(Coordinate& current, Waypoint& target) {
-        return normalize_angle(std::atan2(target.y - current.y, target.x - current.x)
-                               - current.theta);
+        float theta = current.theta;
+
+        if (target.v < 0) {
+            theta = normalize_angle(theta + 180);
+        }
+
+        return -normalize_angle(std::atan2(target.y - current.y, target.x - current.x)
+                               - theta);
     }
 
     bool waypoint_reached(Coordinate& current, size_t waypoint_idx) {
