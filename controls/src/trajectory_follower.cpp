@@ -48,7 +48,12 @@ private:
     rclcpp::Publisher<ackermann_msgs::msg::AckermannDrive>::SharedPtr ackermann_pub_;
 
     float angle_mod(float f) {
-        return fmod(f, 2 * M_PI);
+        float modded = fmod(f, 2 * M_PI);
+        if (modded > M_PI) {
+            modded -= 2 * M_PI;
+        }
+
+        return modded;
     }
 
     float dist_to_waypoint(Coordinate& current, Waypoint& target) {
@@ -56,7 +61,7 @@ private:
     }
 
     float angle_to_waypoint(Coordinate& current, Waypoint& target) {
-        RCLCPP_INFO(this->get_logger(), "ANGLELLEELEL: %f", angle_mod(std::atan2((target.y - current.y), (target.x - current.x))));
+        // RCLCPP_INFO(this->get_logger(), "ANGLELLEELEL: %f", angle_mod(std::atan2((target.y - current.y), (target.x - current.x))));
 
         return angle_mod(angle_mod(std::atan2((target.y - current.y), (target.x - current.x))) - current.theta);
     }
@@ -67,7 +72,7 @@ private:
         float radius = final ? waypoint_final_radius : waypoint_radius;
 
         if (dist < radius) {
-            RCLCPP_INFO(this->get_logger(), "CASE 1 : %zu : %f < %f", current_waypoint, dist, radius);
+            // RCLCPP_INFO(this->get_logger(), "CASE 1 : %zu : %f < %f", current_waypoint, dist, radius);
             return true;
         }
 
@@ -80,13 +85,13 @@ private:
             Waypoint next = waypoints[current_waypoint - 1];
             dot = (current.x - target.x) * (target.x - next.x) + (current.y - target.y) * (target.y -  next.y);
             if (dot > 0) {
-                RCLCPP_INFO(this->get_logger(), "CASE 2 : %zu", current_waypoint);
+                // RCLCPP_INFO(this->get_logger(), "CASE 2 : %zu", current_waypoint);
             }
         } else {
             Waypoint next = waypoints[current_waypoint + 1];
             dot = (current.x - target.x) * (next.x - target.x) + (current.y - target.y) * (next.y - target.y);
             if (dot > 0) {
-                RCLCPP_INFO(this->get_logger(), "CASE 3 : %zu", current_waypoint);
+                // RCLCPP_INFO(this->get_logger(), "CASE 3 : %zu", current_waypoint);
             }
         }
 
@@ -106,7 +111,7 @@ private:
 
     void publish_ackermann_drive(float steering_angle, float speed) {
         auto ackermann_msg = ackermann_msgs::msg::AckermannDrive();
-        ackermann_msg.steering_angle = fmod(steering_angle, 2 * M_PI);
+        ackermann_msg.steering_angle = angle_mod(steering_angle);
 
         if (ackermann_msg.steering_angle < min_steering_angle) {
             ackermann_msg.steering_angle = min_steering_angle;
@@ -124,12 +129,18 @@ private:
             return;
         }
 
+        auto q = msg->pose.pose.orientation;
+
+        float yaw = std::atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));;
+
         Coordinate current = Coordinate(
             msg->pose.pose.position.x, 
             msg->pose.pose.position.y,
-            angle_mod(2 * std::acos(msg->pose.pose.orientation.w)), 
+            angle_mod(yaw),
             msg->twist.twist.linear.x
         );
+
+        RCLCPP_INFO(this->get_logger(), "TRUE HEADING: %f", angle_mod(yaw));
 
         Waypoint target = waypoints[current_waypoint];
 
