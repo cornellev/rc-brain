@@ -161,7 +161,19 @@ def generate_launch_description():
             # ),
 
             # CEV Localization
-            launch("cev_localization", "launch.py"),
+            Node(
+                package="cev_localization",
+                executable="ackermann_ekf",
+                name="cev_localization_node",
+                output="screen",
+                parameters=[
+                    {
+                        "config_file": get_path(
+                            "autonomy", "config", "cev_localization.yml"
+                        )
+                    }
+                ],
+            ),
 
             # Trajectory Launch
             launch("controls", "trajectory_launch.py"),
