@@ -66,11 +66,14 @@ private:
     float angle_to_waypoint(Coordinate& current, Waypoint& target) {
         float theta = current.theta;
 
+        float multiplier = 1.0;
+
         if (target.v < 0) {
-            theta = normalize_angle(theta + 180);
+            theta = normalize_angle(theta + M_PI);
+            multiplier = -1.0;
         }
 
-        return -normalize_angle(std::atan2(target.y - current.y, target.x - current.x)
+        return multiplier * normalize_angle(std::atan2(target.y - current.y, target.x - current.x)
                                - theta);
     }
 
