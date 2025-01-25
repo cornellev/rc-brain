@@ -32,8 +32,6 @@ public:
     }
 
 private:
-    float WB = 0.185;
-
     float min_steering_angle = -20.0 * M_PI / 180.0;
     float max_steering_angle = 20.0 * M_PI / 180.0;
 
@@ -97,8 +95,7 @@ private:
     }
 
     float find_steering_angle(Coordinate& current, Waypoint& target) {
-        float alpha = angle_to_waypoint(current, target);
-        return alpha;
+        return angle_to_waypoint(current, target);
     }
 
     void publish_ackermann_drive(float steering_angle, float speed) {
