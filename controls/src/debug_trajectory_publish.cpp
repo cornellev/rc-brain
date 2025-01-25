@@ -76,7 +76,7 @@ private:
             trajectory_msg.header.stamp = this->now();
             add_waypoints(trajectory_msg, trajectories[current_trajectory]);
             trajectory_pub_->publish(trajectory_msg);
-            // current_trajectory++;
+            current_trajectory++;
         }
     }
 };
