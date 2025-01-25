@@ -94,13 +94,13 @@ def generate_launch_description():
                 name="joy_node", #ros2 uses events, so don't try and direct this to /dev
             ),
             # # IMU
-            # Node(
-            #     package='witmotion_ros',
-            #     executable='witmotion_ros_node',
-            #     parameters=[
-            #         imu_config
-            #     ]
-            # ),
+            Node(
+                package='witmotion_ros',
+                executable='witmotion_ros_node',
+                parameters=[
+                    imu_config
+                ]
+            ),
             # Robot Localization
             # Node(
             #     package="robot_localization",
