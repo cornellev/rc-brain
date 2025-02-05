@@ -111,34 +111,34 @@ def generate_launch_description():
             #     ]
             # ),
             # SLAM TOOLBOX
-            # Node(
-            #     package="slam_toolbox",
-            #     executable="sync_slam_toolbox_node",
-            #     name="sync_slam_toolbox_node",
-            #     parameters=[
-            #         {
-            #             "odom_frame": "odom",
-            #             "base_frame": "base_link",
-            #             "map_frame": "map",
-            #             "scan_topic": "/scan",
-            #             "scan_queue_size": 10,
-            #             "map_update_interval": 0.05,
-            #             # "position_covariance_scale": 1.0,
-            #             # "yaw_covariance_scale": 1.0,
-            #             "resolution": .13,
-            #             "min_laser_range": .15,
-            #             "max_laser_range": 12.0,
-            #             "use_scan_matching": True,
-            #             "do_loop_closing": True,
-            #             "use_scan_barycenter": True,
-            #             "minimum_travel_distance": .05,
-            #             "minimum_travel_heading": .05,
-            #             "correlation_search_space_dimension": .2,
-            #             "loop_search_space_dimension": 3.0,
-            #             "angle_variance_penalty": 0.0
-            #         }
-            #     ]
-            # ),
+            Node(
+                package="slam_toolbox",
+                executable="sync_slam_toolbox_node",
+                name="sync_slam_toolbox_node",
+                parameters=[
+                    {
+                        "odom_frame": "odom",
+                        "base_frame": "base_link",
+                        "map_frame": "map",
+                        "scan_topic": "/scan",
+                        "scan_queue_size": 10,
+                        "map_update_interval": 0.05,
+                        # "position_covariance_scale": 1.0,
+                        # "yaw_covariance_scale": 1.0,
+                        "resolution": .13,
+                        "min_laser_range": .15,
+                        "max_laser_range": 12.0,
+                        "use_scan_matching": True,
+                        "do_loop_closing": True,
+                        "use_scan_barycenter": True,
+                        "minimum_travel_distance": .05,
+                        "minimum_travel_heading": .05,
+                        "correlation_search_space_dimension": .2,
+                        "loop_search_space_dimension": 3.0,
+                        "angle_variance_penalty": 0.0
+                    }
+                ]
+            ),
 
             # UNITREE LIDAR
             # Node(
@@ -147,17 +147,18 @@ def generate_launch_description():
             #     name='unitree_lidar_ros2_node',
             #     output='screen',
             #     parameters= [
-            #             {'port': '/dev/ttyUSB1'},
-            #             {'rotate_yaw_bias': 0.0},
-            #             {'range_scale': 0.001},
-            #             {'range_bias': 0.0},
-            #             {'range_max': 50.0},
-            #             {'range_min': 0.0},
-            #             {'cloud_frame': "unilidar_lidar"},
-            #             {'cloud_topic': "unilidar/cloud"},
-            #             {'cloud_scan_num': 18},
-            #             {'imu_frame': "unilidar_imu"},
-            #             {'imu_topic': "unilidar/imu"}]
+            #         {'port': '/dev/ttyUSB0'},
+            #         {'rotate_yaw_bias': 0.0},
+            #         {'range_scale': 0.001},
+            #         {'range_bias': 0.0},
+            #         {'range_max': 50.0},
+            #         {'range_min': 0.0},
+            #         {'cloud_frame': "unilidar_lidar"},
+            #         {'cloud_topic': "unilidar/cloud"},
+            #         {'cloud_scan_num': 18},
+            #         {'imu_frame': "unilidar_imu"},
+            #         {'imu_topic': "unilidar/imu"}
+            #     ]
             # ),
 
             # CEV Localization
@@ -187,7 +188,7 @@ def generate_launch_description():
             # Serial Communicator
             launch("serial_com", "launch.py"),
             # RPLidar
-            # launch("sllidar_ros2", "sllidar_a1_launch.py", arguments={"serial_port": "/dev/ttyUSB1"}),
+            launch("sllidar_ros2", "sllidar_a1_launch.py", arguments={"serial_port": "/dev/ttyUSB1"}),
             # Encoder Odometry (Ackermann)
             launch("encoder_odometry", "launch.py"),
         ]
