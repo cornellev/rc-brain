@@ -14,11 +14,11 @@ def generate_launch_description():
                 executable="trajectory_follower_node",
                 name="trajectory_node",
             ),
-            Node(
-                package="controls",
-                executable="debug_trajectory",
-                name="debug_trajectory",
-            )
+            # Node(
+            #     package="controls",
+            #     executable="debug_trajectory",
+            #     name="debug_trajectory",
+            # )
         ]
     )
 

@@ -35,11 +35,11 @@ private:
     float min_steering_angle = -20.0 * M_PI / 180.0;
     float max_steering_angle = 20.0 * M_PI / 180.0;
 
-    float waypoint_radius = .3;
-    float waypoint_final_radius = .3;
+    float waypoint_radius = .1;
+    float waypoint_final_radius = .1;
 
     bool waypoints_initialized = false;
-    
+
     std::vector<Waypoint> waypoints;
     size_t current_waypoint = 0;
 
@@ -73,8 +73,8 @@ private:
             multiplier = -1.0;
         }
 
-        return multiplier * normalize_angle(std::atan2(target.y - current.y, target.x - current.x)
-                               - theta);
+        return multiplier
+               * normalize_angle(std::atan2(target.y - current.y, target.x - current.x) - theta);
     }
 
     bool waypoint_reached(Coordinate& current, size_t waypoint_idx) {
