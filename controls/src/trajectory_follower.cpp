@@ -9,15 +9,6 @@
 using cev_msgs::msg::Waypoint;
 using std::placeholders::_1;
 
-struct Coordinate {
-    Coordinate(float x, float y, float theta, float v): x(x), y(y), theta(theta), v(v) {}
-
-    float x;
-    float y;
-    float theta;
-    float v;
-};
-
 class TrajectoryFollower : public rclcpp::Node {
 public:
     TrajectoryFollower(): Node("trajectory_follower") {
@@ -101,7 +92,7 @@ private:
                   + (current.y - target.y) * (next.y - target.y);
         }
 
-        return dist < .3 && dot > 0;
+        return dist < waypoint_radius && dot > 0;
     }
 
     float find_steering_angle(Coordinate& current, Waypoint& target) {
@@ -128,12 +119,13 @@ private:
             return;
         }
 
-        auto q = msg->pose.pose.orientation;
-        float yaw = normalize_angle(std::atan2(2.0 * (q.w * q.z + q.x * q.y),
-            1.0 - 2.0 * (q.y * q.y + q.z * q.z)));
+        // auto q = msg->pose.pose.orientation;
+        // float yaw = normalize_angle(std::atan2(2.0 * (q.w * q.z + q.x * q.y),
+        //     1.0 - 2.0 * (q.y * q.y + q.z * q.z)));
 
-        Coordinate current = Coordinate(msg->pose.pose.position.x, msg->pose.pose.position.y, yaw,
-            msg->twist.twist.linear.x);
+        // Coordinate current = Coordinate(msg->pose.pose.position.x, msg->pose.pose.position.y,
+        // yaw,
+        //     msg->twist.twist.linear.x);
 
         // Skip reached waypoints
         while (waypoint_reached(current, current_waypoint)) {
@@ -147,9 +139,9 @@ private:
 
         Waypoint target = waypoints[current_waypoint];
 
-        float steering_angle = find_steering_angle(current, target);
+        // float steering_angle = find_steering_angle(current, target);
 
-        publish_ackermann_drive(steering_angle, target.v);
+        publish_ackermann_drive(target.tau, target.v);
     }
 
     void trajectory_callback(const cev_msgs::msg::Trajectory::SharedPtr msg) {
