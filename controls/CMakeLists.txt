@@ -14,6 +14,9 @@ find_package(sensor_msgs REQUIRED)
 find_package(ackermann_msgs REQUIRED)
 find_package(cev_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+
 
 add_executable(autobrake_node src/autobrake_node.cpp)
 add_executable(trajectory_follower_node src/trajectory_follower.cpp)
@@ -24,7 +27,9 @@ ament_target_dependencies(autobrake_node
   std_msgs 
   sensor_msgs 
   ackermann_msgs 
-  cev_msgs)
+  cev_msgs
+  tf2_ros
+  tf2_geometry_msgs)
 
 ament_target_dependencies(trajectory_follower_node
   rclcpp 
@@ -32,7 +37,9 @@ ament_target_dependencies(trajectory_follower_node
   sensor_msgs 
   ackermann_msgs 
   cev_msgs
-  nav_msgs)
+  nav_msgs
+  tf2_ros
+  tf2_geometry_msgs)
 
 ament_target_dependencies(debug_trajectory
   rclcpp 
@@ -40,7 +47,9 @@ ament_target_dependencies(debug_trajectory
   sensor_msgs 
   ackermann_msgs 
   cev_msgs
-  nav_msgs)
+  nav_msgs
+  tf2_ros
+  tf2_geometry_msgs)
 
 install(TARGETS autobrake_node trajectory_follower_node debug_trajectory
   DESTINATION lib/${PROJECT_NAME})

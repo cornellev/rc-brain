@@ -5,6 +5,10 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "cev_msgs/msg/waypoint.hpp"
 #include "cev_msgs/msg/trajectory.hpp"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include "tf2/utils.h"
 
 #include <chrono>
 
@@ -23,7 +27,8 @@ struct Coordinate {
 
 class TrajectoryFollower : public rclcpp::Node {
 public:
-    TrajectoryFollower(): Node("trajectory_follower") {
+    TrajectoryFollower()
+        : Node("trajectory_follower"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_) {
         RCLCPP_INFO(this->get_logger(), "meow");
 
         odometry_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("odometry/filtered", 1,
@@ -40,13 +45,16 @@ private:
     float min_steering_angle = -.34;
     float max_steering_angle = .34;
 
-    float waypoint_radius = .1;
-    float waypoint_final_radius = .1;
+    float waypoint_radius = .2;
+    float waypoint_final_radius = .2;
 
     bool waypoints_initialized = false;
 
     float dt = .5;
     float start_time = duration<float>(steady_clock::now().time_since_epoch()).count();
+
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener tf_listener_;
 
     std::vector<Waypoint> waypoints;
     size_t current_waypoint = 0;
@@ -113,7 +121,8 @@ private:
         float elapsed = duration<float>(steady_clock::now().time_since_epoch()).count()
                         - start_time;
 
-        return (elapsed > (dt * current_waypoint)) || (dist < waypoint_radius && dot > 0);
+        return (dist < waypoint_radius) && dot > 0;
+        // return (elapsed > (dt * current_waypoint)) || (dist < waypoint_radius && dot > 0);
     }
 
     float find_steering_angle(Coordinate& current, Waypoint& target) {
@@ -138,14 +147,35 @@ private:
     void odometry_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
         if (!waypoints_initialized || current_waypoint >= waypoints.size()) {
             publish_ackermann_drive(0.0, 0.0);
+            RCLCPP_INFO(this->get_logger(), "Reached dest.");
             return;
         }
 
-        auto q = msg->pose.pose.orientation;
-        float yaw = normalize_angle(std::atan2(2.0 * (q.w * q.z + q.x * q.y),
-            1.0 - 2.0 * (q.y * q.y + q.z * q.z)));
+        geometry_msgs::msg::TransformStamped transform;
 
-        Coordinate current = Coordinate(msg->pose.pose.position.x, msg->pose.pose.position.y, yaw,
+        geometry_msgs::msg::PoseStamped base_link_pose;
+        base_link_pose.header = msg->header;
+        base_link_pose.pose = msg->pose.pose;
+
+        geometry_msgs::msg::PoseStamped map_pose;
+
+        try {
+            transform = tf_buffer_.lookupTransform("map", "odom", tf2::TimePointZero);
+            tf2::doTransform(base_link_pose, map_pose, transform);
+        } catch (const tf2::TransformException& ex) {
+            RCLCPP_WARN(this->get_logger(), "Could not transform odom to map: %s", ex.what());
+            return;
+        }
+
+        float qw = map_pose.pose.orientation.w;
+        float qx = map_pose.pose.orientation.x;
+        float qy = map_pose.pose.orientation.y;
+        float qz = map_pose.pose.orientation.z;
+
+        float yaw = normalize_angle(atan2(2.0 * (qw * qz + qx * qy),
+            1.0 - 2.0 * (qy * qy + qz * qz)));
+
+        Coordinate current = Coordinate(map_pose.pose.position.x, map_pose.pose.position.y, yaw,
             msg->twist.twist.linear.x);
 
         // Skip reached waypoints
@@ -164,9 +194,10 @@ private:
         // RCLCPP_INFO(this->get_logger(), "HERE: ");
         // RCLCPP_INFO(this->get_logger(), "TARGETING: %f", target.v);
 
-        // float steering_angle = find_steering_angle(current, target);
+        float steering_angle = find_steering_angle(current, target);
 
         publish_ackermann_drive(target.tau, target.v);
+        // publish_ackermann_drive(steering_angle, (target.v > 0) ? .3 : -.3);
     }
 
     void trajectory_callback(const cev_msgs::msg::Trajectory::SharedPtr msg) {
