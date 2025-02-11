@@ -6,12 +6,26 @@
 #include "cev_msgs/msg/waypoint.hpp"
 #include "cev_msgs/msg/trajectory.hpp"
 
+#include <chrono>
+
 using cev_msgs::msg::Waypoint;
 using std::placeholders::_1;
+using namespace std::chrono;
+
+struct Coordinate {
+    Coordinate(float x, float y, float theta, float v): x(x), y(y), theta(theta), v(v) {}
+
+    float x;
+    float y;
+    float theta;
+    float v;
+};
 
 class TrajectoryFollower : public rclcpp::Node {
 public:
     TrajectoryFollower(): Node("trajectory_follower") {
+        RCLCPP_INFO(this->get_logger(), "meow");
+
         odometry_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("odometry/filtered", 1,
             std::bind(&TrajectoryFollower::odometry_callback, this, _1));
 
@@ -23,13 +37,16 @@ public:
     }
 
 private:
-    float min_steering_angle = -20.0 * M_PI / 180.0;
-    float max_steering_angle = 20.0 * M_PI / 180.0;
+    float min_steering_angle = -.34;
+    float max_steering_angle = .34;
 
     float waypoint_radius = .1;
     float waypoint_final_radius = .1;
 
     bool waypoints_initialized = false;
+
+    float dt = .5;
+    float start_time = duration<float>(steady_clock::now().time_since_epoch()).count();
 
     std::vector<Waypoint> waypoints;
     size_t current_waypoint = 0;
@@ -76,6 +93,7 @@ private:
         float radius = final ? waypoint_final_radius : waypoint_radius;
 
         if (dist < radius) {
+            // RCLCPP_INFO(this->get_logger(), "HIT RADIUS.");
             return true;
         }
 
@@ -92,7 +110,10 @@ private:
                   + (current.y - target.y) * (next.y - target.y);
         }
 
-        return dist < waypoint_radius && dot > 0;
+        float elapsed = duration<float>(steady_clock::now().time_since_epoch()).count()
+                        - start_time;
+
+        return (elapsed > (dt * current_waypoint)) || (dist < waypoint_radius && dot > 0);
     }
 
     float find_steering_angle(Coordinate& current, Waypoint& target) {
@@ -116,21 +137,22 @@ private:
 
     void odometry_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
         if (!waypoints_initialized || current_waypoint >= waypoints.size()) {
+            publish_ackermann_drive(0.0, 0.0);
             return;
         }
 
-        // auto q = msg->pose.pose.orientation;
-        // float yaw = normalize_angle(std::atan2(2.0 * (q.w * q.z + q.x * q.y),
-        //     1.0 - 2.0 * (q.y * q.y + q.z * q.z)));
+        auto q = msg->pose.pose.orientation;
+        float yaw = normalize_angle(std::atan2(2.0 * (q.w * q.z + q.x * q.y),
+            1.0 - 2.0 * (q.y * q.y + q.z * q.z)));
 
-        // Coordinate current = Coordinate(msg->pose.pose.position.x, msg->pose.pose.position.y,
-        // yaw,
-        //     msg->twist.twist.linear.x);
+        Coordinate current = Coordinate(msg->pose.pose.position.x, msg->pose.pose.position.y, yaw,
+            msg->twist.twist.linear.x);
 
         // Skip reached waypoints
         while (waypoint_reached(current, current_waypoint)) {
             current_waypoint++;
             if (current_waypoint >= waypoints.size()) {
+                // RCLCPP_INFO(this->get_logger(), "RETURNING2.");
                 waypoints_initialized = false;
                 publish_ackermann_drive(0.0, 0.0);
                 return;
@@ -139,14 +161,18 @@ private:
 
         Waypoint target = waypoints[current_waypoint];
 
+        // RCLCPP_INFO(this->get_logger(), "HERE: ");
+        // RCLCPP_INFO(this->get_logger(), "TARGETING: %f", target.v);
+
         // float steering_angle = find_steering_angle(current, target);
 
         publish_ackermann_drive(target.tau, target.v);
     }
 
     void trajectory_callback(const cev_msgs::msg::Trajectory::SharedPtr msg) {
-        waypoints = msg->waypoints;
         current_waypoint = 0;
+        start_time = duration<float>(steady_clock::now().time_since_epoch()).count();
+        waypoints = msg->waypoints;
         waypoints_initialized = true;
     }
 };
