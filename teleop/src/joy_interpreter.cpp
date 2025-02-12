@@ -17,6 +17,10 @@ public:
         return 1 - (axes_[5] + 1) / 2;
     }
 
+    float get_y_button() const {
+        return buttons_[3];
+    }
+
     float get_right_stick_x() const {
         return -axes_[3];
     }
@@ -60,8 +64,21 @@ private:
         }
 
         // Calculate velocity
-        float drive = (gamepad_data.get_right_trigger() - gamepad_data.get_left_trigger())
-                      * max_velocity_;
+        float drive = 0.0;
+
+        if (gamepad_data.get_y_button()) {
+            drive = .3;
+        } else {
+            drive = (gamepad_data.get_right_trigger() - gamepad_data.get_left_trigger())
+                    * max_velocity_;
+        }
+
+        // float drive = (gamepad_data.get_right_trigger() - gamepad_data.get_left_trigger())
+        //               * max_velocity_;
+
+        // float drive = gamepad_data.get_y_button() ? .3 : 0.0;
+
+        // RCLCPP_INFO(this->get_logger(), "Button: %f", gamepad_data.get_y_button());
 
         // Publish AckermannDrive message
         auto ackermann_msg = ackermann_msgs::msg::AckermannDrive();
