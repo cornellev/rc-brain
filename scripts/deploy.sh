@@ -31,6 +31,3 @@ cd ws
 colcon build
 exit 0
 EOF
-
-printf "${BLUE}Opening interactive ssh...${NC}\n"
-ssh $TARGET_USER@$TARGET_CAR
