@@ -63,7 +63,7 @@ float KP_RAW = .1;
 // SID controller values (Sproportional Integral Derivative)
 float kP = KP_RAW;     // Proportional gain for SID controller
 const float kI = 0;    // Integral gain for SID controller
-const float kD = 5.0;  // Derivative gain for SID controller // .003
+const float kD = 2.0;  // Derivative gain for SID controller // .003
 // const float kD = 0.0;
 // float integral = 0;
 float last_error = 0.0;
