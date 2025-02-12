@@ -147,7 +147,7 @@ private:
     void odometry_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
         if (!waypoints_initialized || current_waypoint >= waypoints.size()) {
             publish_ackermann_drive(0.0, 0.0);
-            RCLCPP_INFO(this->get_logger(), "Reached dest.");
+            // RCLCPP_INFO(this->get_logger(), "Reached dest.");
             return;
         }
 
