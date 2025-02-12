@@ -180,19 +180,19 @@ def generate_launch_description():
             #             {'imu_topic': "unilidar/imu"}]
             # ),
             # CEV Localization
-            # Node(
-            #     package="cev_localization",
-            #     executable="ackermann_ekf",
-            #     name="cev_localization_node",
-            #     output="screen",
-            #     parameters=[
-            #         {
-            #             "config_file": get_path(
-            #                 "autonomy", "config", "cev_localization.yml"
-            #             )
-            #         }
-            #     ],
-            # ),
+            Node(
+                package="cev_localization",
+                executable="ackermann_ekf",
+                name="cev_localization_node",
+                output="screen",
+                parameters=[
+                    {
+                        "config_file": get_path(
+                            "autonomy", "config", "cev_localization.yml"
+                        )
+                    }
+                ],
+            ),
             # Trajectory Launch
             # launch("controls", "trajectory_launch.py"),
             ## LAUNCH FILES
@@ -207,6 +207,19 @@ def generate_launch_description():
                 "sllidar_ros2",
                 "sllidar_a1_launch.py",
                 arguments={"serial_port": "/dev/ttyUSB1"},
+            ),
+            Node(
+                package="lidar_odometry",
+                executable="lidar_odometry",
+                name="lidar_odometry_node",
+                output="screen",
+                parameters=[
+                    {
+                        "config_file": get_path(
+                            "autonomy", "config", "lidar_odometry.yaml"
+                        )
+                    },
+                ],
             ),
             # Encoder Odometry (Ackermann)
             # launch("encoder_odometry", "launch.py"),
