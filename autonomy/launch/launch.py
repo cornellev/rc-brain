@@ -175,6 +175,13 @@ def generate_launch_description():
                 ],
             ),
 
+            # Node(
+            #     package="cev_planner_ros2",
+            #     executable="planner_node",
+            #     name="cev_planner_ros2_node",
+            #     output="screen",
+            # ),
+
             # Trajectory Launch
             launch("controls", "trajectory_launch.py"),
 

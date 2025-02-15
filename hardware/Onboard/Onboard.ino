@@ -58,12 +58,12 @@ long last_error_time;
 
 float autobrake = MAX_VELOCITY;
 
-float KP_RAW = .003;
+float KP_RAW = .1;
 
 // SID controller values (Sproportional Integral Derivative)
-float kP = KP_RAW;      // Proportional gain for SID controller
-const float kI = .005;  // Integral gain for SID controller
-const float kD = .002;  // Derivative gain for SID controller // .003
+float kP = KP_RAW;     // Proportional gain for SID controller
+const float kI = 0;    // Integral gain for SID controller
+const float kD = 2.0;  // Derivative gain for SID controller // .003
 // const float kD = 0.0;
 // float integral = 0;
 float last_error = 0.0;
@@ -147,12 +147,12 @@ void updateAckermann() {
 
     reported_val = target_vel;
 
-    if ((autobrake < .6 && target_vel > 0.0) || autobrake < current_velocity) {
-        given_power = 0.0;
-        kP = 4.5;
-    } else {
-        kP = KP_RAW;
-    }
+    // if ((autobrake < .6 && target_vel > 0.0) || autobrake < current_velocity) {
+    //     given_power = 0.0;
+    //     kP = 4.5;
+    // } else {
+    //     kP = KP_RAW;
+    // }
 
     if (target_vel > MAX_VELOCITY) {
         target_vel = MAX_VELOCITY;
@@ -163,15 +163,15 @@ void updateAckermann() {
     long current_time = millis();
 
     float error = target_vel - current_velocity;
-    float delta_error = error - last_error;
+    float delta_error = (error - last_error);
 
-    given_power = max(-1, min(1, (given_power + kP * error + kD * delta_error)));
+    given_power = max(-1, min(1, (given_power + kP * error + kI * total_error + kD * delta_error)));
 
     // given_power = kP * error + kI * total_error + kD * ((error - last_error) / ((current_time -
     // last_error_time) / 1000.0));
 
     last_error = error;
-    //  total_error += error;
+    total_error += error;
     last_error_time = current_time;
 
     //  if (((given_power + target_velocity / MAX_VELOCITY) < .2 && (given_power + target_velocity /
@@ -335,10 +335,10 @@ void loop() {
 
         last_push_time = current_time;
 
-        Serial.print(current_time);
+        Serial.print(current_time);         // time
         Serial.print(" ");
-        Serial.print(current_velocity, 4);
+        Serial.print(current_velocity, 4);  // vel
         Serial.print(" ");
-        Serial.println(target_angle, 4);
+        Serial.println(last_error, 4);      // steer
     }
 }
