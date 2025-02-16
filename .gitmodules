@@ -1,6 +1,9 @@
 [submodule "cev_msgs"]
 	path = cev_msgs
-	url = git@github.com:cornellev/cev_msgs.git
+	url = https://github.com/cornellev/cev_msgs.git
 [submodule "external/serial-ros2"]
 	path = external/serial-ros2
-	url = git@github.com:RoverRobotics-forks/serial-ros2.git
+	url = https://github.com/RoverRobotics-forks/serial-ros2.git
+[submodule "external/witmotion_imu_ros2"]
+	path = external/witmotion_imu_ros2
+	url = https://github.com/cornellev/witomotion_imu_ros2.git
