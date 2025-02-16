@@ -40,7 +40,7 @@ RUN rosdep update --rosdistro $ROS_DISTRO
 RUN mkdir -p src/$FOLDER_NAME
 
 # Copy the full package source code
-COPY --parents * src/$FOLDER_NAME/
+COPY --parents ./* src/$FOLDER_NAME/
 RUN chmod +x src/$FOLDER_NAME/install.sh && src/$FOLDER_NAME/install.sh
 
 # Install package dependencies
