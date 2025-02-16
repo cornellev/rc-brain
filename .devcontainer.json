@@ -3,8 +3,8 @@
     "build": {
         "dockerfile": "Dockerfile.dev"
     },
-    "workspaceMount": "source=${localWorkspaceFolder},target=/home/hogsmeade/src/rc-brain,type=bind",
-    "workspaceFolder": "/home/hogsmeade/src/rc-brain",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/cev/src/rc-brain,type=bind",
+    "workspaceFolder": "/home/cev/src/rc-brain",
     "runArgs": [
         "--rm",
         "--network=host",
@@ -19,6 +19,12 @@
     ],
     "customizations": {
         "vscode": {
+            "extensions": [
+                "ms-iot.vscode-ros",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-python.black-formatter",
+                "xaver.clang-format"
+            ],
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "bash",
                 "terminal.integrated.profiles.linux": {
@@ -38,13 +44,7 @@
                     "editor.wordBasedSuggestions": "off",
                     "editor.defaultFormatter": "ms-python.black-formatter"
                 }
-            },
-            "extensions": [
-                "ms-iot.vscode-ros",
-                "ms-vscode.cpptools-extension-pack",
-                "ms-python.black-formatter",
-                "xaver.clang-format"
-            ]
+            }
         }
     },
     "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"
