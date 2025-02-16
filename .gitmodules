@@ -13,3 +13,6 @@
 [submodule "external/bond"]
 	path = external/bond
 	url = https://github.com/ros/bond_core.git
+[submodule "cev/cev_localization_ros2"]
+	path = cev/cev_localization_ros2
+	url = https://github.com/cornellev/cev_localization_ros2.git
