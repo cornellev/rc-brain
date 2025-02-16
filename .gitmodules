@@ -10,3 +10,6 @@
 [submodule "external/sllidar_ros2"]
 	path = external/sllidar_ros2
 	url = https://github.com/Slamtec/sllidar_ros2.git
+[submodule "external/slam_toolbox"]
+	path = external/slam_toolbox
+	url = https://github.com/SteveMacenski/slam_toolbox.git
