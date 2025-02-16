@@ -7,3 +7,6 @@
 [submodule "external/witmotion_imu_ros2"]
 	path = external/witmotion_imu_ros2
 	url = https://github.com/cornellev/witomotion_imu_ros2.git
+[submodule "external/sllidar_ros2"]
+	path = external/sllidar_ros2
+	url = https://github.com/Slamtec/sllidar_ros2.git
