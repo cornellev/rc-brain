@@ -1,7 +1,11 @@
 #!/bin/bash
-
-sudo apt-get install libqt5serialport5-dev
-sudo apt install libsuitesparse-dev
-sudo apt install libceres-dev
-sudo apt install ros-humble-slam-toolbox 
+sudo apt install \
+    libeigen3-dev \
+    libnlopt-dev \
+    libnlopt-cxx-dev \
+    libyaml-cpp-dev \
+    libqt5serialport5-dev \ 
+    libsuitesparse-dev \
+    libceres-dev \
+    ros-humble-slam-toolbox 
 git submodule update --init --recursive

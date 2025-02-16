@@ -16,3 +16,6 @@
 [submodule "cev/cev_localization_ros2"]
 	path = cev/cev_localization_ros2
 	url = https://github.com/cornellev/cev_localization_ros2.git
+[submodule "cev/cev_planner_ros2"]
+	path = cev/cev_planner_ros2
+	url = https://github.com/cornellev/cev_planner_ros2.git
