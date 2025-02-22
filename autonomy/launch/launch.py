@@ -174,6 +174,15 @@ def generate_launch_description():
                     }
                 ],
             ),
+	        # Node(
+            #     package="cev_planner_ros2",
+            #     executable="planner_node",
+            #     name="cev_planner_ros2_node",
+            #     output="screen",
+            #     # parameters=[
+            #     #     get_path("cev_planner_ros2", "config", "cev_planner.yaml")
+            #     # ],
+            # ),
 
             # Node(
             #     package="cev_planner_ros2",
