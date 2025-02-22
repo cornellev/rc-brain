@@ -125,7 +125,7 @@ def generate_launch_description():
                         "map_update_interval": 0.05,
                         # "position_covariance_scale": 1.0,
                         # "yaw_covariance_scale": 1.0,
-                        "resolution": .13,
+                        "resolution": .05,
                         "min_laser_range": .15,
                         "max_laser_range": 12.0,
                         "use_scan_matching": True,

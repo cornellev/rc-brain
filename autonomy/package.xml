@@ -14,7 +14,6 @@
 
   <!--INTERNAL-->
   <depend>cev_msgs</depend>
-  <depend>controls</depend>
   <depend>encoder_odometry</depend>
   <depend>hardware</depend>
   <depend>serial_com</depend>
