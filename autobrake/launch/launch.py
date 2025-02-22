@@ -10,7 +10,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             Node(
-                package="controls",
+                package="autobrake",
                 executable="autobrake_node",
                 name="autobrake_node",
             )

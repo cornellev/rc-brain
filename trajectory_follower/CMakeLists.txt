@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.8)
-project(controls)
+project(trajectory_follower)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -18,18 +18,8 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 
 
-add_executable(autobrake_node src/autobrake_node.cpp)
 add_executable(trajectory_follower_node src/trajectory_follower.cpp)
 add_executable(debug_trajectory src/debug_trajectory_publish.cpp)
-
-ament_target_dependencies(autobrake_node 
-  rclcpp 
-  std_msgs 
-  sensor_msgs 
-  ackermann_msgs 
-  cev_msgs
-  tf2_ros
-  tf2_geometry_msgs)
 
 ament_target_dependencies(trajectory_follower_node
   rclcpp 
@@ -51,7 +41,7 @@ ament_target_dependencies(debug_trajectory
   tf2_ros
   tf2_geometry_msgs)
 
-install(TARGETS autobrake_node trajectory_follower_node debug_trajectory
+install(TARGETS trajectory_follower_node debug_trajectory
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch/

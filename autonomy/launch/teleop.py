@@ -176,14 +176,14 @@ def generate_launch_description():
             ),
 
             # Trajectory Launch
-            # launch("controls", "trajectory_launch.py"),
+            # launch("trajectory_follower", "trajectory_launch.py"),
 
             ## LAUNCH FILES
 
             # Teleop
             launch("teleop", "launch.py"),
             # Autobrake
-            # launch("controls", "autobrake_launch.py"),
+            # launch("autobrake", "autobrake_launch.py"),
             # Serial Communicator
             launch("serial_com", "launch.py"),
             # RPLidar
