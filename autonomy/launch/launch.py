@@ -87,12 +87,6 @@ def generate_launch_description():
                     'imu'
                 ],
             ),
-            # Run joystick reader
-            Node(
-                package="joy",
-                executable="joy_node",
-                name="joy_node", #ros2 uses events, so don't try and direct this to /dev
-            ),
             # # IMU
             Node(
                 package='witmotion_ros',
@@ -125,7 +119,7 @@ def generate_launch_description():
                         "map_update_interval": 0.05,
                         # "position_covariance_scale": 1.0,
                         # "yaw_covariance_scale": 1.0,
-                        "resolution": .05,
+                        "resolution": .09,
                         "min_laser_range": .15,
                         "max_laser_range": 12.0,
                         "use_scan_matching": True,

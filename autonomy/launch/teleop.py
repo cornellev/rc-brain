@@ -87,12 +87,6 @@ def generate_launch_description():
                     'imu'
                 ],
             ),
-            # Run joystick reader
-            Node(
-                package="joy",
-                executable="joy_node",
-                name="joy_node", #ros2 uses events, so don't try and direct this to /dev
-            ),
             # # IMU
             Node(
                 package='witmotion_ros',
