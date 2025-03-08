@@ -20,6 +20,7 @@
   <depend>teleop</depend>
   <depend>autobrake</depend>
   <depend>trajectory_follower</depend>
+  <depend>mux</depend>
 
   <!--EXTERNAL-->
   <depend>sllidar_ros2</depend>
