@@ -4,7 +4,7 @@ FROM ros:humble
 SHELL ["/bin/bash", "-c"]
 
 ARG FOLDER_NAME=rc-brain
-ARG WORKSPACE_DIR=/home/hogsmeade
+ARG WORKSPACE_DIR=/home/cev
 WORKDIR $WORKSPACE_DIR
 
 # Source the ROS2 environment automatically when a new shell is created
@@ -36,15 +36,11 @@ RUN rosdep update --rosdistro $ROS_DISTRO
 
 RUN mkdir -p src/$FOLDER_NAME
 
-# Install and build build-from-source packages
-# We do this as a separate step from the stuff for our code, since that changes more frequently
-RUN cd src && \
-    git clone https://github.com/Slamtec/sllidar_ros2.git && \
-    cd sllidar_ros2 && \
-    git checkout 3430009
-RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
-RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
+# Copy install.sh
+COPY --parents ./install.sh src/$FOLDER_NAME
 
-# Install self dependencies with rosdep
+# Run install.sh
+RUN src/$FOLDER_NAME/install.sh
+
 COPY --parents ./*/package.xml src/$FOLDER_NAME
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y

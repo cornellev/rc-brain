@@ -14,11 +14,13 @@
 
   <!--INTERNAL-->
   <depend>cev_msgs</depend>
-  <depend>controls</depend>
   <depend>encoder_odometry</depend>
   <depend>hardware</depend>
   <depend>serial_com</depend>
   <depend>teleop</depend>
+  <depend>autobrake</depend>
+  <depend>trajectory_follower</depend>
+  <depend>mux</depend>
 
   <!--EXTERNAL-->
   <depend>sllidar_ros2</depend>
@@ -29,7 +31,6 @@
   <depend>slam_toolbox</depend>
 
   <depend>cev_localization</depend>
-
 
   <export>
     <build_type>ament_cmake</build_type>

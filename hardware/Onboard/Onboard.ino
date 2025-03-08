@@ -58,14 +58,18 @@ long last_error_time;
 
 float autobrake = MAX_VELOCITY;
 
-float KP_RAW = .003;
-
 // SID controller values (Sproportional Integral Derivative)
-float kP = KP_RAW;      // Proportional gain for SID controller
-const float kI = .005;  // Integral gain for SID controller
-const float kD = .002;  // Derivative gain for SID controller // .003
-// const float kD = 0.0;
-// float integral = 0;
+const float kP_1 = 0.8;  // Proportional gain for SID controller
+const float kI_1 = 0;    // Integral gain for SID controller
+const float kD_1 = 0.0;  // Derivative gain for SID controller // .003
+const float kP_2 = 5.0;
+const float kI_2 = 0;
+const float kD_2 = 0.0;
+
+float kP = kP_1;
+float kI = kI_1;
+float kD = kD_1;
+
 float last_error = 0.0;
 float total_error = 0.0;
 
@@ -73,6 +77,11 @@ float given_power = 0.0;
 float max_speed = 0.0;
 
 float reported_val = 1.6;
+
+long last_received_data = millis();
+
+// debug
+float block_1 = 0.0;
 
 // Initialize hardware/sensors
 Encoder left_encoder(ENCODER_LEFT_C1, ENCODER_LEFT_C2);
@@ -82,6 +91,7 @@ Servo servo;
 /**
    Turn steering servo to specified angle. Angle will be clamped to be between -MAX_INPUT_STEER and
    MAX_INPUT_STEER.
+
 
    @param angle: Angle to turn the servo to. Positive values turn the wheels to the left, negative
    values turn the wheels to the right. Zero is straight ahead.
@@ -96,6 +106,7 @@ void writeAngle(float angle) {
 /**
    Set the speed of the vehicle. Positive values move the vehicle forward, negative values move the
    vehicle backward.
+
 
    @param value: Speed of the vehicle as a percentage of the maximum speed.
    @pre -1 <= value <= 1
@@ -125,6 +136,7 @@ void writePercent(float value) {
 /**
    Write the steering angle and speed of the vehicle.
 
+
    @param angle: Angle to turn the steering servo to. Positive values turn the wheels to the right,
    negative values turn the wheels to the left. Zero is straight ahead.
    @param speed: Speed of the vehicle as a percentage of the maximum speed.
@@ -144,34 +156,48 @@ void updateAckermann() {
     // float target_vel = target_velocity;
 
     float target_vel = min(target_velocity, autobrake);
-
     reported_val = target_vel;
 
-    if ((autobrake < .6 && target_vel > 0.0) || autobrake < current_velocity) {
-        given_power = 0.0;
-        kP = 4.5;
+    // if ((autobrake < .6 && target_vel > 0.0) || autobrake < current_velocity) {
+    //     given_power = 0.0;
+    //     kP = 4.5;
+    // } else {
+    //     kP = KP_RAW;
+    // }
+
+    // if accelerating backwards, the constants are smaller bc the motors just accelerate
+    // backwards...better?
+    if (current_velocity > 0) {
+        kP = kP_1;
+        kI = kI_1;
+        kD = kD_1;
+
+        block_1 = 1.0;
     } else {
-        kP = KP_RAW;
+        kP = kP_2;
+        kI = kI_2;
+        kD = kD_2;
+
+        block_1 = 0.0;
     }
 
-    if (target_vel > MAX_VELOCITY) {
-        target_vel = MAX_VELOCITY;
-    } else if (target_vel < MIN_VELOCITY) {
-        target_vel = MIN_VELOCITY;
+    target_vel = constrain(target_vel, MIN_VELOCITY, MAX_VELOCITY);
+    if (target_vel < 0) {
+        target_vel = constrain(target_vel, MIN_VELOCITY * 0.5, 0);
     }
-
     long current_time = millis();
 
     float error = target_vel - current_velocity;
     float delta_error = error - last_error;
 
-    given_power = max(-1, min(1, (given_power + kP * error + kD * delta_error)));
+    given_power = kP * error + kI * total_error + kD * delta_error;
+    given_power = constrain(given_power, -1, 1);
 
     // given_power = kP * error + kI * total_error + kD * ((error - last_error) / ((current_time -
     // last_error_time) / 1000.0));
 
     last_error = error;
-    //  total_error += error;
+    total_error += error;
     last_error_time = current_time;
 
     //  if (((given_power + target_velocity / MAX_VELOCITY) < .2 && (given_power + target_velocity /
@@ -211,9 +237,9 @@ void updateVelocity() {
     float encoder_right = right_encoder.read() * TICKS_TO_METERS;
 
     // ) / 2.0;
-    float avg_dist = ((encoder_left - last_encoder_left) + (encoder_right - last_encoder_right))
-                     / 2.0;  // TODO: Temporarily remove right encoder bc not working
-    // float avg_dist = encoder_left;
+    // float avg_dist = ((encoder_left - last_encoder_left) + (encoder_right - last_encoder_right))
+    //  / 2.0;  // TODO: Temporarily remove right encoder bc not working
+    float avg_dist = encoder_right - last_encoder_right;
 
     // Velocity calculations
     current_velocity = avg_dist / ((current_time - last_update_time) / 1000.0);
@@ -325,8 +351,12 @@ void loop() {
         if (Serial.available() > 0) {
             // Read the incoming data as a string
             String received_data = Serial.readStringUntil('\n');
-
+            last_received_data = current_time;
             parseMessage(received_data);
+        }
+
+        if (current_time - last_received_data > 1000) {
+            target_velocity = 0;
         }
 
         if (current_velocity > max_speed) {
@@ -335,10 +365,10 @@ void loop() {
 
         last_push_time = current_time;
 
-        Serial.print(current_time);
+        Serial.print(current_time);         // time
         Serial.print(" ");
-        Serial.print(current_velocity, 4);
+        Serial.print(current_velocity, 4);  // vel
         Serial.print(" ");
-        Serial.println(target_angle, 4);
+        Serial.println(target_angle, 4);    // steer TODO: FIX
     }
 }

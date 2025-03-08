@@ -1,0 +1,36 @@
+[submodule "cev_msgs"]
+	path = cev_msgs
+	url = https://github.com/cornellev/cev_msgs.git
+[submodule "external/serial-ros2"]
+	path = external/serial-ros2
+	url = https://github.com/RoverRobotics-forks/serial-ros2.git
+[submodule "external/witmotion_imu_ros2"]
+	path = external/witmotion_imu_ros2
+	url = https://github.com/cornellev/witomotion_imu_ros2.git
+[submodule "external/sllidar_ros2"]
+	path = external/sllidar_ros2
+	url = https://github.com/Slamtec/sllidar_ros2.git
+[submodule "external/bond"]
+	path = external/bond
+	url = https://github.com/ros/bond_core.git
+[submodule "cev/cev_localization_ros2"]
+	path = cev/cev_localization_ros2
+	url = https://github.com/cornellev/cev_localization_ros2.git
+[submodule "cev/cev_planner_ros2"]
+	path = cev/cev_planner_ros2
+	url = https://github.com/cornellev/cev_planner_ros2.git
+[submodule "cev/cev_autobrake_ros2"]
+	path = cev/cev_autobrake_ros2
+	url = https://github.com/cornellev/cev_autobrake_ros2.git
+[submodule "cev/cev_teleop_ros2"]
+	path = cev/cev_teleop_ros2
+	url = https://github.com/cornellev/cev_teleop_ros2.git
+[submodule "cev/cev_vision_ros2"]
+	path = cev/cev_vision_ros2
+	url = https://github.com/cornellev/cev_vision_ros2.git
+[submodule "cev/cev_encoder_odometry_ros2"]
+	path = cev/cev_encoder_odometry_ros2
+	url = https://github.com/cornellev/cev_encoder_odometry_ros2.git
+[submodule "cev/cev_trajectory_follower_ros2"]
+	path = cev/cev_trajectory_follower_ros2
+	url = https://github.com/cornellev/cev_trajectory_follower_ros2.git

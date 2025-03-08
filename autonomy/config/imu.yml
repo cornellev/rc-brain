@@ -1,6 +1,6 @@
 witmotion:
   ros__parameters:
-    port: ttyUSB0
+    port: witmotion
     baud_rate: 115200 # baud
     polling_interval: 50 # ms
     timeout_ms: 150 # ms

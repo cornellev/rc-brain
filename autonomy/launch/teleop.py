@@ -194,12 +194,12 @@ def generate_launch_description():
                 ],
             ),
             # Trajectory Launch
-            # launch("controls", "trajectory_launch.py"),
+            # launch("trajectory_follower", "launch.py"),
             ## LAUNCH FILES
             # Teleop
             launch("teleop", "launch.py"),
             # Autobrake
-            # launch("controls", "autobrake_launch.py"),
+            # launch("autobrake", "launch.py"),
             # Serial Communicator
             launch("serial_com", "launch.py"),
             # RPLidar
@@ -208,19 +208,6 @@ def generate_launch_description():
                 "sllidar_a1_launch.py",
                 arguments={"serial_port": "/dev/rplidar"},
             ),
-            # Node(
-            #     package="lidar_odometry",
-            #     executable="lidar_odometry",
-            #     name="lidar_odometry_node",
-            #     output="screen",
-            #     parameters=[
-            #         {
-            #             "config_file": get_path(
-            #                 "autonomy", "config", "lidar_odometry.yaml"
-            #             )
-            #         },
-            #     ],
-            # ),
             # Encoder Odometry (Ackermann)
             # launch("encoder_odometry", "launch.py"),
         ]

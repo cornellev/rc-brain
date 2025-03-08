@@ -4,7 +4,7 @@ FROM ros:humble
 SHELL ["/bin/bash", "-c"]
 
 ARG FOLDER_NAME=rc-brain
-ARG WORKSPACE_DIR=/home/hogsmeade
+ARG WORKSPACE_DIR=/home/cev
 WORKDIR $WORKSPACE_DIR
 
 # Source the ROS2 environment automatically when a new shell is created
@@ -44,4 +44,4 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
 # Copy entrypoint script
 COPY entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
-ENTRYPOINT ["/bin/bash", "/home/hogsmeade/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/home/cev/entrypoint.sh"]

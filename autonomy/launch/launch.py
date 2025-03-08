@@ -110,12 +110,15 @@ def generate_launch_description():
                     "imu",
                 ],
             ),
+<<<<<<< HEAD
             # Run joystick reader
             Node(
                 package="joy",
                 executable="joy_node",
                 name="joy_node",  # ros2 uses events, so don't try and direct this to /dev
             ),
+=======
+>>>>>>> fix/submodule-https
             # # IMU
             Node(
                 package="witmotion_ros",
@@ -146,8 +149,13 @@ def generate_launch_description():
                         "map_update_interval": 0.05,
                         # "position_covariance_scale": 1.0,
                         # "yaw_covariance_scale": 1.0,
+<<<<<<< HEAD
                         "resolution": 0.13,
                         "min_laser_range": 0.15,
+=======
+                        "resolution": .09,
+                        "min_laser_range": .15,
+>>>>>>> fix/submodule-https
                         "max_laser_range": 12.0,
                         "use_scan_matching": True,
                         "do_loop_closing": True,
@@ -193,21 +201,48 @@ def generate_launch_description():
                     }
                 ],
             ),
+<<<<<<< HEAD
             # Trajectory Launch
             launch("controls", "trajectory_launch.py"),
+=======
+	        # Node(
+            #     package="cev_planner_ros2",
+            #     executable="planner_node",
+            #     name="cev_planner_ros2_node",
+            #     output="screen",
+            #     # parameters=[
+            #     #     get_path("cev_planner_ros2", "config", "cev_planner.yaml")
+            #     # ],
+            # ),
+
+            # Node(
+            #     package="cev_planner_ros2",
+            #     executable="planner_node",
+            #     name="cev_planner_ros2_node",
+            #     output="screen",
+            # ),
+
+            # Trajectory Launch
+            launch("trajectory_follower", "launch.py"),
+
+>>>>>>> fix/submodule-https
             ## LAUNCH FILES
             # Teleop
             # launch("teleop", "launch.py"),
             # Autobrake
-            # launch("controls", "autobrake_launch.py"),
+            # launch("autobrake", "launch.py"),
             # Serial Communicator
             launch("serial_com", "launch.py"),
             # RPLidar
+<<<<<<< HEAD
             launch(
                 "sllidar_ros2",
                 "sllidar_a1_launch.py",
                 arguments={"serial_port": "/dev/ttyUSB1"},
             ),
+=======
+            launch("sllidar_ros2", "sllidar_a1_launch.py", arguments={"serial_port": "/dev/rplidar"}),
+>>>>>>> fix/submodule-https
             # Encoder Odometry (Ackermann)
             launch("encoder_odometry", "launch.py"),
         ]
