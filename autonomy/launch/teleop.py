@@ -76,40 +76,40 @@ def generate_launch_description():
             #         "base_link",
             #     ],
             # ),
-            # Node(
-            #     package="tf2_ros",
-            #     executable="static_transform_publisher",
-            #     name="static_transform_publisher_base_link_lidar",
-            #     output="screen",
-            #     arguments=[
-            #         "-0.035",
-            #         "-0.04",
-            #         "0",  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
-            #         "0",
-            #         "0",
-            #         "1",
-            #         "0",  # Rotation: M_PI
-            #         "base_link",
-            #         "laser",
-            #     ],
-            # ),
-            # Node(
-            #     package="tf2_ros",
-            #     executable="static_transform_publisher",
-            #     name="static_transform_publisher_base_link_imu",
-            #     output="screen",
-            #     arguments=[
-            #         "-0.18",
-            #         "0.0",
-            #         "0",  # Translation: x = -0.18, y = 0.07, z = 0 (meters)
-            #         "0",
-            #         "0",
-            #         "0",
-            #         "1",  # Rotation: 0
-            #         "base_link",
-            #         "imu",
-            #     ],
-            # ),
+            Node(
+                package="tf2_ros",
+                executable="static_transform_publisher",
+                name="static_transform_publisher_base_link_lidar",
+                output="screen",
+                arguments=[
+                    "-0.035",
+                    "-0.04",
+                    "0",  # Translation: x = 0.035, y = 0.04, z = 0 (meters)
+                    "0",
+                    "0",
+                    "1",
+                    "0",  # Rotation: M_PI
+                    "base_link",
+                    "laser",
+                ],
+            ),
+            Node(
+                package="tf2_ros",
+                executable="static_transform_publisher",
+                name="static_transform_publisher_base_link_imu",
+                output="screen",
+                arguments=[
+                    "-0.18",
+                    "0.0",
+                    "0",  # Translation: x = -0.18, y = 0.07, z = 0 (meters)
+                    "0",
+                    "0",
+                    "0",
+                    "1",  # Rotation: 0
+                    "base_link",
+                    "imu",
+                ],
+            ),
             # Run joystick reader
             Node(
                 package="joy",
@@ -206,21 +206,21 @@ def generate_launch_description():
             launch(
                 "sllidar_ros2",
                 "sllidar_a1_launch.py",
-                arguments={"serial_port": "/dev/ttyUSB1"},
+                arguments={"serial_port": "/dev/rplidar"},
             ),
-            Node(
-                package="lidar_odometry",
-                executable="lidar_odometry",
-                name="lidar_odometry_node",
-                output="screen",
-                parameters=[
-                    {
-                        "config_file": get_path(
-                            "autonomy", "config", "lidar_odometry.yaml"
-                        )
-                    },
-                ],
-            ),
+            # Node(
+            #     package="lidar_odometry",
+            #     executable="lidar_odometry",
+            #     name="lidar_odometry_node",
+            #     output="screen",
+            #     parameters=[
+            #         {
+            #             "config_file": get_path(
+            #                 "autonomy", "config", "lidar_odometry.yaml"
+            #             )
+            #         },
+            #     ],
+            # ),
             # Encoder Odometry (Ackermann)
             # launch("encoder_odometry", "launch.py"),
         ]

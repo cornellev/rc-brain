@@ -8,7 +8,7 @@ odometry_settings:
   base_link: "base_link" # Base link frame ID
   odom_frame: "odom" # Odometry frame ID
 
-  publish_tf: false
+  publish_tf: true
 
 # Define the sensors used by the node
 sensors:
