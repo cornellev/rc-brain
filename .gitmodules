@@ -21,16 +21,16 @@
 	url = https://github.com/cornellev/cev_planner_ros2.git
 [submodule "cev/cev_autobrake_ros2"]
 	path = cev/cev_autobrake_ros2
-	url = git@github.com:cornellev/cev_autobrake_ros2.git
+	url = https://github.com/cornellev/cev_autobrake_ros2.git
 [submodule "cev/cev_teleop_ros2"]
 	path = cev/cev_teleop_ros2
-	url = git@github.com:cornellev/cev_teleop_ros2.git
+	url = https://github.com/cornellev/cev_teleop_ros2.git
 [submodule "cev/cev_vision_ros2"]
 	path = cev/cev_vision_ros2
-	url = git@github.com:cornellev/cev_vision_ros2.git
+	url = https://github.com/cornellev/cev_vision_ros2.git
 [submodule "cev/cev_encoder_odometry_ros2"]
 	path = cev/cev_encoder_odometry_ros2
-	url = git@github.com:cornellev/cev_encoder_odometry_ros2.git
+	url = https://github.com/cornellev/cev_encoder_odometry_ros2.git
 [submodule "cev/cev_trajectory_follower_ros2"]
 	path = cev/cev_trajectory_follower_ros2
-	url = git@github.com:cornellev/cev_trajectory_follower_ros2.git
+	url = https://github.com/cornellev/cev_trajectory_follower_ros2.git
