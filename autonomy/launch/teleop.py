@@ -92,6 +92,7 @@ def generate_launch_description():
                 package='witmotion_ros',
                 executable='witmotion_ros_node',
                 parameters=[
+                    # {"port": "witmotion"}
                     imu_config
                 ]
             ),
@@ -181,7 +182,7 @@ def generate_launch_description():
             # Serial Communicator
             launch("serial_com", "launch.py"),
             # RPLidar
-            launch("sllidar_ros2", "sllidar_a1_launch.py", arguments={"serial_port": "/dev/ttyUSB1"}),
+            launch("sllidar_ros2", "sllidar_a1_launch.py", arguments={"serial_port": "/dev/rplidar"}),
             # Encoder Odometry (Ackermann)
             launch("encoder_odometry", "launch.py"),
         ]
