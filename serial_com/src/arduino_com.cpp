@@ -12,7 +12,7 @@ public:
         : Node("serial_handler_node"), steering_angle_(0.0), velocity_(0.0), max_velocity_(2.07) {
         // Initialize serial port
         try {
-            serial_port_.setPort("/dev/ttyACM0");
+            serial_port_.setPort("/dev/ttyUSB2");
             serial_port_.setBaudrate(115200);
             serial::Timeout timeout = serial::Timeout::simpleTimeout(1000);
             serial_port_.setTimeout(timeout);
