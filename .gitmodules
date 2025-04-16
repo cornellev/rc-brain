@@ -21,7 +21,7 @@
 	url = https://github.com/cornellev/cev_planner_ros2.git
 [submodule "cev/cev_autobrake_ros2"]
 	path = cev/cev_autobrake_ros2
-	url = https://github.com/cornellev/cev_autobrake_ros2.git
+	url = git@github.com:cornellev/cev_autobrake_ros2.git
 [submodule "cev/cev_teleop_ros2"]
 	path = cev/cev_teleop_ros2
 	url = https://github.com/cornellev/cev_teleop_ros2.git
