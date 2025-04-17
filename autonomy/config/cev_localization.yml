@@ -1,6 +1,6 @@
 # General settings for the Kalman Filter node output
 odometry_settings:
-  publish_rate: 100 # Publish rate of the filter in Hz
+  publish_rate: 50 # Publish rate of the filter in Hz
 
   main_model: "ackermann" # Main model to use for the filter
 

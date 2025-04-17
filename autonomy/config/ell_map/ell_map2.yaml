@@ -1,0 +1,7 @@
+image: ell_map2.pgm
+mode: trinary
+resolution: 0.09
+origin: [-3.37, -4.19, 0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25

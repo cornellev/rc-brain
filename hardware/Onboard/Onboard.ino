@@ -2,13 +2,13 @@
 #include <Encoder.h>
 #include <Servo.h>
 
-#define EN_A 5
-#define IN_1 A2
-#define IN_2 A3
+#define EN_A 3
+#define IN_1 A5
+#define IN_2 A4
 
-#define EN_B 3
-#define IN_3 A5
-#define IN_4 A4
+#define EN_B 5
+#define IN_3 A3
+#define IN_4 A2
 
 #define ENCODER_LEFT_C1 9
 #define ENCODER_LEFT_C2 8
@@ -115,16 +115,16 @@ void writePercent(float value) {
     value = max(min(value, 1), -1);
 
     if (value >= 0) {
-        digitalWrite(IN_1, LOW);
-        digitalWrite(IN_2, HIGH);
+        digitalWrite(IN_1, HIGH);
+        digitalWrite(IN_2, LOW);
         digitalWrite(IN_3, HIGH);
         digitalWrite(IN_4, LOW);
 
         analogWrite(EN_A, value * 255);
         analogWrite(EN_B, value * 255);
     } else {
-        digitalWrite(IN_1, HIGH);
-        digitalWrite(IN_2, LOW);
+        digitalWrite(IN_1, LOW);
+        digitalWrite(IN_2, HIGH);
         digitalWrite(IN_3, LOW);
         digitalWrite(IN_4, HIGH);
 

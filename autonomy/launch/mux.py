@@ -117,7 +117,7 @@ def generate_launch_description():
                         "scan_topic": "/scan",
                         "scan_queue_size": 10,
                         "map_update_interval": 0.05,
-                        # "position_covariance_scale": 1.0,
+                        # "position_covareiance_scale": 1.0,
                         # "yaw_covariance_scale": 1.0,
                         "resolution": .09,
                         "min_laser_range": .15,
@@ -133,6 +133,38 @@ def generate_launch_description():
                     }
                 ]
             ),
+            
+            # Node(
+            #     package="slam_toolbox",
+            #     executable="sync_slam_toolbox_node",
+            #     name="sync_slam_toolbox_node",
+            #     output="screen",
+            #     parameters=[
+            #         {
+            #             "mode": "localization",
+            #             # "map_file_name": "/path/to/autonomy/config/ell_map/my_map",
+            #             "map_file_name": get_path("autonomy", "config", "saved_map/saved_map"),
+            #             "odom_frame": "odom",
+            #             "base_frame": "base_link",
+            #             "map_frame": "map",
+            #             "scan_topic": "/scan",
+            #             "scan_queue_size": 10,
+            #             "map_update_interval": 0.00,
+            #             "resolution": 0.09,
+            #             "min_laser_range": 0.15,
+            #             "max_laser_range": 12.0,
+            #             # "use_scan_matching": True,
+            #             # "do_loop_closing": True,
+            #             "use_scan_barycenter": True,
+            #             # "minimum_travel_distance": 0.05,
+            #             # "minimum_travel_heading": 0.05,
+            #             "correlation_search_space_dimension": 0.2,
+            #             "loop_search_space_dimension": 3.0,
+            #             "angle_variance_penalty": 0.0,
+            #             "map_start_pose": [0.0, 0.0, 0.0],
+            #         }
+            #     ]
+            # ),
 
             # UNITREE LIDAR
             # Node(
