@@ -3,6 +3,13 @@ FROM ros:humble
 
 SHELL ["/bin/bash", "-c"]
 
+# Set up CEV user
+RUN useradd -m -s /bin/bash cev
+RUN usermod -aG sudo cev
+# Grant passwordless sudo access to the 'sudo' group
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER cev
+
 ARG FOLDER_NAME=rc-brain
 ARG WORKSPACE_DIR=/home/cev
 WORKDIR $WORKSPACE_DIR
@@ -12,35 +19,26 @@ RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "source $WORKSPACE_DIR/install/setup.bash" >> ~/.bashrc
 
 # Install dev tools
-RUN apt-get update
-RUN apt-get install -y curl
-RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-RUN cat /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-RUN echo $'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main\n' \
-    $'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy main\n' \
-    $'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main\n' \
-    $'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main\n' \
-    $'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main\n' \
-    $'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main\n' \
-    | tee -a /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y clang-format clang-format-19
+RUN sudo apt-get update
+# Tools required to run clang install
+RUN sudo apt-get install -y \
+    curl \
+    lsb-release \
+    software-properties-common \
+    gnupg
+RUN curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s -- 19
+RUN sudo apt-get install -y clangd-19
+RUN sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-19 100
 
 # Init rosdep and update package index
-# for some reason we need to do this
-RUN rm /var/lib/dpkg/info/libc-bin.* 
-RUN apt-get clean
-RUN apt-get update
-RUN apt-get install -y libc-bin
 RUN rosdep update --rosdistro $ROS_DISTRO
 
+# Run install.sh, which installs additional dependencies
+COPY scripts/install_extra.sh src/$FOLDER_NAME/scripts/
+RUN sudo src/$FOLDER_NAME/scripts/install_extra.sh
+
 RUN mkdir -p src/$FOLDER_NAME
-
-# Copy install.sh
-COPY --parents ./install.sh src/$FOLDER_NAME
-
-# Run install.sh
-RUN src/$FOLDER_NAME/install.sh
-
-COPY --parents ./*/package.xml src/$FOLDER_NAME
+COPY --parents **/package.xml src/$FOLDER_NAME/
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
+
+RUN sudo chown -R cev /home/cev
