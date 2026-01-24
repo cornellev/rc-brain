@@ -7,17 +7,28 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  build:
-
+  build-deploy:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Fetch recursively
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
-
+      - name: Install buildx component
+        run: sudo apt install docker-buildx-plugin
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+        run: docker build . --file Dockerfile.deploy --tag rc-brain-deploy:$(date +%s)
+
+  build-dev:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Fetch recursively
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Install buildx component
+        run: sudo apt install docker-buildx-plugin
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile.dev --tag rc-brain-dev:$(date +%s)

@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.7-labs
 FROM ros:humble
 
 SHELL ["/bin/bash", "-c"]
@@ -35,10 +34,11 @@ RUN rosdep update --rosdistro $ROS_DISTRO
 
 # Run install.sh, which installs additional dependencies
 COPY scripts/install_extra.sh src/$FOLDER_NAME/scripts/
+RUN sudo chown -R cev /home/cev
 RUN sudo src/$FOLDER_NAME/scripts/install_extra.sh
 
+# Install own dependencies
 RUN mkdir -p src/$FOLDER_NAME
 COPY --parents **/package.xml src/$FOLDER_NAME/
-RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
-
 RUN sudo chown -R cev /home/cev
+RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
