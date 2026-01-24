@@ -15,8 +15,10 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Update repositories
+        run: sudo apt-get update
       - name: Install buildx component
-        run: sudo apt install docker-buildx-plugin
+        run: sudo apt-get install docker-buildx-plugin
       - name: Build the Docker image
         run: docker build . --file Dockerfile.deploy --tag rc-brain-deploy:$(date +%s)
 
@@ -28,6 +30,8 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Update repositories
+        run: sudo apt-get update
       - name: Install buildx component
         run: sudo apt install docker-buildx-plugin
       - name: Build the Docker image
