@@ -1,0 +1,6 @@
+[submodule "cev_planner"]
+	path = cev/cev_planner_ros2/cev_planner
+	url = https://github.com/cornellev/cev_planner.git
+[submodule "tmp/matplotlib-cpp"]
+	path = cev/cev_planner_ros2/tmp/matplotlib-cpp
+	url = https://github.com/lava/matplotlib-cpp.git
