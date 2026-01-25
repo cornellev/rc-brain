@@ -28,7 +28,7 @@ COPY --parents external/**/package.xml src/$FOLDER_NAME/
 RUN sudo chown -R cev /home/cev
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
 
-# Run install.sh, which installs additional dependencies
+# Run install_extra.sh, which installs additional dependencies
 COPY scripts/install_extra.sh src/$FOLDER_NAME/scripts/
 RUN sudo src/$FOLDER_NAME/scripts/install_extra.sh
 
