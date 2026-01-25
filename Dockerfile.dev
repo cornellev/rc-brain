@@ -33,7 +33,7 @@ RUN sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-19
 # Init rosdep and update package index
 RUN rosdep update --rosdistro $ROS_DISTRO
 
-# Run install.sh, which installs additional dependencies
+# Run install_extra.sh, which installs additional dependencies
 COPY scripts/install_extra.sh src/$FOLDER_NAME/scripts/
 RUN sudo chown -R cev /home/cev
 RUN sudo src/$FOLDER_NAME/scripts/install_extra.sh
