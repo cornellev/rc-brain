@@ -1,0 +1,50 @@
+# Define the sensors used by the node
+sensors:
+  witmotion_imu:
+    type: "IMU" # Sensor type (IMU, GPS, etc.)
+    topic: "/imu" # Topic to subscribe to
+    frame_id: "imu_frame" # Frame ID for the sensor data
+    
+    state: ["d2_x", "d2_y", "yaw"] # State variables to use from the sensor data
+    covariance_multiplier: 1.0 # Multiplier to multiply message covariance by
+    use_message_covariance: true
+    estimator_models: ["ackermann", "cartesian"] # List of strings representing models to use for the sensor data by name
+
+  encoder_odometry:
+    type: "RAW"
+    topic: "/sensor_collect"
+    frame_id: "odom_frame"
+
+    state: ["d_x", "tau"]
+    covariance_multiplier: 2.0
+    estimator_models: ["ackermann", "cartesian"]
+
+# Define update models with their parameters
+update_models:
+  ackermann:
+    type: "ACKERMANN" # Model type (ACKERMANN, CARTESIAN, etc.)
+    state: ["x", "y", "d_x", "d_y", "yaw", "tau"] # State variables to use from the model in updates
+    estimator_models: []
+
+    publish:
+      active: true
+      topic: "/odometry/ackermann"
+      child_frame: "base_link"
+      parent_frame: "odom"
+      rate: 100
+
+      publish_tf: true
+
+  cartesian:
+    type: "CARTESIAN"
+    state: ["x", "y", "d_x", "d_y", "yaw", "d_yaw"]
+    estimator_models: ["ackermann"]
+
+    publish:
+      active: false
+      topic: "/odometry/cartesian"
+      child_frame: "base_link"
+      parent_frame: "odom_cart"
+      rate: 200
+
+      publish_tf: false
