@@ -10,12 +10,12 @@
 [submodule "external/bond"]
 	path = external/bond
 	url = https://github.com/ros/bond_core.git
-[submodule "cev/cev_localization_ros2/cev_kalman_filter"]
-	path = cev/cev_localization_ros2/cev_kalman_filter
-	url = https://github.com/cornellev/cev_kalman_filter
-[submodule "cev/cev_planner_ros2/cev_planner"]
-	path = cev/cev_planner_ros2/cev_planner
+[submodule "cev/all/cev_planner_ros2/cev_planner"]
+	path = cev/all/cev_planner_ros2/cev_planner
 	url = https://github.com/cornellev/cev_planner.git
-[submodule "cev/cev_planner_ros2/tmp/matplotlib-cpp"]
-	path = cev/cev_planner_ros2/tmp/matplotlib-cpp
+[submodule "cev/all/cev_planner_ros2/matplotlib-cpp"]
+	path = cev/all/cev_planner_ros2/tmp/matplotlib-cpp
 	url = https://github.com/lava/matplotlib-cpp.git
+[submodule "cev/all/cev_localization_ros2/cev_kalman_filter"]
+	path = cev/all/cev_localization_ros2/cev_kalman_filter
+	url = https://github.com/cornellev/cev_kalman_filter
