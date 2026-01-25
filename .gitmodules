@@ -16,6 +16,3 @@
 [submodule "cev/cev_vision_ros2"]
 	path = cev/cev_vision_ros2
 	url = https://github.com/cornellev/cev_vision_ros2.git
-[submodule "cev/cev_trajectory_follower_ros2"]
-	path = cev/cev_trajectory_follower_ros2
-	url = https://github.com/cornellev/cev_trajectory_follower_ros2.git
