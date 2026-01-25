@@ -1,3 +1,0 @@
-[submodule "cev_kalman_filter"]
-	path = cev/cev_localization_ros2/cev_kalman_filter
-	url = https://github.com/cornellev/cev_kalman_filter
