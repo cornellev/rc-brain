@@ -3,6 +3,17 @@ FROM ros:humble
 
 SHELL ["/bin/bash", "-c"]
 
+# Set up CEV user
+RUN useradd -m -s /bin/bash cev
+RUN usermod -aG sudo cev
+# Grant passwordless sudo access to the 'sudo' group
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER cev
+
+# Docker doesn't do this by default
+RUN sudo chown -R cev /home/cev
+
+
 ARG FOLDER_NAME=rc-brain
 ARG WORKSPACE_DIR=/home/cev
 WORKDIR $WORKSPACE_DIR
@@ -12,36 +23,31 @@ RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "source $WORKSPACE_DIR/install/setup.bash" >> ~/.bashrc
 
 # Init rosdep and update package index
-# for some reason we need to do this
-RUN rm /var/lib/dpkg/info/libc-bin.* 
-RUN apt-get clean
-RUN apt-get update
-RUN apt-get install libc-bin
+RUN sudo apt-get update
 RUN rosdep update --rosdistro $ROS_DISTRO
-
-RUN mkdir -p src/$FOLDER_NAME
 
 # Install and build build-from-source packages
 # We do this as a separate step from the stuff for our code, since that changes more frequently
-RUN cd src && \
-    git clone https://github.com/Slamtec/sllidar_ros2.git && \
-    cd sllidar_ros2 && \
-    git checkout 3430009
+COPY --chown=cev --parents external/**/package.xml src/$FOLDER_NAME/
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
-RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
 
-# Install self dependencies with rosdep
-COPY --parents ./*/package.xml src/$FOLDER_NAME
+# Run install_extra.sh, which installs additional dependencies
+COPY --chown=cev scripts/install_extra.sh src/$FOLDER_NAME/scripts/
+RUN sudo src/$FOLDER_NAME/scripts/install_extra.sh
+
+# Finally build external packages
+COPY --chown=cev external src/$FOLDER_NAME/external/
+RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build --symlink-install
+
+# Install all other dependencies
+COPY --chown=cev --parents **/package.xml src/$FOLDER_NAME/
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
 
 # Clean up apt cache to make container smaller
-RUN apt-get clean
+RUN sudo apt-get clean
 
 # Build
-COPY . src/$FOLDER_NAME
-RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build
+COPY --chown=cev . src/$FOLDER_NAME
+RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build --symlink-install
 
-# Copy entrypoint script
-COPY entrypoint.sh entrypoint.sh
-RUN chmod +x entrypoint.sh
-ENTRYPOINT ["/bin/bash", "/home/cev/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/home/cev/src/rc-brain/scripts/deployed_entrypoint.sh"]

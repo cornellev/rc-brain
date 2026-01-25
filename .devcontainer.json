@@ -11,6 +11,7 @@
         "--ipc=host",
         "--privileged"
     ],
+    "containerUser": "cev",
     "containerEnv": {
         "DISPLAY": "${localEnv:DISPLAY}"
     },
@@ -20,10 +21,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-iot.vscode-ros",
-                "ms-vscode.cpptools-extension-pack",
                 "ms-python.black-formatter",
-                "xaver.clang-format"
+                "llvm-vs-code-extensions.vscode-clangd"
             ],
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "bash",
@@ -33,7 +32,7 @@
                     }
                 },
                 "[cpp]": {
-                    "editor.defaultFormatter": "xaver.clang-format"
+                    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
                 },
                 "[python]": {
                     "diffEditor.ignoreTrimWhitespace": false,
