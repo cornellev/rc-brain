@@ -10,6 +10,10 @@ RUN usermod -aG sudo cev
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER cev
 
+# Docker doesn't do this by default
+RUN sudo chown -R cev /home/cev
+
+
 ARG FOLDER_NAME=rc-brain
 ARG WORKSPACE_DIR=/home/cev
 WORKDIR $WORKSPACE_DIR
@@ -24,30 +28,26 @@ RUN rosdep update --rosdistro $ROS_DISTRO
 
 # Install and build build-from-source packages
 # We do this as a separate step from the stuff for our code, since that changes more frequently
-COPY --parents external/**/package.xml src/$FOLDER_NAME/
-RUN sudo chown -R cev /home/cev
+COPY --chown=cev --parents external/**/package.xml src/$FOLDER_NAME/
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
 
 # Run install_extra.sh, which installs additional dependencies
-COPY scripts/install_extra.sh src/$FOLDER_NAME/scripts/
+COPY --chown=cev scripts/install_extra.sh src/$FOLDER_NAME/scripts/
 RUN sudo src/$FOLDER_NAME/scripts/install_extra.sh
 
 # Finally build external packages
-COPY external src/$FOLDER_NAME/external/
-RUN sudo chown -R cev /home/cev
+COPY --chown=cev external src/$FOLDER_NAME/external/
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build --symlink-install
 
 # Install all other dependencies
-COPY --parents **/package.xml src/$FOLDER_NAME/
-RUN sudo chown -R cev /home/cev
+COPY --chown=cev --parents **/package.xml src/$FOLDER_NAME/
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
 
 # Clean up apt cache to make container smaller
 RUN sudo apt-get clean
 
 # Build
-COPY . src/$FOLDER_NAME
-RUN sudo chown -R cev /home/cev
+COPY --chown=cev . src/$FOLDER_NAME
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && colcon build --symlink-install
 
 ENTRYPOINT ["/bin/bash", "/home/cev/src/rc-brain/scripts/deployed_entrypoint.sh"]

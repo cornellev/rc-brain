@@ -14,6 +14,9 @@ ARG FOLDER_NAME=rc-brain
 ARG WORKSPACE_DIR=/home/cev
 WORKDIR $WORKSPACE_DIR
 
+# Docker doesn't do this by default
+RUN sudo chown -R cev /home/cev
+
 # Source the ROS2 environment automatically when a new shell is created
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "source $WORKSPACE_DIR/install/setup.bash" >> ~/.bashrc
@@ -34,12 +37,10 @@ RUN sudo update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-19
 RUN rosdep update --rosdistro $ROS_DISTRO
 
 # Run install_extra.sh, which installs additional dependencies
-COPY scripts/install_extra.sh src/$FOLDER_NAME/scripts/
-RUN sudo chown -R cev /home/cev
+COPY --chown=cev scripts/install_extra.sh src/$FOLDER_NAME/scripts/
 RUN sudo src/$FOLDER_NAME/scripts/install_extra.sh
 
 # Install own dependencies
 RUN mkdir -p src/$FOLDER_NAME
-COPY --parents **/package.xml src/$FOLDER_NAME/
-RUN sudo chown -R cev /home/cev
+COPY --chown=cev --parents **/package.xml src/$FOLDER_NAME/
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && rosdep install --from-paths src -r -y
